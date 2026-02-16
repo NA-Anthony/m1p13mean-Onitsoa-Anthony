@@ -1,0 +1,71 @@
+/* Modern login styles - glass effect, rounded inputs, transitions */
+.login-root {
+	background: linear-gradient(135deg, #eef2f7 0%, #f5f8fb 100%);
+}
+.modern-card-group {
+	border-radius: 12px;
+	overflow: hidden;
+}
+.left-card {
+	background: rgba(255,255,255,0.85);
+	backdrop-filter: blur(6px);
+}
+.right-card {
+	background-color: var(--cui-primary, #0d6efd);
+	min-height: 100%;
+}
+.logo-box {
+	padding: 2rem 1rem 1rem;
+}
+.logo {
+	width: 64px;
+	height: 64px;
+	border-radius: 12px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--cui-primary, #0d6efd);
+	color: white;
+	font-weight: 700;
+	font-size: 1.15rem;
+	margin-bottom: .5rem;
+}
+.logo-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 8px; /* si vous voulez arrondir */
+  display: inline-block;
+}
+.app-title {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+.subtitle { color: #6c757d; margin-bottom: 1rem; }
+.form-floating c-input-group input[cFormControl] {
+	border-radius: 8px;
+	padding: .75rem .75rem;
+	transition: box-shadow .15s ease, transform .05s;
+}
+.form-floating label { display: none; }
+.btn-login { border-radius: 8px; padding: .6rem 1rem; }
+.divider { text-align: center; position: relative; }
+.divider::before, .divider::after { content: ''; height: 1px; background: rgba(0,0,0,0.08); position: absolute; top: 50%; width: 40%; }
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+.divider span { background: transparent; padding: 0 .5rem; color: #6c757d; }
+.socials button { border-radius: 8px; }
+.features-list svg[cIcon] { width: 18px; height: 18px; margin-right: .6rem; vertical-align: -3px; }
+.features-list li { margin-bottom: .8rem; }
+.muted-link { color: #6c757d; text-decoration: none; }
+
+@media (max-width: 767px) {
+	.right-card { display: none; }
+	.modern-card-group { box-shadow: 0 8px 30px rgba(18,38,63,0.08); }
+}
+
+@media (min-width: 768px) {
+	.modern-card-group { display: flex; }
+	.left-card, .right-card { width: 50%; }
+}
