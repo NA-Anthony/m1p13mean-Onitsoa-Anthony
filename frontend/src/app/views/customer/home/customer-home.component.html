@@ -1,0 +1,159 @@
+<div class="customer-home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Bienvenue sur CityCenter</h1>
+      <p class="hero-subtitle">
+        Découvrez des milliers de produits de qualité à prix compétitifs
+      </p>
+      <div class="hero-search">
+        <input
+          type="text"
+          placeholder="Recherchez un produit..."
+          class="hero-input"
+        />
+        <button class="hero-btn">Chercher</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <h2 class="section-title">Catégories Populaires</h2>
+    <div class="categories-grid">
+      <a
+        *ngFor="let category of categories"
+        [routerLink]="['/products']"
+        [queryParams]="{ category: category.name }"
+        class="category-card"
+      >
+        <div class="category-icon">{{ category.icon }}</div>
+        <h3 class="category-name">{{ category.name }}</h3>
+        <p class="category-count">{{ category.count }} produits</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="featured-section">
+    <div class="section-header">
+      <h2 class="section-title">Produits en Vedette</h2>
+      <a routerLink="/products" class="view-all">Voir tous →</a>
+    </div>
+
+    <div class="products-grid">
+      <div
+        *ngFor="let product of featuredProducts.slice(0, 8)"
+        class="product-card"
+      >
+        <div class="product-image-container">
+          <img
+            [src]="product.image"
+            [alt]="product.name"
+            class="product-image"
+          />
+          <div *ngIf="product.discount" class="discount-badge">
+            {{ getDiscountLabel(product.discount) }}
+          </div>
+          <button class="wishlist-btn" title="Ajouter aux favoris">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="product-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <p class="product-description">{{ product.description }}</p>
+
+          <div class="product-rating">
+            <div class="stars">
+              <span
+                *ngFor="let star of [1, 2, 3, 4, 5]"
+                class="star"
+                [class.filled]="star <= Math.floor(product.rating)"
+                >★</span
+              >
+            </div>
+            <span class="rating-value">{{ product.rating }}</span>
+            <span class="reviews-count">({{ product.reviews }} avis)</span>
+          </div>
+
+          <div class="product-price">
+            <span class="current-price">{{ product.price }}€</span>
+            <span class="original-price">{{ product.originalPrice }}€</span>
+          </div>
+
+          <button class="add-to-cart-btn" [disabled]="!product.inStock">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path
+                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+              ></path>
+            </svg>
+            {{ product.inStock ? "Ajouter au panier" : "Indisponible" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Shops Section -->
+  <section class="shops-section">
+    <div class="section-header">
+      <h2 class="section-title">Nos Meilleures Boutiques</h2>
+      <a routerLink="/shop" class="view-all">Voir toutes →</a>
+    </div>
+
+    <div class="shops-grid">
+      <div *ngFor="let shop of topShops" class="shop-card">
+        <img [src]="shop.image" [alt]="shop.name" class="shop-image" />
+        <div class="shop-overlay">
+          <button routerLink="/shop" class="shop-btn">
+            Visiter la boutique
+          </button>
+        </div>
+
+        <div class="shop-info">
+          <h3 class="shop-name">{{ shop.name }}</h3>
+          <p class="shop-description">{{ shop.description }}</p>
+          <div class="shop-meta">
+            <div class="shop-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating">{{ shop.rating }}</span>
+            </div>
+            <span class="products-count"
+              >{{ shop.productsCount }} produits</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotional Banner -->
+  <section class="promo-banner">
+    <div class="promo-content">
+      <h2>Offre Spéciale Aujourd'hui</h2>
+      <p>Jusqu'à 50% de réduction sur les articles sélectionnés</p>
+      <a routerLink="/deals" class="promo-btn">Voir les promotions</a>
+    </div>
+  </section>
+</div>

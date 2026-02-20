@@ -1,0 +1,221 @@
+<div class="customer-layout">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container-fluid">
+        <div class="header-top-content">
+          <div class="logo">
+            <a routerLink="/home" class="logo-link">
+              <img
+                src="assets/brand/image2.jpg"
+                alt="CityCenter"
+                class="logo-img"
+              />
+              <span class="logo-text">CityCenter</span>
+            </a>
+          </div>
+
+          <div class="search-bar">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Rechercher un produit..."
+            />
+            <button class="search-btn">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="header-actions">
+            <button class="action-btn" title="Favoris">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                ></path>
+              </svg>
+            </button>
+
+            <button class="action-btn cart-btn" title="Panier">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path
+                  d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+                ></path>
+              </svg>
+              <span class="cart-count" *ngIf="cartCount > 0">{{
+                cartCount
+              }}</span>
+            </button>
+
+            <div class="user-menu">
+              <button class="action-btn" (click)="toggleMenu()" title="Compte">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </button>
+
+              <div class="user-dropdown" *ngIf="isMenuOpen">
+                <div class="user-info" *ngIf="currentUser">
+                  <p class="user-name">
+                    {{ currentUser.prenom }} {{ currentUser.nom }}
+                  </p>
+                  <p class="user-email">{{ currentUser.email }}</p>
+                </div>
+                <nav class="dropdown-menu">
+                  <a routerLink="/account" class="dropdown-item">Mon Compte</a>
+                  <a routerLink="/orders" class="dropdown-item"
+                    >Mes Commandes</a
+                  >
+                  <a routerLink="/addresses" class="dropdown-item">Adresses</a>
+                  <a routerLink="/account/settings" class="dropdown-item"
+                    >Paramètres</a
+                  >
+                  <hr class="divider" />
+                  <button (click)="logout()" class="dropdown-item logout-btn">
+                    Déconnexion
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" (click)="toggleMenu()">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="header-nav">
+      <div class="container-fluid">
+        <nav class="nav-items">
+          <a
+            routerLink="/home"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-item"
+          >
+            Accueil
+          </a>
+          <a routerLink="/shop" routerLinkActive="active" class="nav-item">
+            Boutiques
+          </a>
+          <a routerLink="/products" routerLinkActive="active" class="nav-item">
+            Tous les Produits
+          </a>
+          <a routerLink="/deals" routerLinkActive="active" class="nav-item">
+            Promotions
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container-fluid">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container-fluid">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4 class="footer-title">À propos de CityCenter</h4>
+          <ul class="footer-links">
+            <li><a href="#about">Qui sommes-nous ?</a></li>
+            <li><a href="#careers">Carrières</a></li>
+            <li><a href="#press">Presse</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4 class="footer-title">Aide & Support</h4>
+          <ul class="footer-links">
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#shipping">Livraison</a></li>
+            <li><a href="#returns">Retours</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4 class="footer-title">Politique</h4>
+          <ul class="footer-links">
+            <li><a href="#privacy">Confidentialité</a></li>
+            <li><a href="#terms">Conditions d'utilisation</a></li>
+            <li><a href="#cookies">Cookies</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4 class="footer-title">Newsletter</h4>
+          <p>Inscrivez-vous pour recevoir nos meilleures offres</p>
+          <div class="newsletter-form">
+            <input
+              type="email"
+              placeholder="Votre email"
+              class="newsletter-input"
+            />
+            <button class="newsletter-btn">S'inscrire</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 CityCenter. Tous droits réservés.</p>
+        <div class="social-links">
+          <a href="#facebook" class="social-link">Facebook</a>
+          <a href="#twitter" class="social-link">Twitter</a>
+          <a href="#instagram" class="social-link">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

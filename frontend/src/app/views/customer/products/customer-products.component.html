@@ -1,0 +1,19 @@
+<div class="products-container">
+  <h1 class="page-title">Tous les Produits</h1>
+
+  <div class="products-grid">
+    <div *ngFor="let product of products" class="product-card">
+      <div
+        class="product-image"
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      ></div>
+      <h3>{{ product.name }}</h3>
+      <div class="rating">⭐ {{ product.rating }}</div>
+      <div class="price">
+        <span class="current">{{ product.price }}€</span>
+        <span class="original">{{ product.originalPrice }}€</span>
+      </div>
+      <button class="add-btn">Ajouter au panier</button>
+    </div>
+  </div>
+</div>

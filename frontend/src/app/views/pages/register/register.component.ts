@@ -151,13 +151,22 @@ export class RegisterComponent {
     this.authService.register(payload).subscribe({
       next: (response) => {
         this.loading = false;
-        this.successMessage =
-          'Inscription réussie ! Redirection vers le tableau de bord...';
-        // console.log('Registration successful', response);
 
-        // Redirection automatique au dashboard (l'utilisateur est déjà authentifié)
+        if (userRole === 'acheteur') {
+          this.successMessage =
+            'Inscription réussie ! Redirection vers la boutique...';
+        } else {
+          this.successMessage =
+            'Inscription réussie ! Redirection vers votre tableau de bord...';
+        }
+
+        // Redirection automatique au bon endroit selon le rôle
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          if (userRole === 'acheteur') {
+            this.router.navigate(['/home']);
+          } else {
+            this.router.navigate(['/admin/dashboard']);
+          }
         }, 1500);
       },
       error: (err) => {

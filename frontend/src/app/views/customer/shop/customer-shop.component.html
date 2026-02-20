@@ -1,0 +1,21 @@
+<div class="shop-container">
+  <h1 class="page-title">Toutes nos Boutiques</h1>
+  <p class="page-subtitle">Découvrez nos meilleures boutiques partenaires</p>
+
+  <div class="shops-listing">
+    <div *ngFor="let shop of shops" class="shop-listing-card">
+      <div
+        class="shop-image"
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      ></div>
+      <div class="shop-details">
+        <h3>{{ shop.name }}</h3>
+        <div class="shop-stats">
+          <span class="rating">⭐ {{ shop.rating }}</span>
+          <span class="products">📦 {{ shop.products }} produits</span>
+        </div>
+        <button class="visit-btn">Visiter la boutique</button>
+      </div>
+    </div>
+  </div>
+</div>
