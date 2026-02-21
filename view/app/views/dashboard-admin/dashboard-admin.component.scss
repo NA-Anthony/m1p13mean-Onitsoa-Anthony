@@ -1,0 +1,21 @@
+// Styles spécifiques au dashboard admin
+.stat-card {
+    border-left: 4px solid;
+    transition: transform 0.2s;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
+  .chart-container {
+    min-height: 300px;
+  }
+  
+  .top-boutique-item {
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(50, 31, 219, 0.05);
+    }
+  }

@@ -1,0 +1,26 @@
+.item-card {
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+      border-left-color: var(--cui-primary);
+    }
+  }
+  
+  .btn-group {
+    .btn {
+      padding: 0.375rem 0.75rem;
+      
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+  
+  .progress {
+    background-color: #e9ecef;
+  }

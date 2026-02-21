@@ -1,0 +1,214 @@
+<c-row>
+    <c-col md="10" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier la commande' : 'Nouvelle commande' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 20">Acheteur</span>
+                <span [class.text-primary]="getProgressValue() >= 40">Boutique</span>
+                <span [class.text-primary]="getProgressValue() >= 60">Adresse</span>
+                <span [class.text-primary]="getProgressValue() >= 80">Articles</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Paiement</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="6" class="mb-3">
+                <label cLabel for="idAcheteur" class="fw-semibold">Acheteur *</label>
+                <select cInput id="idAcheteur" formControlName="idAcheteur" class="form-select">
+                  <option value="">Sélectionnez un acheteur</option>
+                  @for (a of acheteurs; track a._id) {
+                    <option [value]="a._id">{{ a.telephone || 'Acheteur ' + a._id }}</option>
+                  }
+                </select>
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="idBoutique" class="fw-semibold">Boutique *</label>
+                <select cInput id="idBoutique" formControlName="idBoutique" class="form-select">
+                  <option value="">Sélectionnez une boutique</option>
+                  @for (b of boutiques; track b._id) {
+                    <option [value]="b._id">{{ b.nomBoutique }}</option>
+                  }
+                </select>
+              </c-col>
+            </c-row>
+  
+            <!-- Adresse de livraison -->
+            <h6 class="text-primary mt-3 mb-3">
+              <svg cIcon name="cil-location-pin" class="me-2"></svg>
+              Adresse de livraison
+            </h6>
+  
+            <c-row formGroupName="adresseLivraison">
+              <c-col md="12" class="mb-3">
+                <label cLabel for="rue" class="fw-semibold">Rue *</label>
+                <input cInput type="text" id="rue" formControlName="rue" class="form-control">
+              </c-col>
+              
+              <c-col md="4" class="mb-3">
+                <label cLabel for="codePostal" class="fw-semibold">Code postal *</label>
+                <input cInput type="text" id="codePostal" formControlName="codePostal" class="form-control">
+              </c-col>
+              
+              <c-col md="4" class="mb-3">
+                <label cLabel for="ville" class="fw-semibold">Ville *</label>
+                <input cInput type="text" id="ville" formControlName="ville" class="form-control">
+              </c-col>
+              
+              <c-col md="4" class="mb-3">
+                <label cLabel for="pays" class="fw-semibold">Pays</label>
+                <input cInput type="text" id="pays" formControlName="pays" class="form-control">
+              </c-col>
+            </c-row>
+  
+            <!-- Articles -->
+            <h6 class="text-primary mt-3 mb-3">
+              <svg cIcon name="cil-cart" class="me-2"></svg>
+              Articles
+            </h6>
+  
+            <div formArrayName="articles">
+              @for (article of articlesArray.controls; track $index) {
+                <c-row class="mb-2" [formGroupName]="$index">
+                  <c-col md="4">
+                    <input 
+                      type="text" 
+                      class="form-control form-control-sm" 
+                      formControlName="nomProduit"
+                      placeholder="Nom du produit"
+                    >
+                  </c-col>
+                  <c-col md="2">
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="prixUnitaire"
+                      placeholder="Prix"
+                      step="0.01"
+                    >
+                  </c-col>
+                  <c-col md="2">
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="quantite"
+                      placeholder="Qté"
+                      min="1"
+                    >
+                  </c-col>
+                  <c-col md="2">
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="remise"
+                      placeholder="Remise"
+                      step="0.01"
+                    >
+                  </c-col>
+                  <c-col md="2">
+                    <button 
+                      cButton 
+                      color="danger" 
+                      size="sm" 
+                      class="w-100"
+                      (click)="supprimerArticle($index)"
+                    >
+                      <svg cIcon name="cil-trash"></svg>
+                    </button>
+                  </c-col>
+                </c-row>
+              }
+            </div>
+  
+            <button 
+              cButton 
+              color="info" 
+              size="sm" 
+              class="mt-2"
+              (click)="ajouterArticle()"
+            >
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Ajouter un article
+            </button>
+  
+            <!-- Frais et total -->
+            <c-row class="mt-4">
+              <c-col md="4" class="mb-3">
+                <label cLabel for="fraisLivraison" class="fw-semibold">Frais de livraison (€)</label>
+                <input 
+                  cInput 
+                  type="number" 
+                  id="fraisLivraison" 
+                  formControlName="fraisLivraison" 
+                  class="form-control"
+                  step="0.01"
+                  min="0"
+                >
+              </c-col>
+              
+              <c-col md="4" class="mb-3">
+                <label cLabel for="modePaiement" class="fw-semibold">Mode de paiement *</label>
+                <select cInput id="modePaiement" formControlName="modePaiement" class="form-select">
+                  <option value="">Sélectionnez</option>
+                  @for (m of modesPaiement; track m) {
+                    <option [value]="m">{{ m }}</option>
+                  }
+                </select>
+              </c-col>
+              
+              <c-col md="4" class="mb-3">
+                <div class="form-check mt-4">
+                  <input 
+                    type="checkbox" 
+                    class="form-check-input" 
+                    id="paiementEffectue"
+                    formControlName="paiementEffectue"
+                  >
+                  <label class="form-check-label fw-semibold" for="paiementEffectue">
+                    Paiement déjà effectué
+                  </label>
+                </div>
+              </c-col>
+            </c-row>
+  
+            <!-- Total -->
+            <c-row class="mt-3">
+              <c-col md="12">
+                <div class="bg-light p-3 rounded text-end">
+                  <span class="fw-bold">Total TTC: </span>
+                  <span class="fs-4 text-primary">{{ calculerTotal() | number:'1.2-2' }} €</span>
+                </div>
+              </c-col>
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/commandes">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ isEditMode ? 'Mettre à jour' : 'Créer la commande' }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

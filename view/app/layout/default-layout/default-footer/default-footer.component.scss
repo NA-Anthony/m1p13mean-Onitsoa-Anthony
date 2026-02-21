@@ -1,0 +1,50 @@
+.footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 2rem;
+    
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 1rem;
+      
+      .footer-left {
+        .names {
+          font-weight: 500;
+          color: #321fdb;
+          font-size: 0.95rem;
+          
+          &:hover {
+            text-decoration: underline;
+            color: #1b0e7c;
+          }
+        }
+      }
+      
+      .footer-right {
+        .copyright {
+          font-size: 0.9rem;
+          color: #6c757d;
+        }
+      }
+    }
+  }
+  
+  // Version responsive pour mobile
+  @media (max-width: 768px) {
+    .footer {
+      padding: 0.75rem 1rem;
+      
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+        
+        .footer-left {
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+  }

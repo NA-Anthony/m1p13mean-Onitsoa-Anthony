@@ -1,0 +1,158 @@
+<!-- En-tête avec KPIs -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalCommandes }}</div>
+            <div>Commandes</div>
+          </div>
+          <svg cIcon name="cil-cart" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-success">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalDepenses | number:'1.0-0' }} €</div>
+            <div>Dépensé</div>
+          </div>
+          <svg cIcon name="cil-dollar" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-warning">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalAvis }}</div>
+            <div>Avis laissés</div>
+          </div>
+          <svg cIcon name="cil-comment-square" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-info">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ panierActuel }}</div>
+            <div>Articles dans le panier</div>
+          </div>
+          <svg cIcon name="cil-basket" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Commandes en cours -->
+  <c-row class="mb-4">
+    <c-col xs="12">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <svg cIcon name="cil-clock" class="me-2"></svg>
+          Commandes en cours
+        </c-card-header>
+        <c-card-body>
+          @if (commandesEnCours.length > 0) {
+            @for (c of commandesEnCours; track c._id) {
+              <div class="mb-3 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <span class="fw-semibold">Commande #{{ c._id }}</span>
+                    <span class="badge ms-2" [ngClass]="'bg-' + getStatutClass(c.statut)">
+                      {{ c.statut }}
+                    </span>
+                  </div>
+                  <div class="fw-bold">{{ c.total | number:'1.2-2' }} €</div>
+                </div>
+                
+                <c-progress [height]="5" class="mb-2">
+                  <c-progress-bar 
+                    [value]="getProgressValue(c.statut)" 
+                    [color]="getStatutClass(c.statut)"
+                  ></c-progress-bar>
+                </c-progress>
+                
+                <div class="d-flex justify-content-between small">
+                  <span>{{ formatDate(c.dateCommande) }}</span>
+                  <span>{{ c.articles.length }} article(s)</span>
+                </div>
+              </div>
+            }
+          } @else {
+            <p class="text-body-secondary text-center">Aucune commande en cours</p>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Recommandations et historique -->
+  <c-row>
+    <c-col lg="4" class="mb-4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-star" class="me-2"></svg>
+          Recommandations
+        </c-card-header>
+        <c-card-body>
+          @for (r of recommandations; track r.nom) {
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <div class="fw-semibold">{{ r.nom }}</div>
+                <small class="text-body-secondary">{{ r.boutique }}</small>
+              </div>
+              <div>
+                <span class="fw-bold me-2">{{ r.prix }} €</span>
+                <button cButton color="primary" size="sm">
+                  <svg cIcon name="cil-cart"></svg>
+                </button>
+              </div>
+            </div>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col lg="4" class="mb-4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-history" class="me-2"></svg>
+          Historique des commandes
+        </c-card-header>
+        <c-card-body>
+          @for (c of historiqueCommandes; track c._id) {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <div>{{ formatDate(c.dateCommande) }}</div>
+                <small class="text-body-secondary">{{ c._id }}</small>
+              </div>
+              <span class="fw-bold">{{ c.total | number:'1.2-2' }} €</span>
+            </div>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col lg="4" class="mb-4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-comment-square" class="me-2"></svg>
+          Mes derniers avis
+        </c-card-header>
+        <c-card-body>
+          @for (a of derniersAvis; track a._id) {
+            <div class="mb-2">
+              <div class="fw-semibold">{{ a.produitParBoutique?.produit?.nom }}</div>
+              <div class="small">{{ a.commentaire }}</div>
+            </div>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

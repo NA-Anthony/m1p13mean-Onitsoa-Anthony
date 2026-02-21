@@ -1,0 +1,127 @@
+<c-row>
+    <c-col md="4" class="mb-4">
+      <c-card class="shadow-sm text-center">
+        <c-card-body>
+          <c-avatar 
+            [src]="user?.photo || 'assets/images/avatars/default.jpg'" 
+            [size]="'xxl'"
+            class="mb-3 mx-auto border border-3 border-primary"
+            style="width: 120px; height: 120px;"
+          >
+            {{ getInitials() }}
+          </c-avatar>
+          <h4>{{ user?.prenom }} {{ user?.nom }}</h4>
+          
+          <div class="mb-3">
+            <span class="badge me-1" [ngClass]="'bg-' + getRoleBadgeColor()">
+              {{ user?.role | titlecase }}
+            </span>
+            <span class="badge" [ngClass]="user?.actif ? 'bg-success' : 'bg-secondary'">
+              {{ user?.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button cButton color="warning" [routerLink]="['/users', user?._id, 'edit']">
+              <svg cIcon name="cil-pencil" class="me-2"></svg>
+              Modifier
+            </button>
+            <button cButton color="info" (click)="toggleActif()">
+              <svg cIcon [name]="user?.actif ? 'cil-ban' : 'cil-check'" class="me-2"></svg>
+              {{ user?.actif ? 'Désactiver' : 'Activer' }}
+            </button>
+            <button cButton color="secondary" routerLink="/users">
+              <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+              Retour
+            </button>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col md="8">
+      <c-row>
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-info" class="me-2"></svg>
+              Informations personnelles
+            </c-card-header>
+            <c-card-body>
+              <c-row>
+                <c-col md="6">
+                  <div class="mb-3">
+                    <label class="text-body-secondary small">Nom complet</label>
+                    <div class="fs-5">{{ user?.prenom }} {{ user?.nom }}</div>
+                  </div>
+                </c-col>
+                <c-col md="6">
+                  <div class="mb-3">
+                    <label class="text-body-secondary small">Email</label>
+                    <div class="fs-5">
+                      <svg cIcon name="cil-envelope-closed" size="sm" class="text-primary me-2"></svg>
+                      {{ user?.email }}
+                    </div>
+                  </div>
+                </c-col>
+                <c-col md="6">
+                  <div class="mb-3">
+                    <label class="text-body-secondary small">Rôle</label>
+                    <div>
+                      <span class="badge" [ngClass]="'bg-' + getRoleBadgeColor()">
+                        {{ user?.role | titlecase }}
+                      </span>
+                    </div>
+                  </div>
+                </c-col>
+                <c-col md="6">
+                  <div class="mb-3">
+                    <label class="text-body-secondary small">Date d'inscription</label>
+                    <div>
+                      <svg cIcon name="cil-calendar" size="sm" class="me-2"></svg>
+                      {{ formatDate(user?.dateCreation) }}
+                    </div>
+                  </div>
+                </c-col>
+              </c-row>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-history" class="me-2"></svg>
+              Activité récente
+            </c-card-header>
+            <c-card-body>
+              <!-- Version avec classes Bootstrap standard -->
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <svg cIcon name="cil-cart" class="me-2 text-success"></svg>
+                    Dernière commande
+                  </div>
+                  <small class="text-body-secondary">15 mars 2024</small>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <svg cIcon name="cil-star" class="me-2 text-warning"></svg>
+                    Dernier avis laissé
+                  </div>
+                  <small class="text-body-secondary">10 mars 2024</small>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <svg cIcon name="cil-user" class="me-2 text-info"></svg>
+                    Dernière connexion
+                  </div>
+                  <small class="text-body-secondary">{{ formatDate(today) }}</small>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+    </c-col>
+  </c-row>

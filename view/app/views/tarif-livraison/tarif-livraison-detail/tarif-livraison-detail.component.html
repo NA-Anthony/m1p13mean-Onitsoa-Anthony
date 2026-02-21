@@ -1,0 +1,159 @@
+<c-row>
+    <c-col md="4" class="mb-4">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">Tarifs de livraison</h5>
+        </c-card-header>
+        <c-card-body class="text-center">
+          <svg cIcon name="cil-map" size="3xl" class="my-3 text-primary"></svg>
+          
+          <h4 class="mb-1">{{ tarif?.boutique?.nomBoutique }}</h4>
+          <p class="text-body-secondary mb-3">Boutique #{{ tarif?.idBoutique }}</p>
+  
+          <div class="list-group text-start mb-3">
+            <div class="list-group-item d-flex justify-content-between">
+              <span class="fw-semibold">Nombre de tranches</span>
+              <span class="badge bg-info">{{ getNombreTranches() }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span class="fw-semibold">Prix minimum</span>
+              <span class="fw-bold">{{ getPrixMin() | number:'1.2-2' }} €</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span class="fw-semibold">Prix maximum</span>
+              <span class="fw-bold">{{ getPrixMax() | number:'1.2-2' }} €</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span class="fw-semibold">Distance max</span>
+              <span>{{ getDistanceMax() }} km</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span class="fw-semibold">Zone gratuite</span>
+              <span class="text-success">Dès {{ tarif?.zoneGratuite || 0 }} km</span>
+            </div>
+          </div>
+  
+          <div class="d-grid gap-2">
+            <button cButton color="warning" [routerLink]="['/tarifs-livraison', tarif?._id, 'edit']">
+              <svg cIcon name="cil-pencil" class="me-2"></svg>
+              Modifier
+            </button>
+            <button cButton color="secondary" routerLink="/tarifs-livraison">
+              <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+              Retour
+            </button>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  
+    <c-col md="8">
+      <c-row>
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-grid" class="me-2"></svg>
+              Grille tarifaire
+            </c-card-header>
+            <c-card-body>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Tranche (km)</th>
+                      <th class="text-end">Prix (€)</th>
+                      <th class="text-center">Visualisation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (tarif) {
+                      @let tarifsList = tarif.tarifs;
+                      @if (tarifsList && tarifsList.length > 0) {
+                        @for (t of tarifsList; track $index) {
+                          <tr>
+                            <td>{{ t.distanceMin }} - {{ t.distanceMax }} km</td>
+                            <td class="text-end fw-bold">{{ t.prix | number:'1.2-2' }} €</td>
+                            <td class="text-center">
+                              <c-progress [height]="8" class="w-75 mx-auto">
+                                <c-progress-bar 
+                                  [value]="(t.prix / getPrixMax()) * 100" 
+                                  color="success"
+                                ></c-progress-bar>
+                              </c-progress>
+                            </td>
+                          </tr>
+                        }
+                      } @else {
+                        <tr>
+                          <td colspan="3" class="text-center text-body-secondary py-3">
+                            Aucune tranche définie
+                          </td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                  @if (aUneZoneGratuite()) {
+                    <tfoot>
+                      <tr class="table-success">
+                        <td colspan="3" class="text-center">
+                          <svg cIcon name="cil-check" class="me-1"></svg>
+                          Livraison gratuite à partir de {{ tarif?.zoneGratuite }} km
+                        </td>
+                      </tr>
+                    </tfoot>
+                  }
+                </table>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+  
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-calculator" class="me-2"></svg>
+              Calculateur
+            </c-card-header>
+            <c-card-body>
+              <p class="text-body-secondary mb-3">Exemples de prix selon la distance :</p>
+              <div class="list-group">
+                @for (ex of getExemplesDistances(); track ex.distance) {
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span>{{ ex.distance }} km</span>
+                    <span class="fw-bold">
+                      @if (ex.prix === 0) {
+                        <span class="text-success">Gratuit</span>
+                      } @else {
+                        {{ ex.prix | number:'1.2-2' }} €
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+  
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-history" class="me-2"></svg>
+              Informations
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Créé le</span>
+                  <span>{{ formatDate(tarif?.createdAt) }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Modifié le</span>
+                  <span>{{ formatDate(tarif?.updatedAt) || 'Jamais' }}</span>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+    </c-col>
+  </c-row>

@@ -1,0 +1,147 @@
+<c-row>
+    <c-col md="8" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier les tarifs' : 'Nouveaux tarifs de livraison' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 30">Boutique</span>
+                <span [class.text-primary]="getProgressValue() >= 50">Zone gratuite</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Tranches</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="12" class="mb-3">
+                <label cLabel for="idBoutique" class="fw-semibold">Boutique *</label>
+                <select cInput id="idBoutique" formControlName="idBoutique" class="form-select">
+                  <option value="">Sélectionnez une boutique</option>
+                  @for (b of boutiques; track b._id) {
+                    <option [value]="b._id">{{ b.nomBoutique }}</option>
+                  }
+                </select>
+                @if (form.get('idBoutique')?.invalid && form.get('idBoutique')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    La boutique est requise
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="zoneGratuite" class="fw-semibold">Zone gratuite (km)</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-map"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="number" 
+                    id="zoneGratuite" 
+                    formControlName="zoneGratuite" 
+                    class="form-control"
+                    placeholder="50"
+                    min="0"
+                  />
+                  <span class="input-group-text">km</span>
+                </div>
+                <small class="text-body-secondary">
+                  <svg cIcon name="cil-info" size="sm"></svg>
+                  Livraison gratuite pour les distances >= cette valeur
+                </small>
+              </c-col>
+            </c-row>
+  
+            <!-- Tranches de prix -->
+            <h6 class="text-primary mt-3 mb-3">
+              <svg cIcon name="cil-grid" class="me-2"></svg>
+              Tranches de prix
+            </h6>
+  
+            <div formArrayName="tarifs">
+              @for (tranche of tarifsArray.controls; track $index) {
+                <c-row class="mb-2 align-items-end" [formGroupName]="$index">
+                  <c-col md="4">
+                    <label class="small text-body-secondary">Distance min (km)</label>
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="distanceMin"
+                      min="0"
+                    >
+                  </c-col>
+                  <c-col md="4">
+                    <label class="small text-body-secondary">Distance max (km)</label>
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="distanceMax"
+                      min="0"
+                    >
+                  </c-col>
+                  <c-col md="3">
+                    <label class="small text-body-secondary">Prix (€)</label>
+                    <input 
+                      type="number" 
+                      class="form-control form-control-sm" 
+                      formControlName="prix"
+                      min="0"
+                      step="0.01"
+                    >
+                  </c-col>
+                  <c-col md="1">
+                    <button 
+                      cButton 
+                      color="danger" 
+                      size="sm" 
+                      class="w-100"
+                      (click)="supprimerTranche($index)"
+                      [disabled]="tarifsArray.length <= 1"
+                    >
+                      <svg cIcon name="cil-trash"></svg>
+                    </button>
+                  </c-col>
+                </c-row>
+              }
+            </div>
+  
+            <button 
+              cButton 
+              color="info" 
+              size="sm" 
+              class="mt-2"
+              (click)="ajouterTranche()"
+            >
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Ajouter une tranche
+            </button>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/tarifs-livraison">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ isEditMode ? 'Mettre à jour' : 'Créer les tarifs' }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

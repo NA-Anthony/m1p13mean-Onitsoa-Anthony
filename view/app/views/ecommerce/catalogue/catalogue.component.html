@@ -1,0 +1,241 @@
+<!-- Bannière promo -->
+<c-card class="bg-primary text-white mb-4">
+    <c-card-body class="py-4">
+      <c-row class="align-items-center">
+        <c-col>
+          <h3 class="mb-1">Bienvenue sur notre marketplace</h3>
+          <p class="mb-0 opacity-75">Livraison gratuite à partir de 100€ d'achat</p>
+        </c-col>
+        <c-col md="auto">
+          <button cButton color="light" routerLink="/panier">
+            <svg cIcon name="cil-cart" class="me-2"></svg>
+            Mon panier ({{ cartService.totalItems() }})
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Filtres -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row class="g-3">
+        <c-col md="6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-search"></svg>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher un produit..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterProduits()"
+            >
+          </div>
+        </c-col>
+        <c-col md="4">
+          <select class="form-select" [(ngModel)]="selectedCategorie" (change)="filterProduits()">
+            <option value="">Toutes catégories</option>
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat | titlecase }}</option>
+            }
+          </select>
+        </c-col>
+        <c-col md="2">
+          <div class="text-body-secondary small mt-2">
+            {{ filteredProduits.length }} produit(s)
+          </div>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Grille produits -->
+  <c-row>
+    @for (p of filteredProduits; track p._id) {
+      <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
+        <c-card class="h-100 shadow-sm produit-card">
+          <div class="position-relative">
+            <c-avatar 
+              [size]="'xl'" 
+              [src]="p.produit?.image || 'assets/images/products/default.jpg'"
+              class="mx-auto mt-3 border border-3 border-white shadow"
+              style="width: 120px; height: 120px;"
+            ></c-avatar>
+            
+            @if (p.enPromotion) {
+              <span class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                -{{ getRemise(p) }}%
+              </span>
+            }
+            
+            @if (p.stock <= 0) {
+              <span class="position-absolute top-0 end-0 m-2 badge bg-secondary">
+                Rupture
+              </span>
+            } @else if (p.stock < 5) {
+              <span class="position-absolute top-0 end-0 m-2 badge bg-warning">
+                Plus que {{ p.stock }}
+              </span>
+            }
+          </div>
+          
+          <c-card-body class="text-center">
+            <h5 class="card-title mb-1">{{ p.produit?.nom }}</h5>
+            <p class="text-body-secondary small mb-2">{{ p.boutique?.nomBoutique }}</p>
+            
+            <div class="mb-2">
+              @if (p.enPromotion && p.prixPromo) {
+                <span class="text-decoration-line-through text-body-secondary me-2">
+                  {{ p.prix }} €
+                </span>
+                <span class="fw-bold text-danger fs-5">{{ p.prixPromo }} €</span>
+              } @else {
+                <span class="fw-bold fs-5">{{ p.prix }} €</span>
+              }
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button 
+                cButton 
+                color="primary" 
+                [disabled]="p.stock <= 0"
+                (click)="openQuickView(p)"
+              >
+                <svg cIcon name="cil-cart" class="me-2"></svg>
+                Ajouter au panier
+              </button>
+              <button 
+                cButton 
+                color="info" 
+                variant="outline" 
+                [routerLink]="['/produits', p.produit?._id]"
+              >
+                <svg cIcon name="cil-magnifying-glass" class="me-2"></svg>
+                Détails
+              </button>
+            </div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    } @empty {
+      <c-col>
+        <c-card class="text-center py-5">
+          <c-card-body>
+            <svg cIcon name="cil-basket" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5>Aucun produit trouvé</h5>
+            <p class="text-body-secondary">Essayez de modifier vos filtres</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>
+  
+  <!-- Modal quick view -->
+  <c-modal [visible]="showModal" (visibleChange)="showModal = $event">
+    <c-modal-header>
+      <h5 class="modal-title">{{ selectedProduit?.produit?.nom }}</h5>
+      <button cButtonClose (click)="showModal = false"></button>
+    </c-modal-header>
+    
+    <c-modal-body>
+      @if (selectedProduit) {
+        <c-row>
+          <c-col md="5" class="text-center mb-3 mb-md-0">
+            <c-avatar 
+              [src]="selectedProduit.produit?.image || 'assets/images/products/default.jpg'" 
+              [size]="'xl'"
+              style="width: 150px; height: 150px;"
+            ></c-avatar>
+          </c-col>
+          
+          <c-col md="7">
+            <p class="mb-2">{{ selectedProduit.produit?.description }}</p>
+            
+            <p class="mb-2">
+              <strong>Boutique:</strong> {{ selectedProduit.boutique?.nomBoutique }}
+            </p>
+            
+            <p class="mb-2">
+              <strong>Disponibilité:</strong>
+              @if (selectedProduit.stock > 0) {
+                <span class="text-success"> En stock ({{ selectedProduit.stock }} unités)</span>
+              } @else {
+                <span class="text-danger"> Rupture de stock</span>
+              }
+            </p>
+            
+            <div class="mb-3">
+              <strong>Prix:</strong>
+              @if (selectedProduit.enPromotion && selectedProduit.prixPromo) {
+                <span class="text-decoration-line-through text-body-secondary ms-2">
+                  {{ selectedProduit.prix }} €
+                </span>
+                <span class="fw-bold text-danger ms-2">{{ selectedProduit.prixPromo }} €</span>
+              } @else {
+                <span class="fw-bold ms-2">{{ selectedProduit.prix }} €</span>
+              }
+            </div>
+            
+            @if (selectedProduit.produit?.caracteristiques) {
+              <div class="small">
+                <strong>Caractéristiques:</strong>
+                <ul class="mt-1">
+                  @for (item of selectedProduit.produit.caracteristiques | keyvalue; track item.key) {
+                    <li>{{ item.key }}: {{ item.value }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </c-col>
+        </c-row>
+        
+        <c-row class="mt-3">
+          <c-col md="6">
+            <label class="fw-semibold">Quantité</label>
+            <div class="input-group">
+              <button 
+                cButton 
+                color="secondary" 
+                size="sm" 
+                (click)="quantite = quantite > 1 ? quantite - 1 : 1"
+              >
+                -
+              </button>
+              <input 
+                type="number" 
+                class="form-control text-center" 
+                [(ngModel)]="quantite"
+                min="1"
+                [max]="selectedProduit.stock"
+              >
+              <button 
+                cButton 
+                color="secondary" 
+                size="sm" 
+                (click)="quantite = quantite < selectedProduit.stock ? quantite + 1 : selectedProduit.stock"
+              >
+                +
+              </button>
+            </div>
+          </c-col>
+        </c-row>
+      }
+    </c-modal-body>
+    
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="showModal = false">
+        Fermer
+      </button>
+      <button 
+        cButton 
+        color="primary" 
+        [disabled]="selectedProduit?.stock <= 0"
+        (click)="ajouterAuPanier()"
+      >
+        <svg cIcon name="cil-cart" class="me-2"></svg>
+        Ajouter au panier ({{ quantite }})
+      </button>
+    </c-modal-footer>
+  </c-modal>
