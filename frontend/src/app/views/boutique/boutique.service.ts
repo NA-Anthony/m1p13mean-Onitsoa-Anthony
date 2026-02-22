@@ -1,58 +1,64 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Boutique, BOUTIQUES_MOCK } from './boutique.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Boutique } from './boutique.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoutiqueService {
-  private boutiques: Boutique[] = [...BOUTIQUES_MOCK];
+  private apiUrl = 'http://localhost:3000/api/boutiques';
+  private apiAdminUrl = 'http://localhost:3000/api/boutiques-admin';
 
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Récupère toutes les boutiques (publiques)
+   */
   getBoutiques(): Observable<Boutique[]> {
-    return of(this.boutiques);
+    return this.http.get<Boutique[]>(this.apiUrl);
   }
 
-  getBoutiqueById(id: string): Observable<Boutique | undefined> {
-    const boutique = this.boutiques.find(b => b._id === id);
-    return of(boutique);
+  /**
+   * Récupère une boutique par ID
+   * Backend retourne { boutique, produits, totalProduits }
+   */
+  getBoutiqueById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+  /**
+   * Crée une nouvelle boutique (admin)
+   */
   createBoutique(boutique: Partial<Boutique>): Observable<Boutique> {
-    const newBoutique: Boutique = {
-      _id: (this.boutiques.length + 1).toString(),
-      nomBoutique: boutique.nomBoutique || '',
-      description: boutique.description || '',
-      adresse: boutique.adresse || '',
-      telephone: boutique.telephone || '',
-      logo: boutique.logo || 'assets/images/avatars/1.jpg',
-      modePaiementAcceptes: boutique.modePaiementAcceptes || [],
-      horaires: boutique.horaires || {
-        lundi: { ouverture: '', fermeture: '' },
-        mardi: { ouverture: '', fermeture: '' },
-        mercredi: { ouverture: '', fermeture: '' },
-        jeudi: { ouverture: '', fermeture: '' },
-        vendredi: { ouverture: '', fermeture: '' },
-        samedi: { ouverture: '', fermeture: '' },
-        dimanche: { ouverture: '', fermeture: '' }
-      },
-      noteMoyenne: 0,
-      totalAvis: 0
-    };
-    this.boutiques.push(newBoutique);
-    return of(newBoutique);
+    return this.http.post<Boutique>(this.apiAdminUrl, boutique);
   }
 
-  updateBoutique(id: string, boutique: Partial<Boutique>): Observable<Boutique | undefined> {
-    const index = this.boutiques.findIndex(b => b._id === id);
-    if (index !== -1) {
-      this.boutiques[index] = { ...this.boutiques[index], ...boutique };
-      return of(this.boutiques[index]);
-    }
-    return of(undefined);
+  /**
+   * Met à jour une boutique (admin)
+   */
+  updateBoutique(id: string, boutique: Partial<Boutique>): Observable<Boutique> {
+    return this.http.put<Boutique>(`${this.apiAdminUrl}/${id}`, boutique);
   }
 
+  /**
+   * Supprime une boutique (admin)
+   */
   deleteBoutique(id: string): Observable<void> {
-    this.boutiques = this.boutiques.filter(b => b._id !== id);
-    return of(void 0);
+    return this.http.delete<void>(`${this.apiAdminUrl}/${id}`);
+  }
+
+  /**
+   * Récupère toutes les boutiques avec données enrichies (admin)
+   */
+  getAllBoutiquesAdmin(): Observable<Boutique[]> {
+    return this.http.get<Boutique[]>(`${this.apiAdminUrl}/all`);
+  }
+
+  /**
+   * Récupère les statistiques des boutiques (admin)
+   */
+  getBoutiqueStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiAdminUrl}/stats`);
   }
 }

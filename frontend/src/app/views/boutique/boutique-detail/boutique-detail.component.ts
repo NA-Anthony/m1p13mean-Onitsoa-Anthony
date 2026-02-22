@@ -40,7 +40,9 @@ export class BoutiqueDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.boutiqueService.getBoutiqueById(id).subscribe({
-        next: (data) => this.boutique = data || null
+        next: (res) => {
+          this.boutique = res?.boutique || res || null;
+        }
       });
     }
   }
@@ -65,7 +67,7 @@ export class BoutiqueDetailComponent implements OnInit {
 
   getNoteColor(): string {
     if (!this.boutique) return 'secondary';
-    const note = this.boutique.noteMoyenne;
+    const note = this.boutique.noteMoyenne || 0;
     if (note >= 4) return 'success';
     if (note >= 3) return 'warning';
     return 'danger';

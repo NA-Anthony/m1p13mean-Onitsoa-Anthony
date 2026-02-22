@@ -120,11 +120,11 @@
             </p>
             
             <div class="mb-3">
-              @for (paiement of boutique.modePaiementAcceptes.slice(0, 3); track paiement) {
+              @for (paiement of (boutique.modePaiementAcceptes || []).slice(0, 3); track paiement) {
                 <span class="badge bg-info me-1">{{ paiement }}</span>
               }
-              @if (boutique.modePaiementAcceptes.length > 3) {
-                <span class="badge bg-secondary">+{{ boutique.modePaiementAcceptes.length - 3 }}</span>
+              @if ((boutique.modePaiementAcceptes || []).length > 3) {
+                <span class="badge bg-secondary">+{{ (boutique.modePaiementAcceptes || []).length - 3 }}</span>
               }
             </div>
             

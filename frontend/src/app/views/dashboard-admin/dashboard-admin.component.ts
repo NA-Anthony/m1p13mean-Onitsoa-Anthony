@@ -106,7 +106,7 @@ export class DashboardAdminComponent implements OnInit {
   loadTopBoutiques(): void {
     this.boutiqueService.getBoutiques().subscribe(boutiques => {
       this.topBoutiques = boutiques
-        .sort((a, b) => b.noteMoyenne - a.noteMoyenne)
+        .sort((a, b) => (b.noteMoyenne || 0) - (a.noteMoyenne || 0))
         .slice(0, 5);
     });
   }

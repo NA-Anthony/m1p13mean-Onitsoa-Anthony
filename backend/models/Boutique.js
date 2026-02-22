@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const boutiqueSchema = new mongoose.Schema({
-  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   nomBoutique: { type: String, required: true },
   description: String,
   adresse: String,

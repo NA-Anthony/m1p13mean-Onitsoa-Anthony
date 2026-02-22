@@ -75,7 +75,8 @@ export class BoutiqueFormComponent implements OnInit {
 
   loadBoutique(id: string): void {
     this.boutiqueService.getBoutiqueById(id).subscribe({
-      next: (boutique) => {
+      next: (res) => {
+        const boutique = res?.boutique || res;
         if (boutique) {
           this.boutiqueForm.patchValue({
             nomBoutique: boutique.nomBoutique,
@@ -112,8 +113,8 @@ export class BoutiqueFormComponent implements OnInit {
     
     if (this.selectedPaiements.length > 0) progress += 20;
     
-    const horaires = this.boutiqueForm.get('horaires')?.value;
-    const joursOuverts = Object.values(horaires).filter((h: any) => h.ouverture && h.fermeture).length;
+    const horaires = this.boutiqueForm.get('horaires')?.value || {};
+    const joursOuverts = Object.values(horaires).filter((h: any) => h?.ouverture && h?.fermeture).length;
     progress += (joursOuverts / 7) * 40;
     
     return Math.min(progress, 100);

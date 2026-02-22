@@ -67,10 +67,10 @@ export class BoutiqueListComponent implements OnInit {
         boutique.telephone?.includes(this.searchTerm);
       
       const note = parseFloat(this.filterNote);
-      const matchesNote = note === 0 || boutique.noteMoyenne >= note;
+      const matchesNote = note === 0 || (boutique.noteMoyenne || 0) >= note;
       
       const matchesPaiement = this.filterPaiement === '' || 
-        boutique.modePaiementAcceptes.includes(this.filterPaiement);
+        (boutique.modePaiementAcceptes || []).includes(this.filterPaiement);
       
       return matchesSearch && matchesNote && matchesPaiement;
     });
@@ -90,26 +90,28 @@ export class BoutiqueListComponent implements OnInit {
 
   getNoteMoyenne(): string {
     if (this.boutiques.length === 0) return '0';
-    const sum = this.boutiques.reduce((acc, b) => acc + b.noteMoyenne, 0);
+    const sum = this.boutiques.reduce((acc, b) => acc + (b.noteMoyenne || 0), 0);
     return (sum / this.boutiques.length).toFixed(1);
   }
 
   getTotalAvis(): number {
-    return this.boutiques.reduce((acc, b) => acc + b.totalAvis, 0);
+    return this.boutiques.reduce((acc, b) => acc + (b.totalAvis || 0), 0);
   }
 
   getPaiementsUniques(): number {
-    const paiements = new Set(this.boutiques.flatMap(b => b.modePaiementAcceptes));
+    const paiements = new Set(this.boutiques.flatMap(b => b.modePaiementAcceptes || []));
     return paiements.size;
   }
 
   getHorairesOuverts(boutique: Boutique): number {
-    return Object.values(boutique.horaires).filter(h => h.ouverture && h.fermeture).length;
+    if (!boutique.horaires) return 0;
+    return Object.values(boutique.horaires).filter(h => h?.ouverture && h?.fermeture).length;
   }
 
-  getNoteColor(note: number): string {
-    if (note >= 4) return 'success';
-    if (note >= 3) return 'warning';
+  getNoteColor(note?: number): string {
+    const n = note || 0;
+    if (n >= 4) return 'success';
+    if (n >= 3) return 'warning';
     return 'danger';
   }
 }

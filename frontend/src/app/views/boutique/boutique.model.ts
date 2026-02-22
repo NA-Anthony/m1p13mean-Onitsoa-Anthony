@@ -21,10 +21,10 @@ export interface Horaire {
     adresse?: string;
     telephone?: string;
     logo?: string;
-    modePaiementAcceptes: string[];
-    horaires: Horaires;
-    noteMoyenne: number;
-    totalAvis: number;
+    modePaiementAcceptes?: string[];
+    horaires?: Horaires;
+    noteMoyenne?: number;
+    totalAvis?: number;
     createdAt?: Date;
     updatedAt?: Date;
   }
