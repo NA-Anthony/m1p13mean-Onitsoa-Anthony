@@ -1,0 +1,182 @@
+<c-row>
+    <c-col md="8" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier la promotion' : 'Nouvelle promotion' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 25">Produit</span>
+                <span [class.text-primary]="getProgressValue() >= 50">Remise</span>
+                <span [class.text-primary]="getProgressValue() >= 75">Début</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Fin</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="12" class="mb-3">
+                <label cLabel for="idProduitParBoutique" class="fw-semibold">Produit *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-library"></svg>
+                  </span>
+                  <select cInput id="idProduitParBoutique" formControlName="idProduitParBoutique" class="form-select">
+                    <option value="">Sélectionnez un produit</option>
+                    @for (p of produitsParBoutique; track p._id) {
+                      <option [value]="p._id">
+                        {{ p.produit?.nom }} - {{ p.boutique?.nomBoutique }} ({{ p.prix }} €)
+                      </option>
+                    }
+                  </select>
+                </div>
+                @if (form.get('idProduitParBoutique')?.invalid && form.get('idProduitParBoutique')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Le produit est requis
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="remisePourcentage" class="fw-semibold">Pourcentage de remise *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-tags"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="number" 
+                    id="remisePourcentage" 
+                    formControlName="remisePourcentage" 
+                    class="form-control"
+                    placeholder="15"
+                    min="1"
+                    max="100"
+                  />
+                  <span class="input-group-text">%</span>
+                </div>
+                @if (form.get('remisePourcentage')?.invalid && form.get('remisePourcentage')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    @if (form.get('remisePourcentage')?.errors?.['required']) {
+                      La remise est requise
+                    } @else if (form.get('remisePourcentage')?.errors?.['min']) {
+                      La remise doit être d'au moins 1%
+                    } @else if (form.get('remisePourcentage')?.errors?.['max']) {
+                      La remise ne peut pas dépasser 100%
+                    }
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel class="fw-semibold">Aperçu des prix</label>
+                <div class="bg-light p-3 rounded">
+                  <div class="d-flex justify-content-between">
+                    <span>Prix original:</span>
+                    <span>{{ prixOriginal | number:'1.2-2' }} €</span>
+                  </div>
+                  <div class="d-flex justify-content-between text-danger">
+                    <span>Remise:</span>
+                    <span>-{{ form.get('remisePourcentage')?.value || 0 }}%</span>
+                  </div>
+                  <hr class="my-2">
+                  <div class="d-flex justify-content-between fw-bold">
+                    <span>Prix promotionnel:</span>
+                    <span class="text-success">{{ prixPromo | number:'1.2-2' }} €</span>
+                  </div>
+                </div>
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="dateDebut" class="fw-semibold">Date de début *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-calendar"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="date" 
+                    id="dateDebut" 
+                    formControlName="dateDebut" 
+                    class="form-control"
+                    [min]="isEditMode ? null : today"
+                  />
+                </div>
+                @if (form.get('dateDebut')?.invalid && form.get('dateDebut')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    La date de début est requise
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="dateFin" class="fw-semibold">Date de fin *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-calendar"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="date" 
+                    id="dateFin" 
+                    formControlName="dateFin" 
+                    class="form-control"
+                  />
+                </div>
+                @if (form.get('dateFin')?.invalid && form.get('dateFin')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    @if (form.get('dateFin')?.errors?.['required']) {
+                      La date de fin est requise
+                    } @else if (form.get('dateFin')?.errors?.['dateInvalide']) {
+                      La date de fin doit être après la date de début
+                    }
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <div class="form-check">
+                  <input 
+                    type="checkbox" 
+                    class="form-check-input" 
+                    id="actif"
+                    formControlName="actif"
+                  >
+                  <label class="form-check-label fw-semibold" for="actif">
+                    Activer immédiatement
+                  </label>
+                </div>
+              </c-col>
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/promotions">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ isEditMode ? 'Mettre à jour' : 'Créer la promotion' }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

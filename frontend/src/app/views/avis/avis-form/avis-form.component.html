@@ -1,0 +1,113 @@
+<c-row>
+    <c-col md="8" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier l\'avis' : 'Nouvel avis' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 25">Acheteur</span>
+                <span [class.text-primary]="getProgressValue() >= 50">Produit</span>
+                <span [class.text-primary]="getProgressValue() >= 75">Note</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Commentaire</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="6" class="mb-3">
+                <label cLabel for="idAcheteur" class="fw-semibold">Acheteur *</label>
+                <select cInput id="idAcheteur" formControlName="idAcheteur" class="form-select">
+                  <option value="">Sélectionnez un acheteur</option>
+                  @for (a of acheteurs; track a._id) {
+                    <option [value]="a._id">{{ a.telephone || 'Acheteur ' + a._id }}</option>
+                  }
+                </select>
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="idProduitParBoutique" class="fw-semibold">Produit *</label>
+                <select cInput id="idProduitParBoutique" formControlName="idProduitParBoutique" class="form-select">
+                  <option value="">Sélectionnez un produit</option>
+                  @for (p of produitsParBoutique; track p._id) {
+                    <option [value]="p._id">
+                      {{ p.produit?.nom }} - {{ p.boutique?.nomBoutique }}
+                    </option>
+                  }
+                </select>
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="note" class="fw-semibold">Note *</label>
+                <div class="d-flex align-items-center gap-3">
+                  @for (n of notes; track n) {
+                    <div class="form-check">
+                      <input 
+                        type="radio" 
+                        class="form-check-input" 
+                        [id]="'note' + n"
+                        [value]="n"
+                        formControlName="note"
+                      >
+                      <label class="form-check-label" [for]="'note' + n">
+                        <span class="d-flex align-items-center">
+                          @for (i of [1,2,3,4,5]; track i) {
+                            <svg cIcon 
+                              name="cil-star" 
+                              size="sm"
+                              [ngClass]="{'text-warning': i <= n, 'text-secondary': i > n}"
+                            ></svg>
+                          }
+                        </span>
+                      </label>
+                    </div>
+                  }
+                </div>
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="commentaire" class="fw-semibold">Commentaire *</label>
+                <textarea 
+                  cInput 
+                  id="commentaire" 
+                  formControlName="commentaire" 
+                  rows="4" 
+                  class="form-control"
+                  placeholder="Votre avis sur le produit..."
+                ></textarea>
+                @if (form.get('commentaire')?.invalid && form.get('commentaire')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Le commentaire est requis
+                  </div>
+                }
+              </c-col>
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/avis">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ isEditMode ? 'Mettre à jour' : 'Créer l\'avis' }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

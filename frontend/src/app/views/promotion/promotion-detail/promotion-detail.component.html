@@ -1,0 +1,153 @@
+<c-row>
+    <c-col md="4" class="mb-4">
+      <c-card class="shadow-sm text-center">
+        <c-card-body>
+          <c-avatar 
+            [src]="promotion?.produitParBoutique?.produit?.image || 'assets/images/products/default.jpg'" 
+            [size]="'xxl'"
+            class="mb-3 mx-auto border border-3 border-primary"
+            style="width: 120px; height: 120px;"
+          ></c-avatar>
+          <h4>{{ promotion?.produitParBoutique?.produit?.nom }}</h4>
+          <h6 class="text-primary">{{ promotion?.produitParBoutique?.boutique?.nomBoutique }}</h6>
+          
+          <div class="mb-3">
+            <span class="badge me-1" [ngClass]="'bg-' + getStatut().class">
+              {{ getStatut().label }}
+            </span>
+            <span class="badge" [ngClass]="promotion?.actif ? 'bg-success' : 'bg-secondary'">
+              {{ promotion?.actif ? 'Activé' : 'Désactivé' }}
+            </span>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button cButton color="warning" [routerLink]="['/promotions', promotion?._id, 'edit']">
+              <svg cIcon name="cil-pencil" class="me-2"></svg>
+              Modifier
+            </button>
+            <button cButton color="info" (click)="toggleActif()">
+              <svg cIcon [name]="promotion?.actif ? 'cil-ban' : 'cil-check'" class="me-2"></svg>
+              {{ promotion?.actif ? 'Désactiver' : 'Activer' }}
+            </button>
+            <button cButton color="secondary" routerLink="/promotions">
+              <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+              Retour
+            </button>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col md="8">
+      <c-row>
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-info" class="me-2"></svg>
+              Informations promotion
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Remise</span>
+                  <span class="text-danger fw-bold">{{ promotion?.remisePourcentage }}%</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Date de début</span>
+                  <span>{{ formatDate(promotion?.dateDebut) }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Date de fin</span>
+                  <span>{{ formatDate(promotion?.dateFin) }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Durée restante</span>
+                  <span>
+                    @if (getStatut().label === 'Active') {
+                      {{ getRemainingDays() }} jours
+                    } @else if (getStatut().label === 'Expirée') {
+                      Terminée
+                    } @else {
+                      Non débutée
+                    }
+                  </span>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-calculator" class="me-2"></svg>
+              Calcul des prix
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Prix original</span>
+                  <span>{{ getPrixOriginal() }} €</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Remise</span>
+                  <span class="text-danger">-{{ promotion?.remisePourcentage }}%</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Prix promotionnel</span>
+                  <span class="fw-bold text-success">{{ getPrixPromo() | number:'1.2-2' }} €</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Économie</span>
+                  <span class="text-success">{{ getEconomie() | number:'1.2-2' }} €</span>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-chart" class="me-2"></svg>
+              Progression
+            </c-card-header>
+            <c-card-body>
+              <div class="mb-2 d-flex justify-content-between">
+                <span>{{ formatDate(promotion?.dateDebut) }}</span>
+                <span class="fw-semibold">{{ getProgression() | number:'1.0-0' }}%</span>
+                <span>{{ formatDate(promotion?.dateFin) }}</span>
+              </div>
+              <c-progress [height]="10">
+                <c-progress-bar 
+                  [value]="getProgression()" 
+                  [color]="getStatut().class"
+                ></c-progress-bar>
+              </c-progress>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-history" class="me-2"></svg>
+              Historique
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Créée le</span>
+                  <span>{{ formatDate(promotion?.createdAt) }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Modifiée le</span>
+                  <span>{{ formatDate(promotion?.updatedAt) || 'Jamais' }}</span>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+    </c-col>
+  </c-row>

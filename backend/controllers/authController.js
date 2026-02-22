@@ -158,3 +158,62 @@ exports.getMe = async (req, res) => {
     res.status(500).send('Erreur serveur');
   }
 };
+
+// @route   POST /api/auth/init-admin
+// @desc    Créer le premier admin (à supprimer après utilisation)
+exports.initAdmin = async (req, res) => {
+  try {
+    // Vérifier s'il y a déjà un admin
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (adminExists) {
+      return res.status(400).json({ msg: 'Un admin existe déjà' });
+    }
+
+    const { nom, prenom, email, password } = req.body;
+
+    // Créer l'admin
+    const admin = new User({
+      nom: nom || 'Admin',
+      prenom: prenom || 'System',
+      email: email || 'admin@gmail.com',
+      password: password || 'admin123',
+      role: 'admin',
+      actif: true
+    });
+
+    await admin.save();
+
+    // Créer token pour connexion immédiate
+    const payload = {
+      user: {
+        id: admin._id,
+        role: admin.role,
+        email: admin.email
+      }
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ 
+          msg: 'Admin créé avec succès',
+          token,
+          user: {
+            id: admin._id,
+            nom: admin.nom,
+            prenom: admin.prenom,
+            email: admin.email,
+            role: admin.role
+          }
+        });
+      }
+    );
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur serveur');
+  }
+};

@@ -6,6 +6,9 @@ const auth = require('../middleware/auth');
 // @route   POST /api/auth/register
 router.post('/register', authController.register);
 
+// TEMPORAIRE - À SUPPRIMER APRÈS UTILISATION
+router.post('/init-admin', authController.initAdmin);
+
 // @route   POST /api/auth/login
 router.post('/login', authController.login);
 

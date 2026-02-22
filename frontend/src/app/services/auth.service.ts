@@ -87,10 +87,23 @@ export class AuthService {
    * Déconnexion
    */
   logout(): void {
+    // console.log('🚪 Déconnexion en cours...');
+    
+    // Supprimer les données de stockage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Mettre à jour le state
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.isLoadingSubject.next(false);
+    
+    console.log('✅ Données supprimées du localStorage');
+    console.log('   - token:', this.getToken());
+    console.log('   - user:', this.getCurrentUser());
+    
+    // Rediriger vers login
+    console.log('🔄 Redirection vers /login');
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   /**

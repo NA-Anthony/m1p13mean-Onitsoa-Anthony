@@ -20,6 +20,7 @@ app.use('/api/boutiques', require('./routes/boutiques'));
 app.use('/api/produits', require('./routes/produits'));
 
 // Routes PROTÉGÉES (avec middleware auth intégré dans les routes)
+app.use('/api/users', require('./routes/users'));
 app.use('/api/commandes', require('./routes/commandes'));
 
 app.get('/', (req, res) => {

@@ -1,57 +1,123 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { User, USERS_MOCK } from './user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private users: User[] = [...USERS_MOCK];
+  private baseUrl = 'http://localhost:3000/api/users';
 
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Obtenir tous les utilisateurs
+   */
   getUsers(): Observable<User[]> {
-    return of(this.users);
+    return this.http.get<User[]>(this.baseUrl).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ Erreur lors de la récupération des utilisateurs', error);
+        console.error('🔍 Assurez-vous que le backend est démarré sur port 3000');
+        return throwError(() => error);
+      })
+    );
   }
 
-  getUserById(id: string): Observable<User | undefined> {
-    const user = this.users.find(u => u._id === id);
-    return of(user);
+  /**
+   * Obtenir un utilisateur par ID
+   */
+  getUserById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors de la récupération de l'utilisateur ${id}`, error);
+        return throwError(() => error);
+      })
+    );
   }
 
+  /**
+   * Créer un nouvel utilisateur
+   */
   createUser(user: Partial<User>): Observable<User> {
-    const newUser: User = {
-      _id: (this.users.length + 1).toString(),
-      nom: user.nom || '',
-      prenom: user.prenom || '',
-      email: user.email || '',
-      role: user.role || 'acheteur',
-      photo: user.photo || 'assets/images/avatars/default.jpg',
-      dateCreation: new Date(),
-      actif: user.actif ?? true
-    };
-    this.users.push(newUser);
-    return of(newUser);
+    return this.http.post<User>(this.baseUrl, user).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ Erreur lors de la création de l\'utilisateur', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  updateUser(id: string, user: Partial<User>): Observable<User | undefined> {
-    const index = this.users.findIndex(u => u._id === id);
-    if (index !== -1) {
-      this.users[index] = { ...this.users[index], ...user };
-      return of(this.users[index]);
-    }
-    return of(undefined);
+  /**
+   * Modifier un utilisateur
+   */
+  updateUser(id: string, user: Partial<User>): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, user).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors de la modification de l'utilisateur ${id}`, error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  deleteUser(id: string): Observable<void> {
-    this.users = this.users.filter(u => u._id !== id);
-    return of(void 0);
+  /**
+   * Supprimer un utilisateur
+   */
+  deleteUser(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${id}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors de la suppression de l'utilisateur ${id}`, error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  toggleActif(id: string): Observable<User | undefined> {
-    const index = this.users.findIndex(u => u._id === id);
-    if (index !== -1) {
-      this.users[index].actif = !this.users[index].actif;
-      return of(this.users[index]);
-    }
-    return of(undefined);
+  /**
+   * Activer/Désactiver un utilisateur
+   */
+  toggleActif(id: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}/toggle-actif`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors du changement d'état de l'utilisateur ${id}`, error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Changer le mot de passe d'un utilisateur
+   */
+  changePassword(id: string, newPassword: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}/password`, { newPassword }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors du changement de mot de passe`, error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Obtenir les utilisateurs par rôle
+   */
+  getUsersByRole(role: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.baseUrl}/role/${role}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(`❌ Erreur lors de la récupération des utilisateurs avec le rôle ${role}`, error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Obtenir les statistiques utilisateur
+   */
+  getUserStats(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/stats`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ Erreur lors de la récupération des statistiques', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

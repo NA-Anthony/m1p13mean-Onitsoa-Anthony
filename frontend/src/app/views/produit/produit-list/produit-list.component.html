@@ -1,0 +1,146 @@
+<!-- En-tête avec statistiques -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalProduits() }}</div>
+            <div>Total produits</div>
+          </div>
+          <svg cIcon name="cil-library" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    @for (cat of categories; track cat.value) {
+      <c-col sm="6" lg="2" class="mb-3">
+        <c-card class="text-white" [ngClass]="'bg-' + getCategorieColor(cat.value)">
+          <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fs-5 fw-semibold">{{ getTotalByCategorie(cat.value) }}</div>
+              <div class="small">{{ cat.label }}</div>
+            </div>
+            <svg cIcon [name]="cat.icon" size="lg"></svg>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>
+  
+  <!-- Filtres et recherche -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row class="align-items-center">
+        <c-col md="5" class="mb-3 mb-md-0">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-search"></svg>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher un produit..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterProduits()"
+            >
+          </div>
+        </c-col>
+        <c-col md="3" class="mb-3 mb-md-0">
+          <select class="form-select" [(ngModel)]="filterCategorie" (change)="filterProduits()">
+            <option value="">Toutes catégories</option>
+            @for (cat of categories; track cat.value) {
+              <option [value]="cat.value">{{ cat.label }}</option>
+            }
+          </select>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <div class="text-body-secondary small">
+            <svg cIcon name="cil-filter" class="me-1"></svg>
+            {{ filteredProduits.length }} résultat(s)
+          </div>
+        </c-col>
+        <c-col md="2" class="text-end">
+          <button cButton color="primary" routerLink="nouveau">
+            <svg cIcon name="cil-plus" class="me-2"></svg>
+            Nouveau produit
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Liste des produits en cartes -->
+  <c-row>
+    @for (produit of filteredProduits; track produit._id) {
+      <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
+        <c-card class="h-100 shadow-sm produit-card" (click)="voirDetails(produit._id)">
+          <div class="position-relative">
+            <c-avatar 
+              [size]="'xl'" 
+              [src]="produit.image || 'assets/images/products/default.jpg'"
+              class="mx-auto mt-3 border border-3 border-white shadow"
+              style="width: 100px; height: 100px;"
+            ></c-avatar>
+            <span class="position-absolute top-0 end-0 m-2 badge rounded-pill" 
+                  [ngClass]="'bg-' + getCategorieColor(produit.categorie)">
+              {{ getCategorieLabel(produit.categorie) }}
+            </span>
+            @if (produit.datePeremption && isPerime(produit.datePeremption)) {
+              <span class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                <svg cIcon name="cil-warning" size="sm"></svg>
+                Périmé
+              </span>
+            }
+          </div>
+          
+          <c-card-body>
+            <h5 class="card-title mb-1">{{ produit.nom }}</h5>
+            <p class="text-body-secondary small mb-2">
+              {{ (produit.description || 'Aucune description') | slice:0:60 }}...
+            </p>
+            
+            @if (produit.caracteristiques) {
+              <div class="mb-2 small">
+                @for (item of produit.caracteristiques | keyvalue; track item.key) {
+                  <span class="badge bg-light text-dark me-1 mb-1">
+                    {{ item.key }}: {{ item.value }}
+                  </span>
+                }
+              </div>
+            }
+          </c-card-body>
+          
+          <c-card-footer class="bg-transparent border-top-0">
+            <div class="d-flex justify-content-center gap-2" (click)="$event.stopPropagation()">
+              <button cButton color="info" size="sm" [routerLink]="[produit._id]">
+                <svg cIcon name="cil-magnifying-glass" class="me-1"></svg>
+                Détails
+              </button>
+              <button cButton color="warning" size="sm" [routerLink]="[produit._id, 'edit']">
+                <svg cIcon name="cil-pencil" class="me-1"></svg>
+                Modifier
+              </button>
+              <button cButton color="danger" size="sm" (click)="deleteProduit(produit._id)">
+                <svg cIcon name="cil-trash" class="me-1"></svg>
+                Suppr.
+              </button>
+            </div>
+          </c-card-footer>
+        </c-card>
+      </c-col>
+    } @empty {
+      <c-col>
+        <c-card class="text-center py-5">
+          <c-card-body>
+            <svg cIcon name="cil-library" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5>Aucun produit trouvé</h5>
+            <p class="text-body-secondary mb-3">Commencez par créer un nouveau produit</p>
+            <button cButton color="primary" routerLink="nouveau">
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Créer un produit
+            </button>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>

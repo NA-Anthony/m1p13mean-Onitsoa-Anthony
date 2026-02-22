@@ -34,6 +34,9 @@ export class UserFormComponent implements OnInit {
   isEditMode = false;
   userId: string | null = null;
   roles = ROLES;
+  isLoading = false;
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -61,8 +64,12 @@ export class UserFormComponent implements OnInit {
   }
 
   loadUser(id: string): void {
+    this.isLoading = true;
     this.userService.getUserById(id).subscribe({
-      next: (user) => {
+      next: (response) => {
+        this.isLoading = false;
+        // Le backend retourne { user, profile }
+        const user = response.user || response;
         if (user) {
           this.userForm.patchValue({
             nom: user.nom,
@@ -73,6 +80,11 @@ export class UserFormComponent implements OnInit {
             actif: user.actif
           });
         }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = 'Erreur lors du chargement de l\'utilisateur';
+        console.error('Erreur:', error);
       }
     });
   }
@@ -95,15 +107,41 @@ export class UserFormComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+
     const userData = this.userForm.value;
 
     if (this.isEditMode && this.userId) {
       this.userService.updateUser(this.userId, userData).subscribe({
-        next: () => this.router.navigate(['/users'])
+        next: (response) => {
+          this.isLoading = false;
+          this.successMessage = 'Utilisateur modifié avec succès';
+          setTimeout(() => {
+            this.router.navigate(['/users']);
+          }, 1500);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error?.error?.msg || 'Erreur lors de la modification';
+          console.error('Erreur:', error);
+        }
       });
     } else {
       this.userService.createUser(userData).subscribe({
-        next: () => this.router.navigate(['/users'])
+        next: (response) => {
+          this.isLoading = false;
+          this.successMessage = 'Utilisateur créé avec succès';
+          setTimeout(() => {
+            this.router.navigate(['/users']);
+          }, 1500);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error?.error?.msg || 'Erreur lors de la création';
+          console.error('Erreur:', error);
+        }
       });
     }
   }

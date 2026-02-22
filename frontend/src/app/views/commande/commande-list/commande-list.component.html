@@ -1,0 +1,165 @@
+<!-- En-tête avec statistiques -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalCommandes() }}</div>
+            <div>Total commandes</div>
+          </div>
+          <svg cIcon name="cil-cart" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-success">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalCA() | number:'1.0-0' }} €</div>
+            <div>Chiffre d'affaires</div>
+          </div>
+          <svg cIcon name="cil-dollar" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-warning">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalEnAttente() }}</div>
+            <div>En attente</div>
+          </div>
+          <svg cIcon name="cil-clock" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-info">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getMoyenneParCommande() | number:'1.0-0' }} €</div>
+            <div>Panier moyen</div>
+          </div>
+          <svg cIcon name="cil-chart" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Filtres et recherche -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row class="align-items-center">
+        <c-col md="4" class="mb-3 mb-md-0">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-search"></svg>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher commande, acheteur, boutique..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterCommandes()"
+            >
+          </div>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <select class="form-select" [(ngModel)]="filterStatut" (change)="filterCommandes()">
+            <option value="">Tous statuts</option>
+            @for (s of statuts; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <select class="form-select" [(ngModel)]="filterPeriode" (change)="filterCommandes()">
+            <option value="tous">Toute période</option>
+            <option value="7j">7 derniers jours</option>
+            <option value="30j">30 derniers jours</option>
+            <option value="90j">90 derniers jours</option>
+          </select>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <div class="text-body-secondary small">
+            <svg cIcon name="cil-filter" class="me-1"></svg>
+            {{ filteredCommandes.length }} résultat(s)
+          </div>
+        </c-col>
+        <c-col md="2" class="text-end">
+          <button cButton color="primary" routerLink="nouveau">
+            <svg cIcon name="cil-plus" class="me-2"></svg>
+            Nouvelle commande
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Liste des commandes -->
+  <c-row>
+    @for (cmd of filteredCommandes; track cmd._id) {
+      <c-col xs="12" class="mb-3">
+        <c-card class="shadow-sm commande-card" (click)="voirDetails(cmd._id)">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div class="fw-semibold">{{ cmd._id }}</div>
+                <small class="text-body-secondary">{{ formatDate(cmd.dateCommande) }}</small>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div>{{ cmd.acheteur?.telephone || 'Acheteur inconnu' }}</div>
+                <small class="text-body-secondary">{{ cmd.boutique?.nomBoutique }}</small>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div class="fw-bold">{{ cmd.total | number:'1.2-2' }} €</div>
+                <small class="text-body-secondary">{{ cmd.articles.length }} article(s)</small>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <span class="badge" [ngClass]="'bg-' + getStatutInfo(cmd.statut).color">
+                  {{ getStatutInfo(cmd.statut).label }}
+                </span>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <span class="badge" [ngClass]="cmd.paiementEffectue ? 'bg-success' : 'bg-warning'">
+                  {{ cmd.paiementEffectue ? 'Payée' : 'Impayée' }}
+                </span>
+              </c-col>
+              
+              <c-col md="2" class="text-end" (click)="$event.stopPropagation()">
+                <div class="btn-group" role="group">
+                  <button cButton color="info" size="sm" [routerLink]="[cmd._id]" class="me-1">
+                    <svg cIcon name="cil-magnifying-glass"></svg>
+                  </button>
+                  <button cButton color="warning" size="sm" [routerLink]="[cmd._id, 'edit']" class="me-1">
+                    <svg cIcon name="cil-pencil"></svg>
+                  </button>
+                  <button cButton color="danger" size="sm" (click)="deleteCommande(cmd._id)">
+                    <svg cIcon name="cil-trash"></svg>
+                  </button>
+                </div>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    } @empty {
+      <c-col>
+        <c-card class="text-center py-5">
+          <c-card-body>
+            <svg cIcon name="cil-cart" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5>Aucune commande trouvée</h5>
+            <p class="text-body-secondary mb-3">Commencez par créer une nouvelle commande</p>
+            <button cButton color="primary" routerLink="nouveau">
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Créer une commande
+            </button>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>

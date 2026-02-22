@@ -40,6 +40,8 @@ export class UserListComponent implements OnInit {
   searchTerm: string = '';
   filterRole: string = '';
   filterActif: string = 'tous';
+  isLoading = false;
+  errorMessage: string | null = null;
 
   roles = ['admin', 'boutique', 'acheteur'];
 
@@ -53,10 +55,19 @@ export class UserListComponent implements OnInit {
   }
 
   loadUsers(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
     this.userService.getUsers().subscribe({
       next: (data) => {
+        this.isLoading = false;
+        console.log('✅ Utilisateurs chargés depuis le backend:', data);
         this.users = data;
-        this.filteredUsers = data;
+        this.filterUsers();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('❌ Erreur backend:', error);
+        this.errorMessage = '⚠️ Impossible de charger les utilisateurs. Vérifiez que le backend est démarré sur http://localhost:3000';
       }
     });
   }
@@ -76,16 +87,27 @@ export class UserListComponent implements OnInit {
       
       return matchesSearch && matchesRole && matchesActif;
     });
+    console.log(`📊 ${this.filteredUsers.length} utilisateurs affichés`);
   }
 
   voirDetails(id: string): void {
     this.router.navigate(['/users', id]);
   }
 
+  editUser(id: string): void {
+    this.router.navigate(['/users', id, 'edit']);
+  }
+
   deleteUser(id: string): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       this.userService.deleteUser(id).subscribe({
-        next: () => this.loadUsers()
+        next: () => {
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.errorMessage = error?.error?.msg || 'Erreur lors de la suppression';
+          console.error('Erreur:', error);
+        }
       });
     }
   }
@@ -93,7 +115,13 @@ export class UserListComponent implements OnInit {
   toggleActif(id: string, event: Event): void {
     event.stopPropagation();
     this.userService.toggleActif(id).subscribe({
-      next: () => this.loadUsers()
+      next: () => {
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.msg || 'Erreur lors du changement d\'état';
+        console.error('Erreur:', error);
+      }
     });
   }
 

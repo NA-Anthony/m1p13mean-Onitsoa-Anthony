@@ -1,0 +1,206 @@
+<c-row>
+    <c-col md="8" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-user-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 20">Nom</span>
+                <span [class.text-primary]="getProgressValue() >= 40">Prénom</span>
+                <span [class.text-primary]="getProgressValue() >= 70">Email</span>
+                <span [class.text-primary]="getProgressValue() >= 90">Rôle</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Photo</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="6" class="mb-3">
+                <label cLabel for="nom" class="fw-semibold">Nom *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-user"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="text" 
+                    id="nom" 
+                    formControlName="nom" 
+                    class="form-control"
+                    placeholder="Dupont"
+                  />
+                </div>
+                @if (userForm.get('nom')?.invalid && userForm.get('nom')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Le nom est requis
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="prenom" class="fw-semibold">Prénom *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-user"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="text" 
+                    id="prenom" 
+                    formControlName="prenom" 
+                    class="form-control"
+                    placeholder="Jean"
+                  />
+                </div>
+                @if (userForm.get('prenom')?.invalid && userForm.get('prenom')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Le prénom est requis
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="email" class="fw-semibold">Email *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-envelope-closed"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="email" 
+                    id="email" 
+                    formControlName="email" 
+                    class="form-control"
+                    placeholder="jean.dupont@email.com"
+                  />
+                </div>
+                @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    @if (userForm.get('email')?.errors?.['required']) {
+                      L'email est requis
+                    } @else if (userForm.get('email')?.errors?.['email']) {
+                      Format d'email invalide
+                    }
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="password" class="fw-semibold">Mot de passe *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-lock-locked"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="password" 
+                    id="password" 
+                    formControlName="password" 
+                    class="form-control"
+                    placeholder="Minimum 6 caractères"
+                    [attr.required]="!isEditMode"
+                  />
+                </div>
+                @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    @if (userForm.get('password')?.errors?.['required']) {
+                      Le mot de passe est requis
+                    } @else if (userForm.get('password')?.errors?.['minlength']) {
+                      Minimum 6 caractères
+                    }
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="role" class="fw-semibold">Rôle *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-badge"></svg>
+                  </span>
+                  <select cInput id="role" formControlName="role" class="form-select">
+                    @for (role of roles; track role) {
+                      <option [value]="role">{{ role | titlecase }}</option>
+                    }
+                  </select>
+                </div>
+              </c-col>
+              
+              <!-- Message d'erreur global -->
+              @if (errorMessage) {
+                <c-col md="12" class="mb-3">
+                  <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <svg cIcon name="cil-warning" class="me-2"></svg>
+                    {{ errorMessage }}
+                  </div>
+                </c-col>
+              }
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="actif" class="fw-semibold">Statut</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-check"></svg>
+                  </span>
+                  <select cInput id="actif" formControlName="actif" class="form-select">
+                    <option [value]="true">Actif</option>
+                    <option [value]="false">Inactif</option>
+                  </select>
+                </div>
+              </c-col>
+              
+              <c-col md="12" class="mb-3">
+                <label cLabel for="photo" class="fw-semibold">URL de la photo</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-image"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="url" 
+                    id="photo" 
+                    formControlName="photo" 
+                    class="form-control"
+                    placeholder="https://exemple.com/photo.jpg"
+                  />
+                </div>
+              </c-col>
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/users">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="userForm.invalid || isSubmitting">
+                  @if (isSubmitting) {
+                    <svg cIcon name="cil-reload" class="me-2 spinner"></svg>
+                    Traitement...
+                  } @else {
+                    <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-user-plus'" class="me-2"></svg>
+                    {{ isEditMode ? 'Mettre à jour' : 'Créer l\'utilisateur' }}
+                  }
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

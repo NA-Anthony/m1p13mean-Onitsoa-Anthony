@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, Input } from '@angular/core';
+import { Component, computed, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import {
   AvatarComponent,
   BadgeComponent,
@@ -27,6 +27,7 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-default-header',
@@ -34,12 +35,15 @@ import { delay, filter, map, tap } from 'rxjs/operators';
   standalone: true,
   imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle]
 })
-export class DefaultHeaderComponent extends HeaderComponent {
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   readonly #colorModeService = inject(ColorModeService);
+  readonly #authService = inject(AuthService);
   readonly colorMode = this.#colorModeService.colorMode;
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
+
+  @Input() sidebarId: string = 'sidebar1';
 
   readonly colorModes = [
     { name: 'light', text: 'Light', icon: 'cilSun' },
@@ -52,8 +56,7 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode=> mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
-  constructor() {
-    super();
+  ngOnInit() {
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
     this.#colorModeService.eventName.set('ColorSchemeChange');
 
@@ -70,7 +73,12 @@ export class DefaultHeaderComponent extends HeaderComponent {
       .subscribe();
   }
 
-  @Input() sidebarId: string = 'sidebar1';
+  /**
+   * Déconnecte l'utilisateur
+   */
+  onLogout(): void {
+    this.#authService.logout();
+  }
 
   public newMessages = [
     {

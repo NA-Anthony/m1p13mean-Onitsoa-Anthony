@@ -1,0 +1,150 @@
+<!-- En-tête avec statistiques -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalTarifs() }}</div>
+            <div>Boutiques avec tarifs</div>
+          </div>
+          <svg cIcon name="cil-building" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-success">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getNombreTranchesTotal() }}</div>
+            <div>Tranches de prix</div>
+          </div>
+          <svg cIcon name="cil-grid" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-warning">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getPrixMoyen() | number:'1.2-2' }} €</div>
+            <div>Prix moyen</div>
+          </div>
+          <svg cIcon name="cil-dollar" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-info">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getZoneGratuiteMoyenne() | number:'1.0-0' }} km</div>
+            <div>Zone gratuite moy.</div>
+          </div>
+          <svg cIcon name="cil-map" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Filtres et recherche -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row class="align-items-center">
+        <c-col md="8" class="mb-3 mb-md-0">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-search"></svg>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher par boutique..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterTarifs()"
+            >
+          </div>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <div class="text-body-secondary small">
+            <svg cIcon name="cil-filter" class="me-1"></svg>
+            {{ filteredTarifs.length }} résultat(s)
+          </div>
+        </c-col>
+        <c-col md="2" class="text-end">
+          <button cButton color="primary" routerLink="nouveau">
+            <svg cIcon name="cil-plus" class="me-2"></svg>
+            Nouveaux tarifs
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Liste des tarifs -->
+  <c-row>
+    @for (t of filteredTarifs; track t._id) {
+      <c-col xs="12" class="mb-3">
+        <c-card class="shadow-sm tarif-card" (click)="voirDetails(t._id)">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <c-col md="3" class="mb-3 mb-md-0">
+                <div class="fw-semibold">{{ t.boutique?.nomBoutique }}</div>
+                <small class="text-body-secondary">Boutique #{{ t.idBoutique }}</small>
+              </c-col>
+              
+              <c-col md="3" class="mb-3 mb-md-0">
+                <div class="small">
+                  <span class="fw-semibold">{{ t.tarifs.length }}</span> tranche(s) de prix
+                </div>
+                <div class="small text-success">
+                  Gratuit dès {{ t.zoneGratuite }} km
+                </div>
+              </c-col>
+              
+              <c-col md="4" class="mb-3 mb-md-0">
+                <div class="small">
+                  @for (tr of t.tarifs.slice(0, 2); track $index) {
+                    <div class="d-flex justify-content-between">
+                      <span>{{ tr.distanceMin }}-{{ tr.distanceMax }} km:</span>
+                      <span class="fw-semibold">{{ tr.prix }} €</span>
+                    </div>
+                  }
+                  @if (t.tarifs.length > 2) {
+                    <div class="text-body-secondary">+{{ t.tarifs.length - 2 }} autres</div>
+                  }
+                </div>
+              </c-col>
+              
+              <c-col md="2" class="text-end" (click)="$event.stopPropagation()">
+                <div class="btn-group" role="group">
+                  <button cButton color="info" size="sm" [routerLink]="[t._id]" class="me-1">
+                    <svg cIcon name="cil-magnifying-glass"></svg>
+                  </button>
+                  <button cButton color="warning" size="sm" [routerLink]="[t._id, 'edit']" class="me-1">
+                    <svg cIcon name="cil-pencil"></svg>
+                  </button>
+                  <button cButton color="danger" size="sm" (click)="deleteTarif(t._id)">
+                    <svg cIcon name="cil-trash"></svg>
+                  </button>
+                </div>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    } @empty {
+      <c-col>
+        <c-card class="text-center py-5">
+          <c-card-body>
+            <svg cIcon name="cil-map" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5>Aucun tarif de livraison trouvé</h5>
+            <p class="text-body-secondary mb-3">Commencez par créer des tarifs pour une boutique</p>
+            <button cButton color="primary" routerLink="nouveau">
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Créer des tarifs
+            </button>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>

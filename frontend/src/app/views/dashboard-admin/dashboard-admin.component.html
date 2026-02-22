@@ -1,0 +1,181 @@
+<!-- En-tête avec KPIs -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalUsers }}</div>
+            <div>Utilisateurs</div>
+          </div>
+          <svg cIcon name="cil-people" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-success">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalBoutiques }}</div>
+            <div>Boutiques</div>
+          </div>
+          <svg cIcon name="cil-building" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-warning">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalCommandes }}</div>
+            <div>Commandes</div>
+          </div>
+          <svg cIcon name="cil-cart" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-info">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalProduits }}</div>
+            <div>Produits</div>
+          </div>
+          <svg cIcon name="cil-basket" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Deuxième ligne de KPIs -->
+  <c-row class="mb-4">
+    <c-col sm="6" lg="4">
+      <c-card class="border-start border-4 border-primary">
+        <c-card-body>
+          <div class="text-body-secondary small">Chiffre d'affaires</div>
+          <div class="fs-4 fw-semibold">{{ chiffreAffaires | number:'1.0-0' }} €</div>
+          <c-progress [height]="4" class="mt-2">
+            <c-progress-bar [value]="65" color="primary"></c-progress-bar>
+          </c-progress>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="4">
+      <c-card class="border-start border-4 border-success">
+        <c-card-body>
+          <div class="text-body-secondary small">Note moyenne</div>
+          <div class="fs-4 fw-semibold">4.2 / 5</div>
+          <c-progress [height]="4" class="mt-2">
+            <c-progress-bar [value]="84" color="success"></c-progress-bar>
+          </c-progress>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col sm="6" lg="4">
+      <c-card class="border-start border-4 border-warning">
+        <c-card-body>
+          <div class="text-body-secondary small">Taux de conversion</div>
+          <div class="fs-4 fw-semibold">23%</div>
+          <c-progress [height]="4" class="mt-2">
+            <c-progress-bar [value]="23" color="warning"></c-progress-bar>
+          </c-progress>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Graphiques -->
+  <c-row class="mb-4">
+    <c-col md="8">
+      <c-card class="shadow-sm">
+        <c-card-header>
+          <svg cIcon name="cil-chart" class="me-2"></svg>
+          Évolution des commandes
+        </c-card-header>
+        <c-card-body>
+          <c-chart type="bar" [data]="commandesParMois"></c-chart>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col md="4">
+      <c-card class="shadow-sm">
+        <c-card-header>
+          <svg cIcon name="cil-chart-pie" class="me-2"></svg>
+          Répartition des ventes
+        </c-card-header>
+        <c-card-body>
+          <c-chart type="doughnut" [data]="repartitionVentes"></c-chart>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Top boutiques et dernières commandes -->
+  <c-row>
+    <c-col lg="5" class="mb-4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-star" class="me-2"></svg>
+          Top 5 boutiques
+        </c-card-header>
+        <c-card-body>
+          <div class="list-group">
+            @for (b of topBoutiques; track b._id) {
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ b.nomBoutique }}</div>
+                  <small class="text-body-secondary">{{ b.totalAvis }} avis</small>
+                </div>
+                <div class="d-flex align-items-center">
+                  <span class="me-2">{{ b.noteMoyenne }}</span>
+                  <svg cIcon name="cil-star" class="text-warning"></svg>
+                </div>
+              </div>
+            }
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col lg="7" class="mb-4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-list" class="me-2"></svg>
+          Dernières commandes
+        </c-card-header>
+        <c-card-body>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Commande</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of dernieresCommandes; track c._id) {
+                  <tr>
+                    <td>{{ c._id }}</td>
+                    <td>{{ formatDate(c.dateCommande) }}</td>
+                    <td>{{ c.total | number:'1.2-2' }} €</td>
+                    <td>
+                      <span class="badge" [ngClass]="'bg-' + getStatutClass(c.statut)">
+                        {{ c.statut }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
