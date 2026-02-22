@@ -46,18 +46,28 @@ exports.createUser = async (req, res) => {
     await user.save();
 
     // Créer le profil spécifique selon le rôle
-    if (role === 'boutique') {
-      const boutique = new Boutique({
-        _id: user._id,
-        nom: `Boutique de ${prenom} ${nom}`
+    try {
+      if (role === 'boutique') {
+        const boutique = new Boutique({
+          _id: user._id,
+          nomBoutique: `Boutique de ${prenom} ${nom}`
+        });
+        await boutique.save();
+      } else if (role === 'acheteur') {
+        const acheteur = new Acheteur({
+          _id: user._id,
+          nom: `${prenom} ${nom}`
+        });
+        await acheteur.save();
+      }
+    } catch (profileErr) {
+      console.error('❌ Erreur lors de la création du profil:', profileErr.message);
+      // Supprimer l'utilisateur si le profil ne peut pas être créé
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({ 
+        msg: 'Erreur lors de la création du profil utilisateur',
+        error: profileErr.message
       });
-      await boutique.save();
-    } else if (role === 'acheteur') {
-      const acheteur = new Acheteur({
-        _id: user._id,
-        nom: `${prenom} ${nom}`
-      });
-      await acheteur.save();
     }
 
     res.status(201).json({
