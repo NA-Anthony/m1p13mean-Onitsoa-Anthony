@@ -1,238 +1,320 @@
 <c-card class="shadow-sm">
-    <c-card-header class="bg-primary text-white">
-      <h5 class="mb-0">
-        <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
-        {{ isEditMode ? 'Modifier la boutique' : 'Nouvelle boutique' }}
-      </h5>
-    </c-card-header>
-    
-    <c-card-body>
-      <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmit()">
-        <!-- Barre de progression -->
-        <div class="mb-4">
-          <div class="d-flex justify-content-between mb-2 small">
-            <span [class.text-primary]="getProgressValue() >= 20">Informations</span>
-            <span [class.text-primary]="getProgressValue() >= 60">Paiements</span>
-            <span [class.text-primary]="getProgressValue() >= 80">Horaires</span>
-            <span [class.text-primary]="getProgressValue() >= 100">Complet</span>
-          </div>
-          <c-progress [height]="5">
-            <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
-          </c-progress>
+  <c-card-header class="bg-primary text-white">
+    <h5 class="mb-0">
+      <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+      {{ isEditMode ? 'Modifier la boutique' : 'Nouvelle boutique' }}
+    </h5>
+  </c-card-header>
+  
+  <c-card-body>
+    <!-- Messages de notification -->
+    @if (successMessage) {
+      <c-alert color="success" class="mb-3">
+        <svg cIcon name="cil-check" class="me-2"></svg>
+        {{ successMessage }}
+      </c-alert>
+    }
+
+    @if (error) {
+      <c-alert color="danger" class="mb-3">
+        <svg cIcon name="cil-warning" class="me-2"></svg>
+        {{ error }}
+      </c-alert>
+    }
+
+    <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmit()">
+      <!-- Barre de progression -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between mb-2 small">
+          <span [class.text-primary]="getProgressValue() >= 20">Informations</span>
+          <span [class.text-primary]="getProgressValue() >= 60">Paiements</span>
+          <span [class.text-primary]="getProgressValue() >= 80">Horaires</span>
+          <span [class.text-primary]="getProgressValue() >= 100">Complet</span>
         </div>
+        <c-progress [height]="5">
+          <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+        </c-progress>
+      </div>
+      
+      <!-- Informations générales -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <h6 class="text-primary">
+            <svg cIcon name="cil-building" class="me-2"></svg>
+            1. Informations générales
+          </h6>
+          <hr class="mt-1 mb-3">
+        </c-col>
         
-        <!-- Informations générales -->
-        <c-row class="mb-4">
-          <c-col xs="12">
-            <h6 class="text-primary">
-              <svg cIcon name="cil-building" class="me-2"></svg>
-              1. Informations générales
-            </h6>
-            <hr class="mt-1 mb-3">
-          </c-col>
-          
-          <c-col md="6" class="mb-3">
-            <label cLabel for="nomBoutique" class="fw-semibold">
-              Nom de la boutique <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text">
-                <svg cIcon name="cil-building"></svg>
-              </span>
-              <input 
-                cInput 
-                type="text" 
-                id="nomBoutique" 
-                formControlName="nomBoutique" 
-                class="form-control"
-                placeholder="ex: Boutique Parisienne"
-              />
+        <c-col md="6" class="mb-3">
+          <label cLabel for="nomBoutique" class="fw-semibold">
+            Nom de la boutique <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-building"></svg>
+            </span>
+            <input 
+              cInput 
+              type="text" 
+              id="nomBoutique" 
+              formControlName="nomBoutique" 
+              class="form-control"
+              placeholder="ex: Boutique Parisienne"
+            />
+          </div>
+          @if (boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched) {
+            <div class="text-danger small mt-1">
+              <svg cIcon name="cil-warning" size="sm"></svg>
+              Le nom est requis
             </div>
-            @if (boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched) {
-              <div class="text-danger small mt-1">
-                <svg cIcon name="cil-warning" size="sm"></svg>
-                Le nom est requis
+          }
+        </c-col>
+        
+        <c-col md="6" class="mb-3">
+          <label cLabel for="telephone" class="fw-semibold">Téléphone</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-phone"></svg>
+            </span>
+            <input 
+              cInput 
+              type="tel" 
+              id="telephone" 
+              formControlName="telephone" 
+              class="form-control"
+              placeholder="01 23 45 67 89"
+            />
+          </div>
+        </c-col>
+        
+        <c-col md="6" class="mb-3">
+          <label cLabel for="adresse" class="fw-semibold">Adresse</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-location-pin"></svg>
+            </span>
+            <input 
+              cInput 
+              type="text" 
+              id="adresse" 
+              formControlName="adresse" 
+              class="form-control"
+              placeholder="123 Rue de Rivoli, Paris"
+            />
+          </div>
+        </c-col>
+        
+        <!-- Upload de logo -->
+        <c-col md="6" class="mb-3">
+          <label cLabel for="file-upload" class="fw-semibold">Logo de la boutique</label>
+          
+          <div class="border rounded p-3 text-center bg-light">
+            <!-- Prévisualisation -->
+            @if (imagePreview) {
+              <div class="mb-3 position-relative">
+                <img 
+                  [src]="imagePreview" 
+                  alt="Aperçu du logo" 
+                  class="img-fluid rounded border"
+                  style="max-height: 120px; object-fit: contain;"
+                >
+                <!-- Bouton delete ajouté ici -->
+                <button 
+                  type="button"
+                  class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                  (click)="removeImage()"
+                  [disabled]="uploadLoading"
+                  style="border-radius: 50%; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                >
+                  <svg cIcon name="cil-trash" size="sm"></svg>
+                </button>
               </div>
             }
-          </c-col>
-          
-          <c-col md="6" class="mb-3">
-            <label cLabel for="telephone" class="fw-semibold">Téléphone</label>
-            <div class="input-group">
-              <span class="input-group-text">
-                <svg cIcon name="cil-phone"></svg>
-              </span>
-              <input 
-                cInput 
-                type="tel" 
-                id="telephone" 
-                formControlName="telephone" 
-                class="form-control"
-                placeholder="01 23 45 67 89"
+            
+            <!-- Upload progress -->
+            @if (uploadLoading) {
+              <div class="mb-2">
+                <c-progress [height]="5" class="mb-2">
+                  <c-progress-bar [value]="uploadProgress" color="primary"></c-progress-bar>
+                </c-progress>
+                <small class="text-body-secondary">Upload en cours... {{ uploadProgress }}%</small>
+              </div>
+            }
+            
+            <!-- Bouton de sélection -->
+            <div class="d-flex justify-content-center">
+              <label 
+                for="file-upload" 
+                class="btn btn-outline-primary" 
+                [class.disabled]="uploadLoading"
+                style="cursor: pointer;"
+              >
+                <svg cIcon name="cilCloudDownload" class="me-2"></svg>
+                {{ imagePreview ? 'Changer l\'image' : 'Sélectionner une image' }}
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                class="d-none"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                [disabled]="uploadLoading"
               />
             </div>
-          </c-col>
+            
+            <small class="text-body-secondary d-block mt-2">
+              <svg cIcon name="cil-info" size="sm"></svg>
+              Formats acceptés: JPG, PNG, GIF. Max 5MB.
+            </small>
+          </div>
           
-          <c-col md="6" class="mb-3">
-            <label cLabel for="adresse" class="fw-semibold">Adresse</label>
-            <div class="input-group">
-              <span class="input-group-text">
-                <svg cIcon name="cil-location-pin"></svg>
-              </span>
-              <input 
-                cInput 
-                type="text" 
-                id="adresse" 
-                formControlName="adresse" 
-                class="form-control"
-                placeholder="123 Rue de Rivoli, Paris"
-              />
-            </div>
-          </c-col>
-          
-          <c-col md="6" class="mb-3">
-            <label cLabel for="logo" class="fw-semibold">URL du logo</label>
-            <div class="input-group">
-              <span class="input-group-text">
-                <svg cIcon name="cil-image"></svg>
-              </span>
-              <input 
-                cInput 
-                type="url" 
-                id="logo" 
-                formControlName="logo" 
-                class="form-control"
-                placeholder="https://exemple.com/logo.jpg"
-              />
-            </div>
-          </c-col>
-          
-          <c-col xs="12" class="mb-3">
-            <label cLabel for="description" class="fw-semibold">Description</label>
-            <textarea 
-              cInput 
-              id="description" 
-              formControlName="description" 
-              rows="3" 
-              class="form-control"
-              placeholder="Décrivez votre boutique..."
-            ></textarea>
-          </c-col>
-        </c-row>
+          <!-- Champ caché pour stocker l'URL du logo -->
+          <input type="hidden" formControlName="logo">
+        </c-col>
         
-        <!-- Modes de paiement -->
-        <c-row class="mb-4">
-          <c-col xs="12">
-            <h6 class="text-primary">
-              <svg cIcon name="cil-credit-card" class="me-2"></svg>
-              2. Modes de paiement acceptés
-            </h6>
-            <hr class="mt-1 mb-3">
-          </c-col>
-          
-          <c-col xs="12">
-            <div class="border rounded p-3 bg-light">
-              <c-row [gutter]="3">
-                @for (mode of modesPaiement; track mode) {
-                  <c-col md="3" sm="6">
-                    <div class="form-check">
+        <c-col xs="12" class="mb-3">
+          <label cLabel for="description" class="fw-semibold">Description</label>
+          <textarea 
+            cInput 
+            id="description" 
+            formControlName="description" 
+            rows="3" 
+            class="form-control"
+            placeholder="Décrivez votre boutique..."
+          ></textarea>
+        </c-col>
+      </c-row>
+      
+      <!-- Modes de paiement -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <h6 class="text-primary">
+            <svg cIcon name="cil-credit-card" class="me-2"></svg>
+            2. Modes de paiement acceptés
+          </h6>
+          <hr class="mt-1 mb-3">
+        </c-col>
+        
+        <c-col xs="12">
+          <div class="border rounded p-3 bg-light">
+            <c-row [gutter]="3">
+              @for (mode of modesPaiement; track mode) {
+                <c-col md="3" sm="6">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [id]="'paiement-' + mode"
+                      [value]="mode"
+                      (change)="onPaiementChange($event)"
+                      [checked]="selectedPaiements.includes(mode)"
+                    />
+                    <label class="form-check-label" [for]="'paiement-' + mode">
+                      <svg cIcon [name]="getPaymentIcon(mode)" size="sm" class="me-1"></svg>
+                      {{ mode }}
+                    </label>
+                  </div>
+                </c-col>
+              }
+            </c-row>
+          </div>
+        </c-col>
+      </c-row>
+      
+      <!-- Horaires -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <h6 class="text-primary">
+            <svg cIcon name="cil-clock" class="me-2"></svg>
+            3. Horaires d'ouverture
+          </h6>
+          <hr class="mt-1 mb-3">
+        </c-col>
+        
+        <c-col xs="12">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Jour</th>
+                  <th>Ouverture</th>
+                  <th>Fermeture</th>
+                  <th class="text-center">Statut</th>
+                </tr>
+              </thead>
+              <tbody formGroupName="horaires">
+                @for (jour of joursSemaine; track jour) {
+                  <tr [formGroupName]="jour">
+                    <td class="fw-semibold">{{ jour | titlecase }}</td>
+                    <td>
                       <input
-                        class="form-check-input"
-                        type="checkbox"
-                        [id]="'paiement-' + mode"
-                        [value]="mode"
-                        (change)="onPaiementChange($event)"
-                        [checked]="selectedPaiements.includes(mode)"
+                        cInput
+                        type="time"
+                        formControlName="ouverture"
+                        [id]="'ouverture-' + jour"
+                        class="form-control form-control-sm"
+                        (change)="checkHoraire(jour)"
                       />
-                      <label class="form-check-label" [for]="'paiement-' + mode">
-                        <svg cIcon [name]="getPaymentIcon(mode)" size="sm" class="me-1"></svg>
-                        {{ mode }}
-                      </label>
-                    </div>
-                  </c-col>
-                }
-              </c-row>
-            </div>
-          </c-col>
-        </c-row>
-        
-        <!-- Horaires -->
-        <c-row class="mb-4">
-          <c-col xs="12">
-            <h6 class="text-primary">
-              <svg cIcon name="cil-clock" class="me-2"></svg>
-              3. Horaires d'ouverture
-            </h6>
-            <hr class="mt-1 mb-3">
-          </c-col>
-          
-          <c-col xs="12">
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead class="table-light">
-                  <tr>
-                    <th>Jour</th>
-                    <th>Ouverture</th>
-                    <th>Fermeture</th>
-                    <th class="text-center">Statut</th>
+                    </td>
+                    <td>
+                      <input
+                        cInput
+                        type="time"
+                        formControlName="fermeture"
+                        [id]="'fermeture-' + jour"
+                        class="form-control form-control-sm"
+                        (change)="checkHoraire(jour)"
+                      />
+                    </td>
+                    <td class="text-center">
+                      @if (getHoraireStatus(jour)) {
+                        <span class="badge bg-success">
+                          <svg cIcon name="cil-check" size="sm"></svg>
+                          Ouvert
+                        </span>
+                      } @else {
+                        <span class="badge bg-secondary">
+                          <svg cIcon name="cil-x" size="sm"></svg>
+                          Fermé
+                        </span>
+                      }
+                    </td>
                   </tr>
-                </thead>
-                <tbody formGroupName="horaires">
-                  @for (jour of joursSemaine; track jour) {
-                    <tr [formGroupName]="jour">
-                      <td class="fw-semibold">{{ jour | titlecase }}</td>
-                      <td>
-                        <input
-                          cInput
-                          type="time"
-                          formControlName="ouverture"
-                          class="form-control form-control-sm"
-                          (change)="checkHoraire(jour)"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          cInput
-                          type="time"
-                          formControlName="fermeture"
-                          class="form-control form-control-sm"
-                          (change)="checkHoraire(jour)"
-                        />
-                      </td>
-                      <td class="text-center">
-                        @if (getHoraireStatus(jour)) {
-                          <span class="badge bg-success">
-                            <svg cIcon name="cil-check" size="sm"></svg>
-                            Ouvert
-                          </span>
-                        } @else {
-                          <span class="badge bg-secondary">
-                            <svg cIcon name="cil-x" size="sm"></svg>
-                            Fermé
-                          </span>
-                        }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </c-col>
-        </c-row>
-        
-        <!-- Actions -->
-        <c-row class="mt-4">
-          <c-col class="d-flex gap-2 justify-content-end">
-            <button cButton color="secondary" type="button" routerLink="/boutiques">
-              <svg cIcon name="cil-x" class="me-2"></svg>
-              Annuler
-            </button>
-            <button cButton color="primary" type="submit" [disabled]="boutiqueForm.invalid">
-              <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
-              {{ isEditMode ? 'Mettre à jour' : 'Créer la boutique' }}
-            </button>
-          </c-col>
-        </c-row>
-      </form>
-    </c-card-body>
-  </c-card>
+                }
+              </tbody>
+            </table>
+          </div>
+        </c-col>
+      </c-row>
+      
+      <!-- Actions -->
+      <c-row class="mt-4">
+        <c-col class="d-flex gap-2 justify-content-end">
+          <button 
+            cButton 
+            color="secondary" 
+            type="button" 
+            routerLink="/boutiques"
+            [disabled]="loading || uploadLoading"
+          >
+            <svg cIcon name="cil-x" class="me-2"></svg>
+            Annuler
+          </button>
+          <button 
+            cButton 
+            color="primary" 
+            type="submit" 
+            [disabled]="boutiqueForm.invalid || loading || uploadLoading"
+          >
+            @if (loading) {
+              <c-spinner size="sm" class="me-2"></c-spinner>
+            }
+            <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+            {{ loading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer la boutique') }}
+          </button>
+        </c-col>
+      </c-row>
+    </form>
+  </c-card-body>
+</c-card>

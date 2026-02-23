@@ -6,7 +6,9 @@ import {
   GridModule,
   AvatarModule,
   ButtonModule,
-  BadgeModule
+  BadgeModule,
+  SpinnerModule,  // AJOUTER
+  AlertModule     // AJOUTER
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { ProduitService } from '../produit.service';
@@ -24,11 +26,15 @@ import { CATEGORIES_PRODUIT } from '../produit.model';
     AvatarModule,
     ButtonModule,
     BadgeModule,
+    SpinnerModule,  // AJOUTER
+    AlertModule,    // AJOUTER
     IconModule
   ]
 })
 export class ProduitDetailComponent implements OnInit {
-  produit: any = null;  // ← Changé en any pour éviter les erreurs de typage
+  produit: any = null;
+  loading = true;           // AJOUTER
+  error: string | null = null;  // AJOUTER
 
   constructor(
     private route: ActivatedRoute,
@@ -38,10 +44,27 @@ export class ProduitDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.produitService.getProduitById(id).subscribe({
-        next: (data) => this.produit = data || null
-      });
+      this.loadProduit(id);
     }
+  }
+
+  // MODIFIER cette méthode
+  loadProduit(id: string): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.produitService.getProduitById(id).subscribe({
+      next: (response: any) => {
+        // La réponse peut être directement le produit ou { produit, boutiques }
+        this.produit = response?.produit || response;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.msg || 'Erreur lors du chargement du produit';
+        this.loading = false;
+        console.error(err);
+      }
+    });
   }
 
   getCategorieLabel(): string {

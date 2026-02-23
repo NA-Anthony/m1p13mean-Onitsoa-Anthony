@@ -1,14 +1,23 @@
 const Produit = require('../models/Produit');
 const ProduitParBoutique = require('../models/ProduitParBoutique');
-const Promotion = require('../models/Promotion');
-const Avis = require('../models/Avis');
 
 // ✅ ROUTE PUBLIQUE
 // @route   GET /api/produits
 // @desc    Obtenir tous les produits
 exports.getAllProduits = async (req, res) => {
   try {
-    const produits = await Produit.find();
+    const { categorie, search } = req.query;
+    let filter = {};
+
+    if (categorie) {
+      filter.categorie = categorie;
+    }
+
+    if (search) {
+      filter.nom = { $regex: search, $options: 'i' };
+    }
+
+    const produits = await Produit.find(filter).sort('-createdAt');
     res.json(produits);
   } catch (err) {
     console.error(err.message);
@@ -28,14 +37,14 @@ exports.getProduitById = async (req, res) => {
     }
 
     // Trouver toutes les boutiques qui vendent ce produit
-    const boutiquesVendent = await ProduitParBoutique.find({ idProduit: req.params.id })
+    const boutiques = await ProduitParBoutique.find({ idProduit: req.params.id })
       .populate('idBoutique')
       .populate({
         path: 'idProduit',
         populate: { path: 'promotions', match: { actif: true } }
       });
 
-    res.json({ produit, boutiques: boutiquesVendent });
+    res.json({ produit, boutiques });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur serveur');
@@ -64,8 +73,7 @@ exports.rechercheProduits = async (req, res) => {
     const produits = await Produit.find({
       $or: [
         { nom: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } },
-        { categorie: { $regex: q, $options: 'i' } }
+        { description: { $regex: q, $options: 'i' } }
       ]
     });
     res.json(produits);
@@ -76,11 +84,19 @@ exports.rechercheProduits = async (req, res) => {
 };
 
 // 🔒 ROUTE PROTÉGÉE (admin)
-// @route   POST /api/produits
-// @desc    Créer un produit (admin seulement)
-exports.createProduit = async (req, res) => {
+// @route   POST /api/produits-admin
+// @desc    Créer un nouveau produit
+exports.createProduitAdmin = async (req, res) => {
   try {
     const { nom, description, categorie, image, datePeremption, caracteristiques } = req.body;
+
+    // Valider les champs requis
+    if (!nom) {
+      return res.status(400).json({ msg: 'Le nom du produit est requis' });
+    }
+    if (!categorie) {
+      return res.status(400).json({ msg: 'La catégorie est requise' });
+    }
 
     // Vérifier si le produit existe déjà
     const existant = await Produit.findOne({ nom: { $regex: new RegExp(`^${nom}$`, 'i') } });
@@ -88,195 +104,107 @@ exports.createProduit = async (req, res) => {
       return res.status(400).json({ msg: 'Un produit avec ce nom existe déjà' });
     }
 
-    const produit = new Produit({
+    // Créer le nouveau produit
+    const newProduit = new Produit({
       nom,
       description,
       categorie,
       image,
       datePeremption,
-      caracteristiques
+      caracteristiques: caracteristiques || {}
     });
 
-    await produit.save();
-    res.status(201).json(produit);
+    await newProduit.save();
+    res.status(201).json({ msg: 'Produit créé avec succès', produit: newProduit });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Erreur lors de la création du produit', error: err.message });
+  }
+};
+
+// 🔒 ROUTE PROTÉGÉE (admin)
+// @route   GET /api/produits-admin/all
+// @desc    Obtenir tous les produits (vue admin)
+exports.getAllProduitsAdmin = async (req, res) => {
+  try {
+    const produits = await Produit.find().sort('-createdAt');
+    res.json(produits);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur serveur');
   }
 };
 
-// 🔒 ROUTE PROTÉGÉE (boutique)
-// @route   POST /api/produits/boutique
-// @desc    Ajouter un produit à sa boutique
-exports.addProduitToBoutique = async (req, res) => {
+// 🔒 ROUTE PROTÉGÉE (admin)
+// @route   PUT /api/produits-admin/:id
+// @desc    Modifier un produit
+exports.updateProduitAdmin = async (req, res) => {
   try {
-    const { idProduit, prix, stock } = req.body;
-    const idBoutique = req.user.id;
+    const { nom, description, categorie, image, datePeremption, caracteristiques } = req.body;
+    const produitId = req.params.id;
 
-    // Vérifier que le produit existe
-    const produit = await Produit.findById(idProduit);
-    if (!produit) {
-      return res.status(404).json({ msg: 'Produit non trouvé dans le catalogue' });
-    }
-
-    // Vérifier si le produit existe déjà dans la boutique
-    const existant = await ProduitParBoutique.findOne({
-      idBoutique,
-      idProduit
-    });
-
-    if (existant) {
-      return res.status(400).json({ msg: 'Ce produit est déjà dans votre boutique' });
-    }
-
-    const produitBoutique = new ProduitParBoutique({
-      idBoutique,
-      idProduit,
-      prix,
-      stock: stock || 0
-    });
-
-    await produitBoutique.save();
-    
-    const populated = await ProduitParBoutique.findById(produitBoutique._id)
-      .populate('idProduit')
-      .populate('idBoutique');
-
-    res.status(201).json(populated);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Erreur serveur');
-  }
-};
-
-// 🔒 ROUTE PROTÉGÉE (boutique)
-// @route   PUT /api/produits/boutique/:id
-// @desc    Mettre à jour un produit de sa boutique
-exports.updateProduitBoutique = async (req, res) => {
-  try {
-    const produit = await ProduitParBoutique.findById(req.params.id);
-
+    let produit = await Produit.findById(produitId);
     if (!produit) {
       return res.status(404).json({ msg: 'Produit non trouvé' });
     }
 
-    // Vérifier que c'est le propriétaire
-    if (produit.idBoutique.toString() !== req.user.id) {
-      return res.status(403).json({ msg: 'Non autorisé - Cette boutique ne possède pas ce produit' });
-    }
+    // Mettre à jour les champs
+    if (nom) produit.nom = nom;
+    if (description !== undefined) produit.description = description;
+    if (categorie) produit.categorie = categorie;
+    if (image !== undefined) produit.image = image;
+    if (datePeremption !== undefined) produit.datePeremption = datePeremption;
+    if (caracteristiques !== undefined) produit.caracteristiques = caracteristiques;
 
-    const { prix, stock } = req.body;
-    
-    if (prix !== undefined) produit.prix = prix;
-    if (stock !== undefined) produit.stock = stock;
-    
     await produit.save();
-    
-    const updated = await ProduitParBoutique.findById(req.params.id)
-      .populate('idProduit')
-      .populate('idBoutique');
 
-    res.json(updated);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Erreur serveur');
-  }
-};
-
-// 🔒 ROUTE PROTÉGÉE (boutique)
-// @route   DELETE /api/produits/boutique/:id
-// @desc    Supprimer un produit de sa boutique
-exports.deleteProduitBoutique = async (req, res) => {
-  try {
-    const produit = await ProduitParBoutique.findById(req.params.id);
-
-    if (!produit) {
-      return res.status(404).json({ msg: 'Produit non trouvé' });
-    }
-
-    if (produit.idBoutique.toString() !== req.user.id) {
-      return res.status(403).json({ msg: 'Non autorisé' });
-    }
-
-    // Supprimer aussi les promotions associées
-    await Promotion.deleteMany({ idProduitParBoutique: req.params.id });
-    
-    await produit.deleteOne();
-    res.json({ msg: 'Produit retiré de la boutique avec succès' });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Erreur serveur');
-  }
-};
-
-// 🔒 ROUTE PROTÉGÉE (boutique)
-// @route   POST /api/produits/:id/promotion
-// @desc    Ajouter une promotion à un produit
-exports.addPromotion = async (req, res) => {
-  try {
-    const { remisePourcentage, dateDebut, dateFin } = req.body;
-
-    // Vérifier que le produit appartient à la boutique
-    const produit = await ProduitParBoutique.findById(req.params.id);
-    if (!produit) {
-      return res.status(404).json({ msg: 'Produit non trouvé' });
-    }
-
-    if (produit.idBoutique.toString() !== req.user.id) {
-      return res.status(403).json({ msg: 'Non autorisé' });
-    }
-
-    // Désactiver les anciennes promotions
-    await Promotion.updateMany(
-      { idProduitParBoutique: req.params.id, actif: true },
-      { actif: false }
-    );
-
-    const promotion = new Promotion({
-      idProduitParBoutique: req.params.id,
-      remisePourcentage,
-      dateDebut,
-      dateFin,
-      actif: true
+    res.json({
+      msg: 'Produit modifié avec succès',
+      produit
     });
-
-    await promotion.save();
-
-    // Mettre à jour le produit
-    produit.enPromotion = true;
-    await produit.save();
-
-    res.status(201).json(promotion);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur serveur');
   }
 };
 
-// 🔒 ROUTE PROTÉGÉE (boutique)
-// @route   DELETE /api/produits/:id/promotion
-// @desc    Supprimer la promotion d'un produit
-exports.removePromotion = async (req, res) => {
+// 🔒 ROUTE PROTÉGÉE (admin)
+// @route   DELETE /api/produits-admin/:id
+// @desc    Supprimer un produit
+exports.deleteProduitAdmin = async (req, res) => {
   try {
-    const produit = await ProduitParBoutique.findById(req.params.id);
-    
+    const produitId = req.params.id;
+
+    const produit = await Produit.findByIdAndDelete(produitId);
     if (!produit) {
       return res.status(404).json({ msg: 'Produit non trouvé' });
     }
 
-    if (produit.idBoutique.toString() !== req.user.id) {
-      return res.status(403).json({ msg: 'Non autorisé' });
-    }
+    // Supprimer aussi les entrées dans ProduitParBoutique
+    await ProduitParBoutique.deleteMany({ idProduit: produitId });
 
-    await Promotion.updateMany(
-      { idProduitParBoutique: req.params.id, actif: true },
-      { actif: false }
-    );
+    res.json({ msg: 'Produit supprimé avec succès' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur serveur');
+  }
+};
 
-    produit.enPromotion = false;
-    await produit.save();
+// 🔒 ROUTE PROTÉGÉE (admin)
+// @route   GET /api/produits-admin/stats
+// @desc    Statistiques sur les produits
+exports.getProduitStatsAdmin = async (req, res) => {
+  try {
+    const totalProduits = await Produit.countDocuments();
+    
+    const statsParCategorie = await Produit.aggregate([
+      { $group: { _id: '$categorie', count: { $sum: 1 } } }
+    ]);
 
-    res.json({ msg: 'Promotion supprimée avec succès' });
+    res.json({
+      total: totalProduits,
+      parCategorie: statsParCategorie
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur serveur');

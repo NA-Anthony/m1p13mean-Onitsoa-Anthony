@@ -1,47 +1,57 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Produit, PRODUITS_MOCK } from './produit.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Produit } from './produit.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProduitService {
-  private produits: Produit[] = [...PRODUITS_MOCK];
+  private apiUrl = 'http://localhost:3000/api/produits';
+  private apiAdminUrl = 'http://localhost:3000/api/produits-admin';
 
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Récupère tous les produits (public)
+   */
   getProduits(): Observable<Produit[]> {
-    return of(this.produits);
+    return this.http.get<Produit[]>(this.apiUrl);
   }
 
-  getProduitById(id: string): Observable<Produit | undefined> {
-    const produit = this.produits.find(p => p._id === id);
-    return of(produit);
+  /**
+   * Récupère un produit par ID
+   * Le backend peut retourner { produit, boutiques } ou directement le produit
+   */
+  getProduitById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+  /**
+   * Crée un nouveau produit (admin)
+   */
   createProduit(produit: Partial<Produit>): Observable<Produit> {
-    const newProduit: Produit = {
-      _id: (this.produits.length + 1).toString(),
-      nom: produit.nom || '',
-      description: produit.description || '',
-      categorie: produit.categorie || 'autre',
-      image: produit.image || '',
-      datePeremption: produit.datePeremption,
-      caracteristiques: produit.caracteristiques || {}
-    };
-    this.produits.push(newProduit);
-    return of(newProduit);
+    return this.http.post<Produit>(this.apiAdminUrl, produit);
   }
 
-  updateProduit(id: string, produit: Partial<Produit>): Observable<Produit | undefined> {
-    const index = this.produits.findIndex(p => p._id === id);
-    if (index !== -1) {
-      this.produits[index] = { ...this.produits[index], ...produit };
-      return of(this.produits[index]);
-    }
-    return of(undefined);
+  /**
+   * Met à jour un produit (admin)
+   */
+  updateProduit(id: string, produit: Partial<Produit>): Observable<Produit> {
+    return this.http.put<Produit>(`${this.apiAdminUrl}/${id}`, produit);
   }
 
+  /**
+   * Supprime un produit (admin)
+   */
   deleteProduit(id: string): Observable<void> {
-    this.produits = this.produits.filter(p => p._id !== id);
-    return of(void 0);
+    return this.http.delete<void>(`${this.apiAdminUrl}/${id}`);
+  }
+
+  /**
+   * Récupère tous les produits (admin)
+   */
+  getAllProduitsAdmin(): Observable<Produit[]> {
+    return this.http.get<Produit[]>(`${this.apiAdminUrl}/all`);
   }
 }

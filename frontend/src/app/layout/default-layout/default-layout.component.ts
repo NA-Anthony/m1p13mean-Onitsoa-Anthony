@@ -16,7 +16,9 @@ import {
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
+import { adminNavItems, boutiqueNavItems, acheteurNavItems } from './nav';
 import { navItems } from './_nav';
+import { AuthService } from '../../services/auth.service';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -50,6 +52,25 @@ function isOverflown(element: HTMLElement) {
 })
 export class DefaultLayoutComponent {
   public navItems = navItems;
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    const role = user?.role;
+
+    // Sélectionner la navigation en fonction du rôle
+    if (role === 'admin') {
+      this.navItems = adminNavItems;
+    } else if (role === 'boutique') {
+      this.navItems = boutiqueNavItems;
+    } else if (role === 'acheteur') {
+      this.navItems = acheteurNavItems;
+    } else {
+      // Par défaut, navigation admin (ou vide)
+      this.navItems = adminNavItems;
+    }
+  }
 
   onScrollbarUpdate($event: any) {
     // if ($event.verticalUsed) {

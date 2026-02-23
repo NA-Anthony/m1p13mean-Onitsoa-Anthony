@@ -8,10 +8,14 @@ import {
   GridModule,
   ButtonModule,
   ProgressModule,
-  BadgeModule
+  BadgeModule,
+  AlertModule,
+  SpinnerModule,
+  AvatarModule  // ← AJOUTER CET IMPORT
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { BoutiqueService } from '../boutique.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-boutique-form',
@@ -27,6 +31,9 @@ import { BoutiqueService } from '../boutique.service';
     ButtonModule,
     ProgressModule,
     BadgeModule,
+    AlertModule,
+    SpinnerModule,
+    AvatarModule,  // ← AJOUTER DANS LES IMPORTS
     IconModule
   ]
 })
@@ -34,16 +41,26 @@ export class BoutiqueFormComponent implements OnInit {
   boutiqueForm: FormGroup;
   isEditMode = false;
   boutiqueId: string | null = null;
+  loading = false;
+  uploadLoading = false;
+  error: string | null = null;
+  successMessage: string | null = null;
 
   joursSemaine = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
   modesPaiement = ['Carte bancaire', 'Espèces', 'Mobile Money', 'Paypal', 'Apple Pay'];
   selectedPaiements: string[] = [];
+  
+  // Pour l'upload d'image
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
+  uploadProgress = 0;
 
   constructor(
     private fb: FormBuilder,
     private boutiqueService: BoutiqueService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.boutiqueForm = this.fb.group({
       nomBoutique: ['', Validators.required],
@@ -74,9 +91,10 @@ export class BoutiqueFormComponent implements OnInit {
   }
 
   loadBoutique(id: string): void {
+    this.loading = true;
     this.boutiqueService.getBoutiqueById(id).subscribe({
-      next: (res) => {
-        const boutique = res?.boutique || res;
+      next: (response) => {
+        const boutique = response.boutique;
         if (boutique) {
           this.boutiqueForm.patchValue({
             nomBoutique: boutique.nomBoutique,
@@ -88,8 +106,110 @@ export class BoutiqueFormComponent implements OnInit {
             horaires: boutique.horaires
           });
           this.selectedPaiements = boutique.modePaiementAcceptes || [];
+          
+          if (boutique.logo) {
+            this.imagePreview = boutique.logo;
+          }
         }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement de la boutique';
+        this.loading = false;
+        console.error(err);
       }
+    });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        this.error = 'Veuillez sélectionner une image valide';
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        this.error = 'L\'image ne doit pas dépasser 5MB';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.error = null;
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // AJOUTER cette méthode pour le drag & drop
+  onDropFile(event: DragEvent): void {
+    event.preventDefault();
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        this.error = 'Veuillez sélectionner une image valide';
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        this.error = 'L\'image ne doit pas dépasser 5MB';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.error = null;
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // AJOUTER cette méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    document.getElementById('file-upload')?.click();
+  }
+
+  uploadImage(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (!this.selectedFile) {
+        resolve(this.boutiqueForm.get('logo')?.value || '');
+        return;
+      }
+  
+      this.uploadLoading = true;
+      this.uploadProgress = 0;
+      this.error = null;
+      
+      const formData = new FormData();
+      formData.append('image', this.selectedFile);
+      
+      this.http.post('http://localhost:3000/api/upload', formData, {
+        reportProgress: true,
+        observe: 'events'
+      }).subscribe({
+        next: (event: any) => {
+          if (event.type === 1) {
+            this.uploadProgress = Math.round(100 * event.loaded / event.total);
+          } else if (event.type === 4) {
+            this.uploadLoading = false;
+            resolve(event.body.imageUrl || event.body.url || '');
+          }
+        },
+        error: (err) => {
+          this.uploadLoading = false;
+          console.error('Upload error:', err);
+          this.error = err.error?.msg || 'Erreur lors de l\'upload de l\'image';
+          reject(err);
+        }
+      });
     });
   }
 
@@ -146,7 +266,7 @@ export class BoutiqueFormComponent implements OnInit {
     return icons[mode] || 'cil-credit-card';
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.boutiqueForm.invalid) {
       Object.keys(this.boutiqueForm.controls).forEach(key => {
         this.boutiqueForm.get(key)?.markAsTouched();
@@ -154,16 +274,58 @@ export class BoutiqueFormComponent implements OnInit {
       return;
     }
 
-    const boutiqueData = this.boutiqueForm.value;
+    this.loading = true;
+    this.error = null;
 
-    if (this.isEditMode && this.boutiqueId) {
-      this.boutiqueService.updateBoutique(this.boutiqueId, boutiqueData).subscribe({
-        next: () => this.router.navigate(['/boutiques'])
-      });
-    } else {
-      this.boutiqueService.createBoutique(boutiqueData).subscribe({
-        next: () => this.router.navigate(['/boutiques'])
-      });
+    try {
+      const imageUrl = await this.uploadImage();
+      
+      const boutiqueData = {
+        ...this.boutiqueForm.value,
+        logo: imageUrl || this.boutiqueForm.get('logo')?.value
+      };
+
+      if (this.isEditMode && this.boutiqueId) {
+        this.boutiqueService.updateBoutique(this.boutiqueId, boutiqueData).subscribe({
+          next: () => {
+            this.successMessage = 'Boutique mise à jour avec succès';
+            setTimeout(() => {
+              this.router.navigate(['/boutiques']);
+            }, 1500);
+          },
+          error: (err) => {
+            this.error = err.error?.msg || 'Erreur lors de la mise à jour';
+            this.loading = false;
+            console.error(err);
+          }
+        });
+      } else {
+        this.boutiqueService.createBoutique(boutiqueData).subscribe({
+          next: () => {
+            this.successMessage = 'Boutique créée avec succès';
+            setTimeout(() => {
+              this.router.navigate(['/boutiques']);
+            }, 1500);
+          },
+          error: (err) => {
+            this.error = err.error?.msg || 'Erreur lors de la création';
+            this.loading = false;
+            console.error(err);
+          }
+        });
+      }
+    } catch (error) {
+      this.error = 'Erreur lors de l\'upload de l\'image';
+      this.loading = false;
     }
+  }
+
+  removeImage(): void {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.boutiqueForm.patchValue({ logo: '' });
+    // Reset de l'input file
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 }

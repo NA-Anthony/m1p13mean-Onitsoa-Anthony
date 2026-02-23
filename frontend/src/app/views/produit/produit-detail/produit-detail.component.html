@@ -1,4 +1,22 @@
-<c-row>
+<!-- Indicateur de chargement -->
+@if (loading) {
+  <div class="text-center py-5">
+    <c-spinner color="primary"></c-spinner>
+    <p class="mt-2">Chargement du produit...</p>
+  </div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+  <c-alert color="danger" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    {{ error }}
+  </c-alert>
+}
+
+<!-- Contenu du produit -->
+@if (!loading && !error && produit) {
+  <c-row>
     <c-col md="4" class="mb-4">
       <c-card class="shadow-sm text-center">
         <c-card-body>
@@ -105,3 +123,12 @@
       </c-row>
     </c-col>
   </c-row>
+}
+
+<!-- Message si produit non trouvé -->
+@if (!loading && !error && !produit) {
+  <c-alert color="warning" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    Produit non trouvé
+  </c-alert>
+}

@@ -59,8 +59,8 @@ export class BoutiqueDetailComponent implements OnInit {
       'Carte bancaire': 'cil-credit-card',
       'Espèces': 'cil-money',
       'Mobile Money': 'cil-phone',
-      'Paypal': 'cib-paypal',
-      'Apple Pay': 'cib-apple-pay'
+      'Paypal': 'cibCcPaypal',
+      'Apple Pay': 'cibCcApplePay'
     };
     return icons[mode] || 'cil-credit-card';
   }
