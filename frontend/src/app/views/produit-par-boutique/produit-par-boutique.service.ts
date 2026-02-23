@@ -1,84 +1,94 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { ProduitParBoutique, PRODUITS_PAR_BOUTIQUE_POPULED } from './produit-par-boutique.model';
-import { BOUTIQUES_MOCK } from '../boutique/boutique.model';
-import { PRODUITS_MOCK } from '../produit/produit.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ProduitParBoutique } from './produit-par-boutique.model';
+import { AuthService } from '../../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProduitParBoutiqueService {
-  private produitsParBoutique: ProduitParBoutique[] = [...PRODUITS_PAR_BOUTIQUE_POPULED];
+  private apiUrl = 'http://localhost:3000/api/produits/boutique';
+  private apiAdminUrl = 'http://localhost:3000/api/produits-admin/all-produits-boutique';
 
-  getProduitsParBoutique(): Observable<ProduitParBoutique[]> {
-    return of(this.produitsParBoutique);
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  /**
+   * Récupère tous les produits par boutique (admin)
+   */
+  getAllProduitsParBoutique(): Observable<ProduitParBoutique[]> {
+    return this.http.get<ProduitParBoutique[]>(this.apiAdminUrl);
   }
 
-  getProduitParBoutiqueById(id: string): Observable<ProduitParBoutique | undefined> {
-    const item = this.produitsParBoutique.find(p => p._id === id);
-    return of(item);
+  /**
+   * Récupère les produits de la boutique connectée
+   */
+  getMesProduits(): Observable<ProduitParBoutique[]> {
+    return this.http.get<ProduitParBoutique[]>(`${this.apiUrl}/mes-produits`);
   }
 
-  getProduitsByBoutique(idBoutique: string): Observable<ProduitParBoutique[]> {
-    const items = this.produitsParBoutique.filter(p => p.idBoutique === idBoutique);
-    return of(items);
+  /**
+   * Récupère un produit par ID
+   */
+  getProduitParBoutiqueById(id: string): Observable<ProduitParBoutique> {
+    return this.http.get<ProduitParBoutique>(`${this.apiUrl}/${id}`);
   }
 
-  getProduitsByProduit(idProduit: string): Observable<ProduitParBoutique[]> {
-    const items = this.produitsParBoutique.filter(p => p.idProduit === idProduit);
-    return of(items);
+  /**
+   * Crée un nouveau produit dans la boutique (boutique only)
+   */
+  createProduitParBoutique(produit: Partial<ProduitParBoutique>): Observable<ProduitParBoutique> {
+    return this.http.post<ProduitParBoutique>(this.apiUrl, produit);
   }
 
-  createProduitParBoutique(item: Partial<ProduitParBoutique>): Observable<ProduitParBoutique> {
-    const newItem: ProduitParBoutique = {
-      _id: (this.produitsParBoutique.length + 1).toString(),
-      idBoutique: item.idBoutique || '',
-      idProduit: item.idProduit || '',
-      prix: item.prix || 0,
-      stock: item.stock || 0,
-      enPromotion: item.enPromotion || false,
-      prixPromo: item.prixPromo,
-      boutique: BOUTIQUES_MOCK.find(b => b._id === item.idBoutique),
-      produit: PRODUITS_MOCK.find(p => p._id === item.idProduit)
-    };
-    this.produitsParBoutique.push(newItem);
-    return of(newItem);
+  /**
+   * Met à jour un produit (boutique only)
+   */
+  updateProduitParBoutique(id: string, produit: Partial<ProduitParBoutique>): Observable<ProduitParBoutique> {
+    return this.http.put<ProduitParBoutique>(`${this.apiUrl}/${id}`, produit);
   }
 
-  updateProduitParBoutique(id: string, item: Partial<ProduitParBoutique>): Observable<ProduitParBoutique | undefined> {
-    const index = this.produitsParBoutique.findIndex(p => p._id === id);
-    if (index !== -1) {
-      this.produitsParBoutique[index] = { 
-        ...this.produitsParBoutique[index], 
-        ...item,
-        boutique: BOUTIQUES_MOCK.find(b => b._id === (item.idBoutique || this.produitsParBoutique[index].idBoutique)),
-        produit: PRODUITS_MOCK.find(p => p._id === (item.idProduit || this.produitsParBoutique[index].idProduit))
-      };
-      return of(this.produitsParBoutique[index]);
-    }
-    return of(undefined);
-  }
-
+  /**
+   * Supprime un produit (boutique only)
+   */
   deleteProduitParBoutique(id: string): Observable<void> {
-    this.produitsParBoutique = this.produitsParBoutique.filter(p => p._id !== id);
-    return of(void 0);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  updateStock(id: string, nouvelleQuantite: number): Observable<ProduitParBoutique | undefined> {
-    const index = this.produitsParBoutique.findIndex(p => p._id === id);
-    if (index !== -1) {
-      this.produitsParBoutique[index].stock = nouvelleQuantite;
-      return of(this.produitsParBoutique[index]);
-    }
-    return of(undefined);
+  /**
+   * Met à jour le stock (boutique only)
+   */
+  updateStock(id: string, stock: number): Observable<ProduitParBoutique> {
+    return this.http.patch<ProduitParBoutique>(`${this.apiUrl}/${id}/stock`, { stock });
   }
 
-  togglePromotion(id: string): Observable<ProduitParBoutique | undefined> {
-    const index = this.produitsParBoutique.findIndex(p => p._id === id);
-    if (index !== -1) {
-      this.produitsParBoutique[index].enPromotion = !this.produitsParBoutique[index].enPromotion;
-      return of(this.produitsParBoutique[index]);
+  /**
+   * Ajoute une promotion à un produit
+   */
+  ajouterPromotion(id: string, promotion: { remisePourcentage: number, dateDebut: string, dateFin: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/promotion`, promotion);
+  }
+
+  /**
+   * Supprime la promotion d'un produit
+   */
+  supprimerPromotion(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}/promotion`);
+  }
+
+  /**
+   * Vérifie si l'utilisateur peut modifier (boutique propriétaire)
+   */
+  peutModifier(produit: ProduitParBoutique): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) return false;
+    if (user.role === 'admin') return false;
+    if (user.role === 'boutique') {
+      return produit.idBoutique === user._id;
     }
-    return of(undefined);
+    return false;
   }
 }

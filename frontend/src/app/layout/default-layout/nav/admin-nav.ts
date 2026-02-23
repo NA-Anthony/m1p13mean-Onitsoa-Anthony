@@ -50,36 +50,7 @@ export const adminNavItems: INavData[] = [
     },
     {
       name: 'Produits par boutique',
-      url: '/produits-par-boutique',
-      iconComponent: { name: 'cil-building' },
-      children: [
-        {
-          name: 'Liste des produits',
-          url: '/produits-par-boutique',
-          iconComponent: { name: 'cil-list' }
-        },
-        {
-          name: 'Ajouter',
-          url: '/produits-par-boutique/nouveau',
-          iconComponent: { name: 'cil-plus' }
-        }
-      ]
-    },
-    {
-      name: 'Promotions',
-      url: '/promotions',
-      iconComponent: { name: 'cil-tags' },
-      children: [
-        {
-          name: 'Liste des promotions',
-          url: '/promotions',
-          iconComponent: { name: 'cil-list' }
-        },
-        {
-          name: 'Nouvelle promotion',
-          url: '/promotions/nouveau',
-          iconComponent: { name: 'cil-plus' }
-        }
-      ]
+      url: '/produits-par-boutique/produits-par-boutique',
+      iconComponent: { name: 'cil-building' }
     }
 ];

@@ -1,174 +1,249 @@
+<!-- Toast de notification -->
+<c-toast
+  *ngIf="showToast"
+  [color]="toastColor"
+  class="position-fixed top-0 end-0 m-3"
+  style="z-index: 1050;"
+>
+  <c-toast-header>
+    <strong class="me-auto">{{ toastColor === 'success' ? 'Succès' : 'Erreur' }}</strong>
+    <button cButtonClose (click)="showToast = false"></button>
+  </c-toast-header>
+  <c-toast-body>{{ toastMessage }}</c-toast-body>
+</c-toast>
+
+<!-- Modal de confirmation suppression -->
+<c-modal [visible]="showDeleteModal" (visibleChange)="showDeleteModal = $event">
+  <c-modal-header>
+    <h5 class="modal-title">Confirmer la suppression</h5>
+    <button cButtonClose (click)="showDeleteModal = false"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Êtes-vous sûr de vouloir supprimer le produit <strong>{{ itemToDelete?.idProduit?.nom }}</strong> de la boutique <strong>{{ itemToDelete?.idBoutique?.nomBoutique }}</strong> ?</p>
+    <p class="text-danger">Cette action est irréversible.</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showDeleteModal = false">Annuler</button>
+    <button cButton color="danger" (click)="deleteItem()">Supprimer</button>
+  </c-modal-footer>
+</c-modal>
+
 <!-- En-tête avec statistiques -->
 <c-row class="mb-4">
-    <c-col sm="6" lg="3">
-      <c-card class="text-white bg-primary">
-        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fs-4 fw-semibold">{{ getTotalItems() }}</div>
-            <div>Références</div>
-          </div>
-          <svg cIcon name="cil-library" size="xl"></svg>
-        </c-card-body>
-      </c-card>
-    </c-col>
-    <c-col sm="6" lg="3">
-      <c-card class="text-white bg-success">
-        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fs-4 fw-semibold">{{ getTotalValeurStock() | number:'1.0-0' }} €</div>
-            <div>Valeur du stock</div>
-          </div>
-          <svg cIcon name="cil-cart" size="xl"></svg>
-        </c-card-body>
-      </c-card>
-    </c-col>
-    <c-col sm="6" lg="3">
-      <c-card class="text-white bg-warning">
-        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fs-4 fw-semibold">{{ getTotalEnPromotion() }}</div>
-            <div>En promotion</div>
-          </div>
-          <svg cIcon name="cil-tags" size="xl"></svg>
-        </c-card-body>
-      </c-card>
-    </c-col>
-    <c-col sm="6" lg="3">
-      <c-card class="text-white bg-danger">
-        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fs-4 fw-semibold">{{ getTotalRupture() }}</div>
-            <div>En rupture</div>
-          </div>
-          <svg cIcon name="cil-warning" size="xl"></svg>
-        </c-card-body>
-      </c-card>
-    </c-col>
-  </c-row>
-  
-  <!-- Filtres et recherche -->
-  <c-card class="mb-4">
-    <c-card-body>
-      <c-row class="align-items-center">
-        <c-col md="4" class="mb-3 mb-md-0">
-          <div class="input-group">
-            <span class="input-group-text">
-              <svg cIcon name="cil-search"></svg>
-            </span>
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="Rechercher produit ou boutique..." 
-              [(ngModel)]="searchTerm"
-              (input)="filterItems()"
-            >
-          </div>
-        </c-col>
-        <c-col md="2" class="mb-3 mb-md-0">
-          <select class="form-select" [(ngModel)]="filterBoutique" (change)="filterItems()">
-            <option value="">Toutes boutiques</option>
-            @for (b of boutiques; track b._id) {
-              <option [value]="b._id">{{ b.nomBoutique }}</option>
-            }
-          </select>
-        </c-col>
-        <c-col md="2" class="mb-3 mb-md-0">
-          <select class="form-select" [(ngModel)]="filterStock" (change)="filterItems()">
-            <option value="tous">Tous les stocks</option>
-            <option value="en_stock">En stock</option>
-            <option value="alerte">Stock faible</option>
-            <option value="rupture">En rupture</option>
-          </select>
-        </c-col>
-        <c-col md="2" class="mb-3 mb-md-0">
-          <div class="text-body-secondary small">
-            <svg cIcon name="cil-filter" class="me-1"></svg>
-            {{ filteredItems.length }} résultat(s)
-          </div>
-        </c-col>
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-primary">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ getTotalItems() }}</div>
+          <div>Références</div>
+        </div>
+        <svg cIcon name="cil-library" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-success">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ getTotalValeurStock() | number:'1.0-0' }} €</div>
+          <div>Valeur du stock</div>
+        </div>
+        <svg cIcon name="cil-cart" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-warning">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ getTotalEnPromotion() }}</div>
+          <div>En promotion</div>
+        </div>
+        <svg cIcon name="cil-tags" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-danger">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ getTotalRupture() }}</div>
+          <div>En rupture</div>
+        </div>
+        <svg cIcon name="cil-warning" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- Filtres et recherche -->
+<c-card class="mb-4">
+  <c-card-body>
+    <c-row class="align-items-center">
+      <c-col md="4" class="mb-3 mb-md-0">
+        <div class="input-group">
+          <span class="input-group-text">
+            <svg cIcon name="cil-search"></svg>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Rechercher produit ou boutique..." 
+            [(ngModel)]="searchTerm"
+            (input)="filterItems()"
+          >
+        </div>
+      </c-col>
+      <c-col md="3" class="mb-3 mb-md-0">
+        <select class="form-select" [(ngModel)]="filterStock" (change)="filterItems()">
+          <option value="tous">Tous les stocks</option>
+          <option value="en_stock">En stock (stock > 0)</option>
+          <option value="alerte">Stock faible (1-5 unités)</option>
+          <option value="rupture">En rupture (stock = 0)</option>
+        </select>
+      </c-col>
+      <c-col md="3" class="mb-3 mb-md-0">
+        <div class="text-body-secondary small">
+          <svg cIcon name="cil-filter" class="me-1"></svg>
+          {{ filteredItems.length }} résultat(s)
+        </div>
+      </c-col>
+      @if (isBoutique) {
         <c-col md="2" class="text-end">
           <button cButton color="primary" routerLink="nouveau">
             <svg cIcon name="cil-plus" class="me-2"></svg>
-            Ajouter
+            Ajouter un produit
           </button>
         </c-col>
-      </c-row>
-    </c-card-body>
-  </c-card>
-  
-  <!-- Liste des produits par boutique -->
+      }
+    </c-row>
+  </c-card-body>
+</c-card>
+
+<!-- Indicateur de chargement -->
+@if (loading) {
+  <div class="text-center py-5">
+    <c-spinner color="primary"></c-spinner>
+    <p class="mt-2">Chargement...</p>
+  </div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+  <c-alert color="danger" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    {{ error }}
+  </c-alert>
+}
+
+<!-- Liste des produits -->
+@if (!loading && !error) {
   <c-row>
     @for (item of filteredItems; track item._id) {
       <c-col xs="12" class="mb-3">
         <c-card class="shadow-sm item-card" (click)="voirDetails(item._id)">
           <c-card-body>
             <c-row class="align-items-center">
+              <!-- Avatar / Image -->
               <c-col md="1" class="text-center mb-3 mb-md-0">
                 <c-avatar 
-                  [src]="item.produit?.image || 'assets/images/products/default.jpg'" 
+                  [src]="item.idProduit?.image || 'assets/images/products/default.webp'" 
                   [size]="'md'"
                   class="mx-auto"
                 ></c-avatar>
               </c-col>
               
+              <!-- Produit et boutique -->
               <c-col md="3" class="mb-3 mb-md-0">
-                <div class="fw-semibold">{{ item.produit?.nom }}</div>
-                <small class="text-body-secondary">{{ item.boutique?.nomBoutique }}</small>
+                <div class="fw-semibold">{{ item.idProduit?.nom }}</div>
+                <small class="text-body-secondary">{{ item.idBoutique?.nomBoutique }}</small>
+                @if (item.idProduit?.categorie) {
+                  <div><small class="badge bg-light text-dark">{{ item.idProduit?.categorie }}</small></div>
+                }
               </c-col>
               
+              <!-- Prix -->
               <c-col md="2" class="mb-3 mb-md-0">
                 @if (item.enPromotion && item.prixPromo) {
                   <div>
                     <span class="text-decoration-line-through text-body-secondary me-2">
-                      {{ item.prix }} €
+                      {{ item.prix | number:'1.2-2' }} €
                     </span>
-                    <span class="fw-bold text-danger">{{ item.prixPromo }} €</span>
-                    <span class="badge bg-danger ms-2">-{{ getRemise(item) }}%</span>
+                    <span class="fw-bold text-danger">{{ item.prixPromo | number:'1.2-2' }} €</span>
+                    <span class="badge bg-danger ms-2">-{{ ((item.prix - item.prixPromo) / item.prix * 100) | number:'1.0-0' }}%</span>
                   </div>
                 } @else {
-                  <span class="fw-bold">{{ item.prix }} €</span>
+                  <span class="fw-bold">{{ item.prix | number:'1.2-2' }} €</span>
                 }
               </c-col>
               
+              <!-- Stock -->
               <c-col md="2" class="mb-3 mb-md-0">
                 <div class="d-flex align-items-center">
-                  <span class="me-2">{{ item.stock }} unités</span>
+                  <span class="me-2">{{ item.stock }} unité(s)</span>
                   <span class="badge" [ngClass]="'bg-' + getStockStatus(item.stock).class">
                     {{ getStockStatus(item.stock).label }}
                   </span>
                 </div>
-                <c-progress [height]="4" class="mt-2" style="width: 100px;">
-                  <c-progress-bar 
-                    [value]="(item.stock / 20) * 100" 
-                    [color]="getStockStatus(item.stock).class"
-                    [max]="100">
-                  </c-progress-bar>
-                </c-progress>
               </c-col>
               
+              <!-- Promotion -->
               <c-col md="2" class="mb-3 mb-md-0">
-                <button 
-                  cButton 
-                  [color]="item.enPromotion ? 'danger' : 'info'" 
-                  size="sm"
-                  (click)="togglePromotion(item._id, $event)"
-                >
-                  <svg cIcon [name]="item.enPromotion ? 'cil-tags' : 'cil-plus'" class="me-1"></svg>
-                  {{ item.enPromotion ? 'Promo' : 'Ajouter promo' }}
-                </button>
+                @if (item.enPromotion) {
+                  @if (isBoutique) {
+                    <button 
+                      cButton 
+                      color="danger" 
+                      size="sm"
+                      (click)="openPromoModal(item, $event)"
+                    >
+                      <svg cIcon name="cil-tags" class="me-1"></svg>
+                      Gérer promo
+                    </button>
+                  } @else {
+                    <span class="badge bg-danger">En promotion</span>
+                  }
+                } @else if (isBoutique) {
+                  <button 
+                    cButton 
+                    color="info" 
+                    size="sm"
+                    (click)="openPromoModal(item, $event)"
+                  >
+                    <svg cIcon name="cil-plus" class="me-1"></svg>
+                    Ajouter promo
+                  </button>
+                }
               </c-col>
               
+              <!-- Actions -->
               <c-col md="2" class="text-end" (click)="$event.stopPropagation()">
                 <div class="btn-group" role="group">
-                  <button cButton color="info" size="sm" [routerLink]="[item._id]" class="me-1">
+                  <button cButton color="info" size="sm" [routerLink]="[item._id]" class="me-1" title="Voir détails">
                     <svg cIcon name="cil-magnifying-glass"></svg>
                   </button>
-                  <button cButton color="warning" size="sm" [routerLink]="[item._id, 'edit']" class="me-1">
-                    <svg cIcon name="cil-pencil"></svg>
-                  </button>
-                  <button cButton color="danger" size="sm" (click)="deleteItem(item._id)">
-                    <svg cIcon name="cil-trash"></svg>
-                  </button>
+                  
+                  @if (isBoutique) {
+                    <button 
+                      cButton 
+                      color="warning" 
+                      size="sm" 
+                      class="me-1"
+                      [routerLink]="[item._id, 'edit']"
+                      title="Modifier"
+                    >
+                      <svg cIcon name="cil-pencil"></svg>
+                    </button>
+                    <button 
+                      cButton 
+                      color="danger" 
+                      size="sm"
+                      (click)="confirmDelete(item, $event)"
+                      title="Supprimer"
+                    >
+                      <svg cIcon name="cil-trash"></svg>
+                    </button>
+                  }
                 </div>
               </c-col>
             </c-row>
@@ -181,13 +256,134 @@
           <c-card-body>
             <svg cIcon name="cil-library" size="3xl" class="text-body-secondary mb-3"></svg>
             <h5>Aucun produit trouvé</h5>
-            <p class="text-body-secondary mb-3">Commencez par ajouter un produit à une boutique</p>
-            <button cButton color="primary" routerLink="nouveau">
-              <svg cIcon name="cil-plus" class="me-2"></svg>
-              Ajouter un produit
-            </button>
+            @if (isBoutique) {
+              <p class="text-body-secondary mb-3">Commencez par ajouter un produit à votre boutique</p>
+              <button cButton color="primary" routerLink="nouveau">
+                <svg cIcon name="cil-plus" class="me-2"></svg>
+                Ajouter un produit
+              </button>
+            }
           </c-card-body>
         </c-card>
       </c-col>
     }
   </c-row>
+}
+
+<!-- Modal de promotion -->
+<c-modal [visible]="showPromoModal" (visibleChange)="showPromoModal = $event" size="lg">
+  <c-modal-header>
+    <h5 class="modal-title">
+      <svg cIcon name="cil-tags" class="me-2"></svg>
+      Ajouter une promotion
+    </h5>
+    <button cButtonClose (click)="closePromoModal()"></button>
+  </c-modal-header>
+  
+  <c-modal-body>
+    @if (selectedItemForPromo) {
+      <div class="mb-4">
+        <div class="bg-light p-3 rounded">
+          <div class="d-flex align-items-center gap-3">
+            <c-avatar 
+              [src]="selectedItemForPromo.idProduit?.image || 'assets/images/products/default.webp'" 
+              [size]="'lg'"
+            ></c-avatar>
+            <div>
+              <h6 class="mb-1">{{ selectedItemForPromo.idProduit?.nom }}</h6>
+              <small class="text-body-secondary">{{ selectedItemForPromo.idBoutique?.nomBoutique }}</small>
+              <div class="mt-1">
+                <span class="badge bg-secondary">Prix actuel: {{ selectedItemForPromo.prix | number:'1.2-2' }} €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <c-col md="6" class="mb-3">
+          <label class="fw-semibold">Remise (%)</label>
+          <div class="input-group">
+            <input 
+              type="number" 
+              class="form-control" 
+              [(ngModel)]="promoData.remise"
+              [ngModelOptions]="{standalone: true}"
+              min="1"
+              max="100"
+              placeholder="15"
+            >
+            <span class="input-group-text">%</span>
+          </div>
+        </c-col>
+
+        <c-col md="6" class="mb-3">
+          <label class="fw-semibold">Date de début</label>
+          <input 
+            type="date" 
+            class="form-control" 
+            [(ngModel)]="promoData.dateDebut"
+            [ngModelOptions]="{standalone: true}"
+            [min]="today"
+          >
+        </c-col>
+
+        <c-col md="6" class="mb-3">
+          <label class="fw-semibold">Date de fin</label>
+          <input 
+            type="date" 
+            class="form-control" 
+            [(ngModel)]="promoData.dateFin"
+            [ngModelOptions]="{standalone: true}"
+          >
+        </c-col>
+
+        <c-col md="6" class="mb-3">
+          <label class="fw-semibold">Aperçu du prix</label>
+          <div class="bg-light p-3 rounded">
+            <div class="d-flex justify-content-between">
+              <span>Prix original:</span>
+              <span>{{ selectedItemForPromo.prix | number:'1.2-2' }} €</span>
+            </div>
+            @if (promoData.remise) {
+              <div class="d-flex justify-content-between text-danger">
+                <span>Remise:</span>
+                <span>-{{ promoData.remise }}%</span>
+              </div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Prix promo:</span>
+                <span class="text-success">{{ getPrixPromo(selectedItemForPromo.prix, promoData.remise) | number:'1.2-2' }} €</span>
+              </div>
+            }
+          </div>
+        </c-col>
+      </div>
+
+      @if (promoError) {
+        <c-alert color="danger" class="mt-2">
+          <svg cIcon name="cil-warning" class="me-2"></svg>
+          {{ promoError }}
+        </c-alert>
+      }
+    }
+  </c-modal-body>
+  
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closePromoModal()">
+      Annuler
+    </button>
+    <button 
+      cButton 
+      color="primary" 
+      (click)="savePromotion()"
+      [disabled]="!isPromoValid()"
+    >
+      @if (promoSaving) {
+        <c-spinner size="sm" class="me-2"></c-spinner>
+      }
+      <svg cIcon name="cil-check" class="me-2"></svg>
+      {{ promoSaving ? 'Enregistrement...' : 'Ajouter la promotion' }}
+    </button>
+  </c-modal-footer>
+</c-modal>

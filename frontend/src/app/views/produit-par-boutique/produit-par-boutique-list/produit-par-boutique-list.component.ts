@@ -8,13 +8,15 @@ import {
   AvatarModule,
   ButtonModule,
   BadgeModule,
-  ProgressModule
+  ProgressModule,
+  ToastModule,
+  SpinnerModule,
+  AlertModule,
+  ModalModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { ProduitParBoutiqueService } from '../produit-par-boutique.service';
-import { ProduitParBoutique } from '../produit-par-boutique.model';
-import { BOUTIQUES_MOCK } from '../../boutique/boutique.model';
-import { PRODUITS_MOCK } from '../../produit/produit.model';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-produit-par-boutique-list',
@@ -31,51 +33,109 @@ import { PRODUITS_MOCK } from '../../produit/produit.model';
     ButtonModule,
     BadgeModule,
     ProgressModule,
+    ToastModule,
+    SpinnerModule,
+    AlertModule,
+    ModalModule,
     IconModule
   ]
 })
 export class ProduitParBoutiqueListComponent implements OnInit {
-  items: ProduitParBoutique[] = [];
-  filteredItems: ProduitParBoutique[] = [];
+  items: any[] = [];
+  filteredItems: any[] = [];
+  loading = true;
+  error: string | null = null;
+  
   searchTerm: string = '';
-  filterBoutique: string = '';
   filterStock: string = 'tous';
   
-  boutiques = BOUTIQUES_MOCK;
+  // Pour le modal de suppression
+  showDeleteModal = false;
+  itemToDelete: any = null;
+  
+  // Pour le modal de promotion
+  showPromoModal = false;
+  selectedItemForPromo: any = null;
+  promoData = {
+    remise: 0,
+    dateDebut: '',
+    dateFin: ''
+  };
+  promoSaving = false;
+  promoError: string | null = null;
+  today: string = new Date().toISOString().split('T')[0];
+  
+  // Pour les toasts
+  showToast = false;
+  toastMessage = '';
+  toastColor: 'success' | 'danger' = 'success';
+  
+  // Rôles
+  isAdmin = false;
+  isBoutique = false;
 
   constructor(
     private service: ProduitParBoutiqueService,
+    private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    const user = this.authService.getCurrentUser();
+    const role = user?.role;
+    this.isAdmin = role === 'admin';
+    this.isBoutique = role === 'boutique';
+  }
 
   ngOnInit(): void {
     this.loadItems();
   }
 
   loadItems(): void {
-    this.service.getProduitsParBoutique().subscribe({
-      next: (data) => {
-        this.items = data;
-        this.filteredItems = data;
-      }
-    });
+    this.loading = true;
+    this.error = null;
+    
+    if (this.isAdmin) {
+      // Admin voit tout
+      this.service.getAllProduitsParBoutique().subscribe({
+        next: (data) => {
+          this.items = data || [];
+          this.filteredItems = data || [];
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = err.error?.msg || 'Erreur lors du chargement';
+          this.loading = false;
+          console.error(err);
+        }
+      });
+    } else if (this.isBoutique) {
+      // Boutique voit ses produits seulement
+      this.service.getMesProduits().subscribe({
+        next: (data) => {
+          this.items = data || [];
+          this.filteredItems = data || [];
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = err.error?.msg || 'Erreur lors du chargement';
+          this.loading = false;
+          console.error(err);
+        }
+      });
+    }
   }
 
   filterItems(): void {
     this.filteredItems = this.items.filter(item => {
       const matchesSearch = this.searchTerm === '' || 
-        item.produit?.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        item.boutique?.nomBoutique.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      const matchesBoutique = this.filterBoutique === '' || 
-        item.idBoutique === this.filterBoutique;
+        item.idProduit?.nom?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        item.idBoutique?.nomBoutique?.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       const matchesStock = this.filterStock === 'tous' || 
         (this.filterStock === 'en_stock' && item.stock > 0) ||
-        (this.filterStock === 'rupture' && item.stock === 0) ||
-        (this.filterStock === 'alerte' && item.stock > 0 && item.stock < 5);
+        (this.filterStock === 'alerte' && item.stock > 0 && item.stock < 5) ||
+        (this.filterStock === 'rupture' && item.stock === 0);
       
-      return matchesSearch && matchesBoutique && matchesStock;
+      return matchesSearch && matchesStock;
     });
   }
 
@@ -83,19 +143,123 @@ export class ProduitParBoutiqueListComponent implements OnInit {
     this.router.navigate(['/produits-par-boutique', id]);
   }
 
-  deleteItem(id: string): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit de la boutique ?')) {
-      this.service.deleteProduitParBoutique(id).subscribe({
-        next: () => this.loadItems()
-      });
+  editItem(id: string, event: Event): void {
+    event.stopPropagation();
+    if (this.isAdmin) {
+      this.showToastMessage('Les administrateurs ne peuvent pas modifier les produits', 'danger');
+      return;
     }
+    this.router.navigate(['/produits-par-boutique', id, 'edit']);
   }
 
-  togglePromotion(id: string, event: Event): void {
+  confirmDelete(item: any, event: Event): void {
     event.stopPropagation();
-    this.service.togglePromotion(id).subscribe({
-      next: () => this.loadItems()
+    if (this.isAdmin) {
+      this.showToastMessage('Les administrateurs ne peuvent pas supprimer les produits', 'danger');
+      return;
+    }
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  deleteItem(): void {
+    if (!this.itemToDelete) return;
+    
+    this.service.deleteProduitParBoutique(this.itemToDelete._id).subscribe({
+      next: () => {
+        this.showDeleteModal = false;
+        this.itemToDelete = null;
+        this.showToastMessage('Produit supprimé avec succès', 'success');
+        this.loadItems();
+      },
+      error: (err) => {
+        this.showDeleteModal = false;
+        this.showToastMessage(err.error?.msg || 'Erreur lors de la suppression', 'danger');
+        console.error(err);
+      }
     });
+  }
+
+  // Gestion de la promotion - RENOMMÉE en openPromoModal
+  openPromoModal(item: any, event: Event): void {
+    event.stopPropagation();
+    if (this.isAdmin) {
+      this.showToastMessage('Les administrateurs ne peuvent pas gérer les promotions', 'danger');
+      return;
+    }
+    this.selectedItemForPromo = item;
+    this.promoData = {
+      remise: 0,
+      dateDebut: this.today,
+      dateFin: ''
+    };
+    this.promoError = null;
+    this.showPromoModal = true;
+  }
+
+  closePromoModal(): void {
+    this.showPromoModal = false;
+    this.selectedItemForPromo = null;
+    this.promoData = {
+      remise: 0,
+      dateDebut: '',
+      dateFin: ''
+    };
+    this.promoError = null;
+    this.promoSaving = false;
+  }
+
+  getPrixPromo(prix: number, remise: number): number {
+    if (!remise) return prix;
+    return prix - (prix * remise / 100);
+  }
+
+  isPromoValid(): boolean {
+    if (!this.promoData.remise || this.promoData.remise < 1 || this.promoData.remise > 100) return false;
+    if (!this.promoData.dateDebut) return false;
+    if (!this.promoData.dateFin) return false;
+    if (new Date(this.promoData.dateFin) <= new Date(this.promoData.dateDebut)) return false;
+    return true;
+  }
+
+  savePromotion(): void {
+    if (!this.selectedItemForPromo || !this.isPromoValid()) return;
+
+    this.promoSaving = true;
+    this.promoError = null;
+
+    const promotionData = {
+      remisePourcentage: this.promoData.remise,
+      dateDebut: this.promoData.dateDebut,
+      dateFin: this.promoData.dateFin
+    };
+
+    this.service.ajouterPromotion(this.selectedItemForPromo._id, promotionData).subscribe({
+      next: (updated: any) => {
+        // Mettre à jour l'item dans la liste
+        const index = this.items.findIndex(i => i._id === this.selectedItemForPromo._id);
+        if (index !== -1) {
+          this.items[index] = updated;
+          this.filteredItems = [...this.items];
+          this.filterItems();
+        }
+        
+        this.showToastMessage('Promotion ajoutée avec succès', 'success');
+        this.closePromoModal();
+        this.promoSaving = false;
+      },
+      error: (err: any) => {
+        this.promoError = err.error?.msg || 'Erreur lors de l\'ajout de la promotion';
+        this.promoSaving = false;
+        console.error(err);
+      }
+    });
+  }
+
+  getStockStatus(stock: number): { class: string, label: string } {
+    if (stock === 0) return { class: 'danger', label: 'Rupture' };
+    if (stock < 5) return { class: 'warning', label: 'Stock faible' };
+    return { class: 'success', label: 'En stock' };
   }
 
   getTotalItems(): number {
@@ -103,7 +267,10 @@ export class ProduitParBoutiqueListComponent implements OnInit {
   }
 
   getTotalValeurStock(): number {
-    return this.items.reduce((acc, item) => acc + (item.prix * item.stock), 0);
+    return this.items.reduce((acc, item) => {
+      const prix = item.enPromotion && item.prixPromo ? item.prixPromo : item.prix;
+      return acc + (prix * item.stock);
+    }, 0);
   }
 
   getTotalEnPromotion(): number {
@@ -114,18 +281,13 @@ export class ProduitParBoutiqueListComponent implements OnInit {
     return this.items.filter(i => i.stock === 0).length;
   }
 
-  getStockStatus(stock: number): { class: string, label: string } {
-    if (stock === 0) return { class: 'danger', label: 'Rupture' };
-    if (stock < 5) return { class: 'warning', label: 'Stock faible' };
-    return { class: 'success', label: 'En stock' };
-  }
-
-  getPrixActuel(item: ProduitParBoutique): number {
-    return item.enPromotion && item.prixPromo ? item.prixPromo : item.prix;
-  }
-
-  getRemise(item: ProduitParBoutique): number {
-    if (!item.enPromotion || !item.prixPromo) return 0;
-    return Math.round(((item.prix - item.prixPromo) / item.prix) * 100);
+  private showToastMessage(message: string, color: 'success' | 'danger'): void {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 3000);
   }
 }

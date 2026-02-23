@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   CardModule,
@@ -8,11 +8,12 @@ import {
   AvatarModule,
   ButtonModule,
   BadgeModule,
-  ProgressModule
+  SpinnerModule,
+  AlertModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { ProduitParBoutiqueService } from '../produit-par-boutique.service';
-import { ProduitParBoutique } from '../produit-par-boutique.model';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-produit-par-boutique-detail',
@@ -27,31 +28,67 @@ import { ProduitParBoutique } from '../produit-par-boutique.model';
     AvatarModule,
     ButtonModule,
     BadgeModule,
-    ProgressModule,
+    SpinnerModule,
+    AlertModule,
     IconModule
   ]
 })
 export class ProduitParBoutiqueDetailComponent implements OnInit {
-  item: ProduitParBoutique | null = null;
+  item: any = null;
   quantiteInput: number = 0;
+  
+  // États
+  loading = true;
+  error: string | null = null;
+  showPromoForm = false;
+  
+  // Données promotion
+  promoRemise: number = 0;
+  promoDateDebut: string = '';
+  promoDateFin: string = '';
+  today: string = new Date().toISOString().split('T')[0];
+  
+  // Rôles
+  isAdmin = false;
+  isBoutique = false;
 
   constructor(
     private route: ActivatedRoute,
-    private service: ProduitParBoutiqueService
-  ) {}
+    private service: ProduitParBoutiqueService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    const user = this.authService.getCurrentUser();
+    const role = user?.role;
+    this.isAdmin = role === 'admin';
+    this.isBoutique = role === 'boutique';
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.service.getProduitParBoutiqueById(id).subscribe({
-        next: (data) => {
-          this.item = data || null;
-          if (this.item) {
-            this.quantiteInput = this.item.stock;
-          }
-        }
-      });
+      this.loadItem(id);
     }
+  }
+
+  loadItem(id: string): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.service.getProduitParBoutiqueById(id).subscribe({
+      next: (data: any) => {
+        this.item = data;
+        if (this.item) {
+          this.quantiteInput = this.item.stock;
+        }
+        this.loading = false;
+      },
+      error: (err: any) => {
+        this.error = err.error?.msg || 'Erreur lors du chargement';
+        this.loading = false;
+        console.error(err);
+      }
+    });
   }
 
   getStockStatus(): { class: string, label: string } {
@@ -85,23 +122,70 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
     }
 
     this.service.updateStock(this.item._id, this.quantiteInput).subscribe({
-      next: (updated) => {
+      next: (updated: any) => {
         if (updated) {
           this.item = updated;
           alert('Stock mis à jour avec succès');
         }
+      },
+      error: (err: any) => {
+        alert(err.error?.msg || 'Erreur lors de la mise à jour');
+        console.error(err);
       }
     });
   }
 
-  togglePromotion(): void {
+  ajouterPromotion(): void {
     if (!this.item) return;
     
-    this.service.togglePromotion(this.item._id).subscribe({
-      next: (updated) => {
-        if (updated) {
-          this.item = updated;
-        }
+    if (!this.promoRemise || this.promoRemise < 1 || this.promoRemise > 100) {
+      alert('La remise doit être entre 1 et 100%');
+      return;
+    }
+    
+    if (!this.promoDateDebut || !this.promoDateFin) {
+      alert('Veuillez saisir les dates');
+      return;
+    }
+    
+    if (new Date(this.promoDateFin) <= new Date(this.promoDateDebut)) {
+      alert('La date de fin doit être après la date de début');
+      return;
+    }
+
+    const promotionData = {
+      remisePourcentage: this.promoRemise,
+      dateDebut: this.promoDateDebut,
+      dateFin: this.promoDateFin
+    };
+
+    this.service.ajouterPromotion(this.item._id, promotionData).subscribe({
+      next: (updated: any) => {
+        this.item = updated;
+        this.showPromoForm = false;
+        this.promoRemise = 0;
+        this.promoDateDebut = '';
+        this.promoDateFin = '';
+        alert('Promotion ajoutée avec succès');
+      },
+      error: (err: any) => {
+        alert(err.error?.msg || 'Erreur lors de l\'ajout de la promotion');
+        console.error(err);
+      }
+    });
+  }
+
+  supprimerPromotion(): void {
+    if (!this.item || !confirm('Supprimer cette promotion ?')) return;
+    
+    this.service.supprimerPromotion(this.item._id).subscribe({
+      next: (updated: any) => {
+        this.item = updated;
+        alert('Promotion supprimée');
+      },
+      error: (err: any) => {
+        alert(err.error?.msg || 'Erreur lors de la suppression');
+        console.error(err);
       }
     });
   }

@@ -1,23 +1,44 @@
 <c-row>
-    <c-col md="8" class="mx-auto">
-      <c-card class="shadow-sm">
-        <c-card-header class="bg-primary text-white">
-          <h5 class="mb-0">
-            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
-            {{ isEditMode ? 'Modifier le produit en boutique' : 'Ajouter un produit en boutique' }}
-          </h5>
-        </c-card-header>
-        
-        <c-card-body>
+  <c-col md="8" class="mx-auto">
+    <c-card class="shadow-sm">
+      <c-card-header class="bg-primary text-white">
+        <h5 class="mb-0">
+          <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+          {{ isEditMode ? 'Modifier le produit' : 'Ajouter un produit à la boutique' }}
+        </h5>
+      </c-card-header>
+      
+      <c-card-body>
+        <!-- Messages -->
+        @if (successMessage) {
+          <c-alert color="success" class="mb-3">
+            <svg cIcon name="cil-check" class="me-2"></svg>
+            {{ successMessage }}
+          </c-alert>
+        }
+
+        @if (error) {
+          <c-alert color="danger" class="mb-3">
+            <svg cIcon name="cil-warning" class="me-2"></svg>
+            {{ error }}
+          </c-alert>
+        }
+
+        @if (loading) {
+          <div class="text-center py-5">
+            <c-spinner color="primary"></c-spinner>
+            <p class="mt-2">Chargement...</p>
+          </div>
+        }
+
+        @if (!loading) {
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <!-- Barre de progression -->
             <div class="mb-4">
               <div class="d-flex justify-content-between mb-2 small">
-                <span [class.text-primary]="getProgressValue() >= 20">Boutique</span>
                 <span [class.text-primary]="getProgressValue() >= 40">Produit</span>
-                <span [class.text-primary]="getProgressValue() >= 60">Prix</span>
-                <span [class.text-primary]="getProgressValue() >= 80">Stock</span>
-                <span [class.text-primary]="getProgressValue() >= 100">Promo</span>
+                <span [class.text-primary]="getProgressValue() >= 70">Prix</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Stock</span>
               </div>
               <c-progress [height]="5">
                 <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
@@ -25,37 +46,16 @@
             </div>
             
             <c-row>
-              <c-col md="6" class="mb-3">
-                <label cLabel for="idBoutique" class="fw-semibold">Boutique *</label>
-                <div class="input-group">
-                  <span class="input-group-text">
-                    <svg cIcon name="cil-building"></svg>
-                  </span>
-                  <select cInput id="idBoutique" formControlName="idBoutique" class="form-select">
-                    <option value="">Sélectionnez une boutique</option>
-                    @for (b of boutiques; track b._id) {
-                      <option [value]="b._id">{{ b.nomBoutique }}</option>
-                    }
-                  </select>
-                </div>
-                @if (form.get('idBoutique')?.invalid && form.get('idBoutique')?.touched) {
-                  <div class="text-danger small mt-1">
-                    <svg cIcon name="cil-warning" size="sm"></svg>
-                    La boutique est requise
-                  </div>
-                }
-              </c-col>
-              
-              <c-col md="6" class="mb-3">
+              <c-col md="12" class="mb-3">
                 <label cLabel for="idProduit" class="fw-semibold">Produit *</label>
                 <div class="input-group">
                   <span class="input-group-text">
-                    <svg cIcon name="cil-library"></svg>
+                    <svg cIcon name="cil-basket"></svg>
                   </span>
                   <select cInput id="idProduit" formControlName="idProduit" class="form-select">
                     <option value="">Sélectionnez un produit</option>
                     @for (p of produits; track p._id) {
-                      <option [value]="p._id">{{ p.nom }}</option>
+                      <option [value]="p._id">{{ p.nom }} ({{ p.categorie }})</option>
                     }
                   </select>
                 </div>
@@ -124,72 +124,38 @@
                   </div>
                 }
               </c-col>
-              
-              <c-col md="12" class="mb-3">
-                <div class="form-check">
-                  <input 
-                    type="checkbox" 
-                    class="form-check-input" 
-                    id="enPromotion"
-                    formControlName="enPromotion"
-                  >
-                  <label class="form-check-label fw-semibold" for="enPromotion">
-                    Mettre en promotion
-                  </label>
-                </div>
-              </c-col>
-              
-              <c-col md="12" class="mb-3">
-                <label cLabel for="prixPromo" class="fw-semibold">Prix promotionnel (€)</label>
-                <div class="input-group">
-                  <span class="input-group-text">
-                    <svg cIcon name="cil-tags"></svg>
-                  </span>
-                  <input 
-                    cInput 
-                    type="number" 
-                    id="prixPromo" 
-                    formControlName="prixPromo" 
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
-                @if (form.get('enPromotion')?.value && form.get('prixPromo')?.invalid && form.get('prixPromo')?.touched) {
-                  <div class="text-danger small mt-1">
-                    <svg cIcon name="cil-warning" size="sm"></svg>
-                    @if (form.get('prixPromo')?.errors?.['required']) {
-                      Le prix promotionnel est requis
-                    } @else if (form.get('prixPromo')?.errors?.['min']) {
-                      Le prix doit être positif
-                    }
-                  </div>
-                }
-                @if (form.get('enPromotion')?.value && form.get('prix')?.value && form.get('prixPromo')?.value > form.get('prix')?.value) {
-                  <div class="text-warning small mt-1">
-                    <svg cIcon name="cil-warning" size="sm"></svg>
-                    Le prix promotionnel devrait être inférieur au prix normal
-                  </div>
-                }
-              </c-col>
             </c-row>
             
             <!-- Actions -->
             <c-row class="mt-4">
               <c-col class="d-flex gap-2 justify-content-end">
-                <button cButton color="secondary" type="button" routerLink="/produits-par-boutique">
+                <button 
+                  cButton 
+                  color="secondary" 
+                  type="button" 
+                  routerLink="/produits-par-boutique"
+                  [disabled]="saving"
+                >
                   <svg cIcon name="cil-x" class="me-2"></svg>
                   Annuler
                 </button>
-                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                <button 
+                  cButton 
+                  color="primary" 
+                  type="submit" 
+                  [disabled]="form.invalid || saving"
+                >
+                  @if (saving) {
+                    <c-spinner size="sm" class="me-2"></c-spinner>
+                  }
                   <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
-                  {{ isEditMode ? 'Mettre à jour' : 'Ajouter' }}
+                  {{ saving ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Ajouter') }}
                 </button>
               </c-col>
             </c-row>
           </form>
-        </c-card-body>
-      </c-card>
-    </c-col>
-  </c-row>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
