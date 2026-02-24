@@ -1,0 +1,85 @@
+<div class="container-lg">
+  <div class="page-header mb-4">
+    <div class="row align-items-center">
+      <div class="col">
+        <h1 class="page-title">Mes commandes</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Rechercher par ID..." 
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="filterCommandes()"
+      >
+    </div>
+    <div class="col-md-6">
+      <select 
+        class="form-select" 
+        [(ngModel)]="filterStatut"
+        (ngModelChange)="filterCommandes()"
+      >
+        <option value="">Tous les statuts</option>
+        <option value="en_attente">En attente</option>
+        <option value="confirmée">Confirmée</option>
+        <option value="préparée">Préparée</option>
+        <option value="expédiée">Expédiée</option>
+        <option value="livrée">Livrée</option>
+        <option value="annulée">Annulée</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="loading" class="alert alert-info">
+    Chargement des commandes...
+  </div>
+
+  <div *ngIf="!loading && filteredCommandes.length === 0" class="alert alert-info">
+    Aucune commande trouvée.
+  </div>
+
+  <div *ngIf="!loading && filteredCommandes.length > 0" class="card">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID Commande</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cmd of filteredCommandes">
+            <td>{{ cmd._id | slice:0:8 }}...</td>
+            <td>{{ formatDate(cmd.dateCommande) }}</td>
+            <td>
+              <c-badge 
+                [color]="getStatutColor(cmd.statut)"
+              >
+                {{ cmd.statut || 'N/A' }}
+              </c-badge>
+            </td>
+            <td class="fw-bold">{{ cmd.total | number:'1.2-2' }} €</td>
+            <td>
+              <button 
+                type="button" 
+                class="btn btn-sm btn-primary"
+                (click)="voirDetails(cmd._id)"
+              >
+                Détails
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

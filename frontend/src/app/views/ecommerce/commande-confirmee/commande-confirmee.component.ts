@@ -40,7 +40,7 @@ export class CommandeConfirmeeComponent implements OnInit {
 
   loadCommande(): void {
     this.commandeService.getCommandeById(this.commandeId).subscribe({
-      next: (data) => this.commande = data
+      next: (data: any) => this.commande = data
     });
   }
 

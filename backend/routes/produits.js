@@ -10,6 +10,7 @@ router.get('/', produitController.getAllProduits);
 router.get('/:id', produitController.getProduitById);
 router.get('/categorie/:categorie', produitController.getProduitsByCategorie);
 router.get('/recherche', produitController.rechercheProduits);
+router.get('/boutiques/tous', produitParBoutiqueController.getAllProduitsParBoutique); // Tous les produits par boutique (public)
 
 // 🔒 ROUTES PROTÉGÉES (boutique)
 router.get('/boutique/mes-produits', auth, boutique, produitParBoutiqueController.getMesProduits);

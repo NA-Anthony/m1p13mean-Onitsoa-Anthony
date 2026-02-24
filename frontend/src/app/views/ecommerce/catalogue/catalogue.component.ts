@@ -54,23 +54,25 @@ export class CatalogueComponent implements OnInit {
   }
 
   loadProduits(): void {
-    this.produitService.getProduitsParBoutique().subscribe({
-      next: (data) => {
+    this.produitService.getAllProduitsParBoutique().subscribe({
+      next: (data: any) => {
         this.produits = data;
         this.filteredProduits = data;
         
         // Extraire les catégories uniques et filtrer les undefined
-        const cats = new Set(data.map(p => p.produit?.categorie).filter(Boolean));
-        this.categories = Array.from(cats) as string[];  // ← CORRIGÉ
+        const cats = new Set(data.map((p: any) => p.produit?.categorie).filter(Boolean));
+        this.categories = Array.from(cats) as string[];
       }
     });
   }
 
   filterProduits(): void {
     this.filteredProduits = this.produits.filter(p => {
+      const nomProduit = p.produit?.nom || p.idProduit?.nom || '';
+      const nomBoutique = p.boutique?.nomBoutique || p.idBoutique?.nomBoutique || '';
       const matchesSearch = this.searchTerm === '' || 
-        p.produit?.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        p.boutique?.nomBoutique.toLowerCase().includes(this.searchTerm.toLowerCase());
+        nomProduit.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        nomBoutique.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       const matchesCategorie = this.selectedCategorie === '' || 
         p.produit?.categorie === this.selectedCategorie;
@@ -88,19 +90,24 @@ export class CatalogueComponent implements OnInit {
   ajouterAuPanier(): void {
     if (!this.selectedProduit) return;
     
-    const prix = this.selectedProduit.enPromotion && this.selectedProduit.prixPromo 
-      ? this.selectedProduit.prixPromo 
+    const prix = (this.selectedProduit.enPromotion && this.selectedProduit.prixPromo)
+      ? this.selectedProduit.prixPromo
       : this.selectedProduit.prix;
-    
+    const idBoutiqueValue = (typeof this.selectedProduit.idBoutique === 'string')
+      ? this.selectedProduit.idBoutique
+      : (this.selectedProduit.idBoutique && this.selectedProduit.idBoutique._id) || this.selectedProduit.boutique?._id;
+
+    const nomBoutiqueValue = this.selectedProduit.boutique?.nomBoutique || (this.selectedProduit.idBoutique && this.selectedProduit.idBoutique.nomBoutique) || 'Boutique';
+
     this.cartService.ajouterAuPanier({
       idProduitParBoutique: this.selectedProduit._id,
-      idBoutique: this.selectedProduit.idBoutique,
-      nomProduit: this.selectedProduit.produit.nom,
-      nomBoutique: this.selectedProduit.boutique.nomBoutique,
+      idBoutique: idBoutiqueValue,
+      nomProduit: this.selectedProduit.produit?.nom || this.selectedProduit.idProduit?.nom || 'Produit',
+      nomBoutique: nomBoutiqueValue,
       prix: prix,
       quantite: this.quantite,
       stock: this.selectedProduit.stock,
-      image: this.selectedProduit.produit.image,
+      image: this.selectedProduit.produit?.image || this.selectedProduit.idProduit?.image,
       enPromotion: this.selectedProduit.enPromotion,
       prixPromo: this.selectedProduit.prixPromo
     });

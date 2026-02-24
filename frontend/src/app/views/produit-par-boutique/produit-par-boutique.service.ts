@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ProduitParBoutique } from './produit-par-boutique.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -9,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class ProduitParBoutiqueService {
   private apiUrl = 'http://localhost:3000/api/produits/boutique';
-  private apiAdminUrl = 'http://localhost:3000/api/produits-admin/all-produits-boutique';
+  private apiPublicUrl = 'http://localhost:3000/api/produits/boutiques/tous'; // Route publique pour catalogue
 
   constructor(
     private http: HttpClient,
@@ -17,24 +18,42 @@ export class ProduitParBoutiqueService {
   ) {}
 
   /**
-   * Récupère tous les produits par boutique (admin)
+   * Récupère tous les produits par boutique (public - pour le catalogue)
    */
   getAllProduitsParBoutique(): Observable<ProduitParBoutique[]> {
-    return this.http.get<ProduitParBoutique[]>(this.apiAdminUrl);
+    return this.http.get<any[]>(this.apiPublicUrl).pipe(
+      map((items) => items.map(item => ({
+        ...item,
+        produit: item.idProduit || item.produit,
+        boutique: item.idBoutique || item.boutique
+      })))
+    );
   }
 
   /**
    * Récupère les produits de la boutique connectée
    */
   getMesProduits(): Observable<ProduitParBoutique[]> {
-    return this.http.get<ProduitParBoutique[]>(`${this.apiUrl}/mes-produits`);
+    return this.http.get<any[]>(`${this.apiUrl}/mes-produits`).pipe(
+      map((items) => items.map(item => ({
+        ...item,
+        produit: item.idProduit || item.produit,
+        boutique: item.idBoutique || item.boutique
+      })))
+    );
   }
 
   /**
    * Récupère un produit par ID
    */
   getProduitParBoutiqueById(id: string): Observable<ProduitParBoutique> {
-    return this.http.get<ProduitParBoutique>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(item => ({
+        ...item,
+        produit: item.idProduit || item.produit,
+        boutique: item.idBoutique || item.boutique
+      }))
+    );
   }
 
   /**

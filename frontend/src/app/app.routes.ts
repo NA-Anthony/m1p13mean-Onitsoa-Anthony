@@ -122,14 +122,18 @@ export const routes: Routes = [
         path: 'produits-par-boutique',
         loadChildren: () => import('./views/produit-par-boutique/routes').then((m) => m.routes)
       },
+      {
+        path: 'ecommerce',
+        loadChildren: () => import('./views/ecommerce/routes').then((m) => m.routes)
+      },
       // {
       //   path: 'promotions',
       //   loadChildren: () => import('./views/promotion/routes').then((m) => m.routes)
       // },
-      // {
-      //   path: 'commandes',
-      //   loadChildren: () => import('./views/commande/routes').then((m) => m.routes)
-      // },
+      {
+        path: 'commandes',
+        loadChildren: () => import('./views/commande/routes').then((m) => m.routes)
+      },
       // {
       //   path: 'avis',
       //   loadChildren: () => import('./views/avis/routes').then((m) => m.routes)

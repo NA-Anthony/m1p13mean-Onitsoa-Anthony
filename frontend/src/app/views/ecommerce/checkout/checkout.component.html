@@ -49,7 +49,7 @@
                     <select class="form-select" formControlName="idAcheteur">
                       <option value="">Choisir un acheteur</option>
                       @for (a of acheteurs; track a._id) {
-                        <option [value]="a._id">{{ a.telephone || 'Acheteur ' + a._id }}</option>
+                        <option [value]="a._id">{{ a.nom || 'Acheteur ' + a._id }}</option>
                       }
                     </select>
                   </c-col>

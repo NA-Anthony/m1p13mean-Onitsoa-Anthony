@@ -71,10 +71,11 @@ export class PanierComponent {
   }
 
   passerCommande(): void {
-    this.router.navigate(['/checkout']);
+    // Checkout route is nested under /ecommerce
+    this.router.navigate(['/ecommerce', 'checkout']);
   }
 
   continuerAchats(): void {
-    this.router.navigate(['/catalogue']);
+    this.router.navigate(['/ecommerce', 'catalogue']);
   }
 }

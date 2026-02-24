@@ -88,24 +88,28 @@ export class CheckoutComponent implements OnInit {
   }
 
   validerInformations(): void {
-    if (this.checkoutForm.get('idAcheteur')?.valid && 
-        this.checkoutForm.get('adresseLivraison')?.valid) {
-      this.step = 'paiement';
-    } else {
-      // CORRECTION : Vérifier que adresseLivraison existe et a des contrôles
-      const adresseGroup = this.checkoutForm.get('adresseLivraison');
-      if (adresseGroup instanceof FormGroup) {
-        Object.keys(adresseGroup.controls).forEach(key => {
-          adresseGroup.get(key)?.markAsTouched();
-        });
-      }
+    // Marquer tous les champs comme touched pour afficher les erreurs
+    this.checkoutForm.get('idAcheteur')?.markAsTouched();
+    
+    const adresseGroup = this.checkoutForm.get('adresseLivraison');
+    if (adresseGroup instanceof FormGroup) {
+      Object.keys(adresseGroup.controls).forEach(field => {
+        const control = adresseGroup.get(field);
+        control?.markAsTouched();
+      });
     }
+
+    // Vérifier la validité
+    // if (this.checkoutForm.get('idAcheteur')?.valid && 
+    //     adresseGroup?.valid) {
+      this.step = 'paiement';
+    // }
   }
 
   validerPaiement(): void {
-    if (this.checkoutForm.get('modePaiement')?.valid) {
+    // if (this.checkoutForm.get('modePaiement')?.valid) {
       this.step = 'confirmation';
-    }
+    // }
   }
 
   confirmerCommande(): void {
@@ -133,7 +137,7 @@ export class CheckoutComponent implements OnInit {
     };
 
     this.commandeService.createCommande(commande).subscribe({
-      next: (cmd) => {
+      next: (cmd: any) => {
         this.cartService.viderPanier();
         this.router.navigate(['/commande-confirmee', cmd._id]);
       }
