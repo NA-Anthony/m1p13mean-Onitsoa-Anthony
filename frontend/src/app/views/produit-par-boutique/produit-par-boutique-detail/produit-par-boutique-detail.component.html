@@ -311,7 +311,68 @@
           </c-card>
         </c-col>
         
-        <!-- Historique -->
+        <!-- Historique des promotions -->
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-history" class="me-2"></svg>
+              Historique des promotions
+              @if (isBoutique) {
+                <button 
+                  cButton 
+                  color="info" 
+                  size="sm" 
+                  class="ms-auto"
+                  (click)="showHistorique = !showHistorique"
+                >
+                  {{ showHistorique ? 'Masquer' : 'Afficher' }}
+                </button>
+              }
+            </c-card-header>
+            
+            @if (showHistorique && historiquePromotions.length > 0) {
+              <c-card-body>
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Remise</th>
+                        <th>Date début</th>
+                        <th>Date fin</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (promo of historiquePromotions; track promo._id) {
+                        <tr>
+                          <td>{{ promo.remisePourcentage }}%</td>
+                          <td>{{ formatDateSimple(promo.dateDebut) }}</td>
+                          <td>{{ formatDateSimple(promo.dateFin) }}</td>
+                          <td>
+                            @if (promo.actif) {
+                              <span class="badge bg-success">Active</span>
+                            } @else {
+                              <span class="badge bg-secondary">Inactive</span>
+                            }
+                            @if (promo._id === item.promotion?._id) {
+                              <span class="badge bg-info ms-1">Actuelle</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </c-card-body>
+            } @else if (showHistorique && historiquePromotions.length === 0) {
+              <c-card-body>
+                <p class="text-body-secondary text-center">Aucun historique de promotion</p>
+              </c-card-body>
+            }
+          </c-card>
+        </c-col>
+        
+        <!-- Historique général -->
         <c-col xs="12" class="mb-4">
           <c-card class="shadow-sm">
             <c-card-header>

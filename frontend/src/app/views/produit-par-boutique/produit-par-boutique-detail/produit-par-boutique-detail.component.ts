@@ -48,6 +48,10 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
   promoDateFin: string = '';
   today: string = new Date().toISOString().split('T')[0];
   
+  // Historique des promotions
+  historiquePromotions: any[] = [];
+  showHistorique = false;
+  
   // Rôles
   isAdmin = false;
   isBoutique = false;
@@ -82,11 +86,25 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
           this.quantiteInput = this.item.stock;
         }
         this.loading = false;
+        this.loadHistoriquePromotions();
       },
       error: (err: any) => {
         this.error = err.error?.msg || 'Erreur lors du chargement';
         this.loading = false;
         console.error(err);
+      }
+    });
+  }
+
+  loadHistoriquePromotions(): void {
+    if (!this.item) return;
+    
+    this.service.getHistoriquePromotions(this.item._id).subscribe({
+      next: (data: any[]) => {
+        this.historiquePromotions = data;
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement historique:', err);
       }
     });
   }
@@ -153,6 +171,24 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
       return;
     }
 
+    // Vérifier s'il y a déjà une promotion
+    const aDejaPromo = this.item.enPromotion;
+    
+    let messageConfirmation = 'Êtes-vous sûr de vouloir ajouter cette promotion ?';
+    
+    if (aDejaPromo) {
+      messageConfirmation = '⚠️ ATTENTION : Ce produit a déjà une promotion active.\n\n' +
+        'En ajoutant cette nouvelle promotion :\n' +
+        '• L\'ancienne promotion sera désactivée\n' +
+        '• Si les dates de la nouvelle promotion sont dans le futur, elle sera programmée\n' +
+        '• Si les dates sont actuelles, elle deviendra active immédiatement\n\n' +
+        'Voulez-vous continuer ?';
+    }
+
+    if (!confirm(messageConfirmation)) {
+      return;
+    }
+
     const promotionData = {
       remisePourcentage: this.promoRemise,
       dateDebut: this.promoDateDebut,
@@ -160,13 +196,20 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
     };
 
     this.service.ajouterPromotion(this.item._id, promotionData).subscribe({
-      next: (updated: any) => {
-        this.item = updated;
+      next: (response: any) => {
+        this.item = response.produit;
         this.showPromoForm = false;
         this.promoRemise = 0;
         this.promoDateDebut = '';
         this.promoDateFin = '';
-        alert('Promotion ajoutée avec succès');
+        
+        // Afficher le message de l'API
+        if (response.message) {
+          alert(response.message);
+        }
+        
+        // Recharger l'historique
+        this.loadHistoriquePromotions();
       },
       error: (err: any) => {
         alert(err.error?.msg || 'Erreur lors de l\'ajout de la promotion');
@@ -176,12 +219,15 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
   }
 
   supprimerPromotion(): void {
-    if (!this.item || !confirm('Supprimer cette promotion ?')) return;
+    if (!this.item || !confirm('⚠️ Voulez-vous vraiment supprimer cette promotion ?')) return;
     
     this.service.supprimerPromotion(this.item._id).subscribe({
-      next: (updated: any) => {
-        this.item = updated;
-        alert('Promotion supprimée');
+      next: (response: any) => {
+        this.item = response.produit;
+        if (response.message) {
+          alert(response.message);
+        }
+        this.loadHistoriquePromotions();
       },
       error: (err: any) => {
         alert(err.error?.msg || 'Erreur lors de la suppression');
@@ -198,6 +244,15 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
+    });
+  }
+
+  formatDateSimple(date: Date): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
   }
 }

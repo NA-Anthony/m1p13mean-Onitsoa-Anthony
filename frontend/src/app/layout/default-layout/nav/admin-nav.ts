@@ -49,8 +49,8 @@ export const adminNavItems: INavData[] = [
         ]
     },
     {
-      name: 'Produits par boutique',
-      url: '/produits-par-boutique/produits-par-boutique',
-      iconComponent: { name: 'cil-building' }
+        name: 'Produits par boutique',
+        url: '/produits-par-boutique',
+        iconComponent: { name: 'cil-building' }
     }
 ];

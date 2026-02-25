@@ -224,31 +224,32 @@ export class ProduitParBoutiqueListComponent implements OnInit {
 
   savePromotion(): void {
     if (!this.selectedItemForPromo || !this.isPromoValid()) return;
-
+  
     this.promoSaving = true;
     this.promoError = null;
-
+  
     const promotionData = {
       remisePourcentage: this.promoData.remise,
       dateDebut: this.promoData.dateDebut,
       dateFin: this.promoData.dateFin
     };
-
+  
     this.service.ajouterPromotion(this.selectedItemForPromo._id, promotionData).subscribe({
-      next: (updated: any) => {
+      next: (response: any) => {
         // Mettre à jour l'item dans la liste
-        const index = this.items.findIndex(i => i._id === this.selectedItemForPromo._id);
+        const index = this.items.findIndex(i => i && i._id === this.selectedItemForPromo._id);
         if (index !== -1) {
-          this.items[index] = updated;
+          this.items[index] = response.produit || response;
           this.filteredItems = [...this.items];
           this.filterItems();
         }
         
-        this.showToastMessage('Promotion ajoutée avec succès', 'success');
+        this.showToastMessage(response.message || 'Promotion ajoutée avec succès', 'success');
         this.closePromoModal();
         this.promoSaving = false;
       },
       error: (err: any) => {
+        // Afficher le message d'erreur spécifique
         this.promoError = err.error?.msg || 'Erreur lors de l\'ajout de la promotion';
         this.promoSaving = false;
         console.error(err);
@@ -267,14 +268,16 @@ export class ProduitParBoutiqueListComponent implements OnInit {
   }
 
   getTotalValeurStock(): number {
-    return this.items.reduce((acc, item) => {
-      const prix = item.enPromotion && item.prixPromo ? item.prixPromo : item.prix;
-      return acc + (prix * item.stock);
+    return (this.items || []).reduce((acc, item) => {
+      if (!item) return acc;
+      const prix = item.enPromotion && item.prixPromo ? item.prixPromo : (item.prix || 0);
+      return acc + (prix * (item.stock || 0));
     }, 0);
   }
 
   getTotalEnPromotion(): number {
-    return this.items.filter(i => i.enPromotion).length;
+    if (!this.items || !Array.isArray(this.items)) return 0;
+    return this.items.filter(item => item && item.enPromotion === true).length;
   }
 
   getTotalRupture(): number {

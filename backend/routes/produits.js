@@ -15,6 +15,7 @@ router.get('/boutiques/tous', produitParBoutiqueController.getAllProduitsParBout
 // 🔒 ROUTES PROTÉGÉES (boutique)
 router.get('/boutique/mes-produits', auth, boutique, produitParBoutiqueController.getMesProduits);
 router.get('/boutique/:id', auth, produitParBoutiqueController.getProduitParBoutiqueById);
+router.get('/boutique/:id/promotions', auth, produitParBoutiqueController.getHistoriquePromotions);
 router.post('/boutique', auth, boutique, produitParBoutiqueController.createProduitParBoutique);
 router.put('/boutique/:id', auth, boutique, produitParBoutiqueController.updateProduitParBoutique);
 router.patch('/boutique/:id/stock', auth, boutique, produitParBoutiqueController.updateStock);
