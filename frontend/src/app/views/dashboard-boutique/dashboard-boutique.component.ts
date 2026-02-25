@@ -7,15 +7,14 @@ import {
   ButtonModule,
   BadgeModule,
   TableModule,
-  ProgressModule
+  ProgressModule,
+  SpinnerModule,
+  AlertModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
-import { BoutiqueService } from '../boutique/boutique.service';
-import { ProduitParBoutiqueService } from '../produit-par-boutique/produit-par-boutique.service';
-import { CommandeService } from '../commande/commande.service';
-// import { AvisService } from '../avis/avis.service';
-import { PortefeuilleService } from '../ecommerce/portefeuille.service';
+import { DashboardBoutiqueService } from '../../services/dashboard-boutique.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-boutique',
@@ -31,115 +30,121 @@ import { PortefeuilleService } from '../ecommerce/portefeuille.service';
     BadgeModule,
     TableModule,
     ProgressModule,
+    SpinnerModule,
+    AlertModule,
     ChartjsComponent,
     IconModule
   ]
 })
 export class DashboardBoutiqueComponent implements OnInit {
-  boutiqueId = '1'; // À remplacer par l'ID de la boutique connectée
-
+  boutiqueNom: string = '';
+  boutiqueLogo: string = '';
+  
+  // États
+  loading = true;
+  error: string | null = null;
+  
   // Statistiques
-  totalProduits = 0;
-  totalCommandes = 0;
-  totalAvis = 0;
-  noteMoyenne = 0;
-  chiffreAffaires = 0;
-  valeurStock = 0;
-  caisseBoutique = 0;
+  stats = {
+    produits: {
+      total: 0,
+      valeurStock: 0,
+      stockFaible: [] as any[]
+    },
+    commandes: {
+      total: 0,
+      chiffreAffaires: 0,
+      parStatut: {
+        en_attente: 0,
+        confirmée: 0,
+        préparée: 0,
+        expédiée: 0,
+        livrée: 0,
+        annulée: 0
+      },
+      dernieres: [] as any[],
+      ventes7Jours: [] as any[]
+    },
+    avis: {
+      total: 0,
+      noteMoyenne: 0,
+      repartition: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      derniers: [] as any[]
+    },
+    promotions: {
+      total: 0,
+      actives: [] as any[]
+    }
+  };
 
-  // Alertes stock
-  stockFaible: any[] = [];
-
-  // Derniers avis
-  derniersAvis: any[] = [];
-
-  // Dernières commandes
-  dernieresCommandes: any[] = [];
-
-  // Graphique ventes
-  ventesParMois: any = {
-    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+  // Graphiques
+  ventes7Jours: any = {
+    labels: [],
     datasets: [
       {
-        label: 'Ventes',
+        label: 'Ventes (€)',
         backgroundColor: '#2eb85c',
-        data: [45, 52, 68, 74, 80, 72, 65, 58, 62, 75, 82, 88]
+        borderColor: '#2eb85c',
+        data: []
+      }
+    ]
+  };
+
+  repartitionVentes: any = {
+    labels: ['1 étoile', '2 étoiles', '3 étoiles', '4 étoiles', '5 étoiles'],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: ['#321fdb', '#f9b115', '#2eb85c', '#e55353', '#39f'],
+        hoverBackgroundColor: ['#1b0e7c', '#d4950b', '#1f9b4a', '#b13b3b', '#0d6efd']
       }
     ]
   };
 
   constructor(
-    private boutiqueService: BoutiqueService,
-    private produitService: ProduitParBoutiqueService,
-    private commandeService: CommandeService,
-    // private avisService: AvisService,
-    private portefeuilleService: PortefeuilleService
-  ) { }
+    private dashboardService: DashboardBoutiqueService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.loadStats();
-    this.chargerCaisse();
-    this.loadStockFaible();
-    // this.loadDerniersAvis();
-    this.loadDernieresCommandes();
+    this.loadDashboardData();
   }
 
-  chargerCaisse(): void {
-    this.portefeuilleService.getCaisseBoutique().subscribe({
-      next: (res) => this.caisseBoutique = res.caisse,
-      error: (err) => console.error(err)
-    });
-  }
-
-  loadStats(): void {
-    // Produits de la boutique
-    this.produitService.getProduitsByBoutique(this.boutiqueId).subscribe((produits: any[]) => {
-      this.totalProduits = produits.length;
-      this.valeurStock = produits.reduce((acc: number, p: any) => acc + (p.prix * p.stock), 0);
-    });
-
-    // Commandes de la boutique
-    this.commandeService.getCommandesBoutique().subscribe((commandes: any[]) => {
-      this.totalCommandes = commandes.length;
-      this.chiffreAffaires = commandes.reduce((acc: number, c: any) => acc + (c.total || 0), 0);
-    });
-
-    // Avis des produits de la boutique
-    /*
-    this.avisService.getAvis().subscribe(avis => {
-      // ...
-    });
-    */
-  }
-
-  loadStockFaible(): void {
-    this.produitService.getProduitsByBoutique(this.boutiqueId).subscribe(produits => {
-      this.stockFaible = produits
-        .filter(p => p.stock > 0 && p.stock < 5)
-        .sort((a, b) => a.stock - b.stock)
-        .slice(0, 5);
+  loadDashboardData(): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.dashboardService.getStats().subscribe({
+      next: (response: any) => {
+        this.boutiqueNom = response.boutique?.nom;
+        this.boutiqueLogo = response.boutique?.logo;
+        this.stats = response.stats;
+        
+        // Préparer les données des graphiques
+        this.prepareGraphiques();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.msg || 'Erreur lors du chargement des données';
+        this.loading = false;
+        console.error(err);
+      }
     });
   }
 
-  loadDerniersAvis(): void {
-    this.avisService.getAvis().subscribe(avis => {
-      this.derniersAvis = avis
-        .filter(a => a.produitParBoutique?.idBoutique === this.boutiqueId)
-        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
-        .slice(0, 3);
-    });
-  }
-
-  loadDernieresCommandes(): void {
-    this.commandeService.getCommandesByBoutique(this.boutiqueId).subscribe(commandes => {
-      this.dernieresCommandes = commandes
-        .sort((a, b) => new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime())
-        .slice(0, 5);
-    });
-  }
-
-  getNoteEtoiles(note: number): number[] {
-    return [1, 2, 3, 4, 5];
+  prepareGraphiques(): void {
+    // Graphique des ventes des 7 derniers jours
+    this.ventes7Jours.labels = this.stats.commandes.ventes7Jours.map(v => v.date);
+    this.ventes7Jours.datasets[0].data = this.stats.commandes.ventes7Jours.map(v => v.total);
+    
+    // Graphique de répartition des notes
+    this.repartitionVentes.datasets[0].data = [
+      this.stats.avis.repartition[1] || 0,
+      this.stats.avis.repartition[2] || 0,
+      this.stats.avis.repartition[3] || 0,
+      this.stats.avis.repartition[4] || 0,
+      this.stats.avis.repartition[5] || 0
+    ];
   }
 
   getStatutClass(statut: string): string {
@@ -154,7 +159,36 @@ export class DashboardBoutiqueComponent implements OnInit {
     return classes[statut] || 'secondary';
   }
 
+  getNoteEtoiles(note: number): number[] {
+    return [1, 2, 3, 4, 5];
+  }
+
+  getStockStatus(stock: number): { class: string, label: string } {
+    if (stock === 0) return { class: 'danger', label: 'Rupture' };
+    if (stock < 5) return { class: 'warning', label: 'Stock faible' };
+    return { class: 'success', label: 'En stock' };
+  }
+
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('fr-FR');
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatMontant(montant: number): string {
+    return (montant || 0).toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + ' €';
+  }
+
+  getPourcentageSatisfaction(): number {
+    if (this.stats.avis.total === 0) return 0;
+    return (this.stats.avis.noteMoyenne / 5) * 100;
   }
 }

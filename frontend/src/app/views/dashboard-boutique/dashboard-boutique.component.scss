@@ -1,26 +1,51 @@
-// Styles spécifiques au dashboard boutique
-.alert-card {
-    border-left: 4px solid #e55353;
-  }
+// Styles pour les cartes
+.c-card {
+  transition: all 0.2s ease;
   
-  .stock-low {
-    color: #e55353;
-    font-weight: 600;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
   }
+}
+
+// Styles pour les badges de note
+.text-warning {
+  color: #f9b115;
+}
+
+.text-secondary {
+  color: #6c757d;
+}
+
+// Styles pour la barre de progression
+.progress {
+  background-color: #e9ecef;
   
-  .avis-item {
-    transition: background-color 0.2s;
-    
-    &:hover {
-      background-color: rgba(46, 184, 92, 0.05);
-    }
+  .progress-bar {
+    transition: width 0.3s ease;
   }
+}
+
+// Styles pour le tableau
+.table-hover tbody tr:hover {
+  background-color: rgba(50, 31, 219, 0.05);
+  cursor: pointer;
+}
+
+// Styles pour les listes
+.list-group-item {
+  transition: background-color 0.2s ease;
   
-  .stats-progress {
-    margin-top: 0.5rem;
-    
-    .progress {
-      background-color: #e9ecef;
-      height: 6px;
-    }
+  &:hover {
+    background-color: #f8f9fa;
   }
+}
+
+// Badge de statut
+.badge {
+  &.bg-warning { background-color: #f9b115; }
+  &.bg-info { background-color: #39f; }
+  &.bg-primary { background-color: #321fdb; }
+  &.bg-success { background-color: #2eb85c; }
+  &.bg-danger { background-color: #e55353; }
+}

@@ -33,6 +33,7 @@ app.use('/api/boutiques-admin', require('./routes/boutiques-admin'));
 app.use('/api/produits-admin', require('./routes/produits-admin')); // ← AJOUTER
 app.use('/api/commandes', require('./routes/commandes'));
 app.use('/api/portefeuille', require('./routes/portefeuille'));
+app.use('/api/dashboard-boutique', require('./routes/dashboard-boutique')); 
 
 app.get('/', (req, res) => {
   res.json({

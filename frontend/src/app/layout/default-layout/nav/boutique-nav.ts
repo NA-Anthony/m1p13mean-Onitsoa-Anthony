@@ -3,11 +3,11 @@ import { INavData } from '@coreui/angular';
 export const boutiqueNavItems: INavData[] = [
     {
         name: 'Dashboard',
-        url: '/dashboard',
+        url: '/dashboard-boutique',
         iconComponent: { name: 'cil-speedometer' },
         badge: {
-          color: 'info',
-          text: 'NEW'
+          color: 'warning',
+          text: 'BOUTIQUE'
         }
     },
     {
