@@ -1,0 +1,87 @@
+<c-row>
+    <!-- Résumé & Dépôt -->
+    <c-col md="4">
+        <c-card class="mb-4 shadow border-0 text-white bg-primary text-center py-4">
+            <c-card-body>
+                <h5 class="opacity-75 mb-2">Mon Solde Actuel</h5>
+                <h1 class="display-4 fw-bold mb-0">{{ solde | number:'1.2-2' }} €</h1>
+            </c-card-body>
+        </c-card>
+
+        <c-card class="mb-4 shadow border-0">
+            <c-card-header class="bg-white fw-bold py-3">Effectuer un dépôt</c-card-header>
+            <c-card-body>
+                <form (ngSubmit)="effectuerDepot()">
+                    <div class="mb-3">
+                        <label class="form-label">Montant (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">€</span>
+                            <input type="number" class="form-control" [(ngModel)]="montantDepot" name="montant" min="1"
+                                step="0.5">
+                        </div>
+                        <div class="form-text">Créditez instantanément votre compte.</div>
+                    </div>
+
+                    <button cButton type="submit" color="primary"
+                        class="w-100 py-2 d-flex align-items-center justify-content-center" [disabled]="submitting">
+                        <c-spinner *ngIf="submitting" size="sm" class="me-2"></c-spinner>
+                        <svg *ngIf="!submitting" cIcon name="cil-wallet" class="me-2"></svg>
+                        Déposer maintenant
+                    </button>
+                </form>
+            </c-card-body>
+        </c-card>
+    </c-col>
+
+    <!-- Historique -->
+    <c-col md="8">
+        <c-card class="shadow border-0">
+            <c-card-header class="bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                Historique des transactions
+                <button cButton color="light" size="sm" (click)="loadTransactions()">
+                    <svg cIcon name="cil-reload"></svg>
+                </button>
+            </c-card-header>
+            <c-card-body>
+                @if (loading) {
+                <div class="text-center py-5">
+                    <c-spinner color="primary"></c-spinner>
+                </div>
+                } @else if (transactions.length === 0) {
+                <div class="text-center py-5 text-muted">
+                    <svg cIcon name="cil-swap-vertical" size="3xl" class="mb-3 opacity-25"></svg>
+                    <p>Aucune transaction pour le moment.</p>
+                </div>
+                } @else {
+                <table cTable hover responsive align="middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th class="text-end">Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (t of transactions; track t._id) {
+                        <tr>
+                            <td class="small">{{ t.date | date:'short' }}</td>
+                            <td>
+                                <span [class]="'badge bg-' + getStatusColor(t.type) + ' text-capitalize'">
+                                    {{ t.type }}
+                                </span>
+                            </td>
+                            <td class="small">{{ t.description }}</td>
+                            <td class="text-end fw-bold" [class.text-danger]="t.montant < 0"
+                                [class.text-success]="t.montant > 0">
+                                {{ (t.montant > 0 ? '+' : '') }}{{ t.montant | number:'1.2-2' }} €
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                }
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>

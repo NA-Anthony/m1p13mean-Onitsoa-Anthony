@@ -14,7 +14,8 @@ import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { BoutiqueService } from '../boutique/boutique.service';
 import { ProduitParBoutiqueService } from '../produit-par-boutique/produit-par-boutique.service';
 import { CommandeService } from '../commande/commande.service';
-import { AvisService } from '../avis/avis.service';
+// import { AvisService } from '../avis/avis.service';
+import { PortefeuilleService } from '../ecommerce/portefeuille.service';
 
 @Component({
   selector: 'app-dashboard-boutique',
@@ -36,7 +37,7 @@ import { AvisService } from '../avis/avis.service';
 })
 export class DashboardBoutiqueComponent implements OnInit {
   boutiqueId = '1'; // À remplacer par l'ID de la boutique connectée
-  
+
   // Statistiques
   totalProduits = 0;
   totalCommandes = 0;
@@ -44,16 +45,17 @@ export class DashboardBoutiqueComponent implements OnInit {
   noteMoyenne = 0;
   chiffreAffaires = 0;
   valeurStock = 0;
-  
+  caisseBoutique = 0;
+
   // Alertes stock
   stockFaible: any[] = [];
-  
+
   // Derniers avis
   derniersAvis: any[] = [];
-  
+
   // Dernières commandes
   dernieresCommandes: any[] = [];
-  
+
   // Graphique ventes
   ventesParMois: any = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
@@ -70,41 +72,44 @@ export class DashboardBoutiqueComponent implements OnInit {
     private boutiqueService: BoutiqueService,
     private produitService: ProduitParBoutiqueService,
     private commandeService: CommandeService,
-    private avisService: AvisService
-  ) {}
+    // private avisService: AvisService,
+    private portefeuilleService: PortefeuilleService
+  ) { }
 
   ngOnInit(): void {
     this.loadStats();
+    this.chargerCaisse();
     this.loadStockFaible();
-    this.loadDerniersAvis();
+    // this.loadDerniersAvis();
     this.loadDernieresCommandes();
+  }
+
+  chargerCaisse(): void {
+    this.portefeuilleService.getCaisseBoutique().subscribe({
+      next: (res) => this.caisseBoutique = res.caisse,
+      error: (err) => console.error(err)
+    });
   }
 
   loadStats(): void {
     // Produits de la boutique
-    this.produitService.getProduitsByBoutique(this.boutiqueId).subscribe(produits => {
+    this.produitService.getProduitsByBoutique(this.boutiqueId).subscribe((produits: any[]) => {
       this.totalProduits = produits.length;
-      this.valeurStock = produits.reduce((acc, p) => acc + (p.prix * p.stock), 0);
+      this.valeurStock = produits.reduce((acc: number, p: any) => acc + (p.prix * p.stock), 0);
     });
 
     // Commandes de la boutique
-    this.commandeService.getCommandesByBoutique(this.boutiqueId).subscribe(commandes => {
+    this.commandeService.getCommandesBoutique().subscribe((commandes: any[]) => {
       this.totalCommandes = commandes.length;
-      this.chiffreAffaires = commandes.reduce((acc, c) => acc + c.total, 0);
+      this.chiffreAffaires = commandes.reduce((acc: number, c: any) => acc + (c.total || 0), 0);
     });
 
     // Avis des produits de la boutique
+    /*
     this.avisService.getAvis().subscribe(avis => {
-      const avisBoutique = avis.filter(a => 
-        a.produitParBoutique?.idBoutique === this.boutiqueId
-      );
-      this.totalAvis = avisBoutique.length;
-      
-      if (avisBoutique.length > 0) {
-        const somme = avisBoutique.reduce((acc, a) => acc + a.note, 0);
-        this.noteMoyenne = somme / avisBoutique.length;
-      }
+      // ...
     });
+    */
   }
 
   loadStockFaible(): void {

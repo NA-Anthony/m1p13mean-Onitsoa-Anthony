@@ -1,204 +1,216 @@
 <c-row>
-    <c-col md="8">
-      <c-card class="shadow-sm mb-4">
-        <c-card-header class="bg-primary text-white">
-          <h5 class="mb-0">
-            <svg cIcon name="cil-check" class="me-2"></svg>
-            Finaliser la commande
-          </h5>
-        </c-card-header>
-        
-        <c-card-body>
-          <!-- Progress bar -->
-          <c-row class="mb-4">
-            <c-col>
-              <div class="d-flex justify-content-between">
-                <div class="text-center" [class.text-primary]="step === 'info'">
-                  <span class="badge rounded-pill" [ngClass]="step === 'info' ? 'bg-primary' : 'bg-secondary'">1</span>
-                  <div class="small">Informations</div>
-                </div>
-                <div class="flex-grow-1 mx-2 mt-2">
-                  <c-progress [height]="2">
-                    <c-progress-bar [value]="step === 'info' ? 0 : (step === 'paiement' ? 50 : 100)"></c-progress-bar>
-                  </c-progress>
-                </div>
-                <div class="text-center" [class.text-primary]="step === 'paiement'">
-                  <span class="badge rounded-pill" [ngClass]="step === 'paiement' ? 'bg-primary' : 'bg-secondary'">2</span>
-                  <div class="small">Paiement</div>
-                </div>
-                <div class="flex-grow-1 mx-2 mt-2">
-                  <c-progress [height]="2">
-                    <c-progress-bar [value]="step === 'confirmation' ? 100 : 0"></c-progress-bar>
-                  </c-progress>
-                </div>
-                <div class="text-center" [class.text-primary]="step === 'confirmation'">
-                  <span class="badge rounded-pill" [ngClass]="step === 'confirmation' ? 'bg-primary' : 'bg-secondary'">3</span>
-                  <div class="small">Confirmation</div>
-                </div>
+  <c-col md="8">
+    <c-card class="shadow-sm mb-4">
+      <c-card-header class="bg-primary text-white">
+        <h5 class="mb-0">
+          <svg cIcon name="cil-check" class="me-2"></svg>
+          Finaliser la commande
+        </h5>
+      </c-card-header>
+
+      <c-card-body>
+        <!-- Progress bar -->
+        <c-row class="mb-4">
+          <c-col>
+            <div class="d-flex justify-content-between">
+              <div class="text-center" [class.text-primary]="step === 'info'">
+                <span class="badge rounded-pill" [ngClass]="step === 'info' ? 'bg-primary' : 'bg-secondary'">1</span>
+                <div class="small">Informations</div>
               </div>
-            </c-col>
-          </c-row>
-  
-          <form [formGroup]="checkoutForm">
-            @if (step === 'info') {
-              <!-- Étape 1: Informations -->
-              <div>
-                <h6 class="mb-3">1. Sélectionner l'acheteur</h6>
-                <c-row class="mb-4">
-                  <c-col md="12">
-                    <select class="form-select" formControlName="idAcheteur">
-                      <option value="">Choisir un acheteur</option>
-                      @for (a of acheteurs; track a._id) {
-                        <option [value]="a._id">{{ a.nom || 'Acheteur ' + a._id }}</option>
-                      }
-                    </select>
-                  </c-col>
-                </c-row>
-  
-                <h6 class="mb-3">2. Adresse de livraison</h6>
-                <c-row formGroupName="adresseLivraison">
-                  <c-col md="12" class="mb-3">
-                    <label class="fw-semibold">Rue</label>
-                    <input type="text" class="form-control" formControlName="rue">
-                  </c-col>
-                  <c-col md="4" class="mb-3">
-                    <label class="fw-semibold">Code postal</label>
-                    <input type="text" class="form-control" formControlName="codePostal">
-                  </c-col>
-                  <c-col md="4" class="mb-3">
-                    <label class="fw-semibold">Ville</label>
-                    <input type="text" class="form-control" formControlName="ville">
-                  </c-col>
-                  <c-col md="4" class="mb-3">
-                    <label class="fw-semibold">Pays</label>
-                    <input type="text" class="form-control" formControlName="pays">
-                  </c-col>
-                </c-row>
-  
-                <div class="d-flex justify-content-between mt-4">
-                  <button cButton color="secondary" type="button" (click)="retourPanier()">
-                    Retour au panier
-                  </button>
-                  <button cButton color="primary" type="button" (click)="validerInformations()">
-                    Continuer vers le paiement
-                  </button>
-                </div>
+              <div class="flex-grow-1 mx-2 mt-2">
+                <c-progress [height]="2">
+                  <c-progress-bar [value]="step === 'info' ? 0 : (step === 'paiement' ? 50 : 100)"></c-progress-bar>
+                </c-progress>
               </div>
-            }
-  
-            @if (step === 'paiement') {
-              <!-- Étape 2: Paiement -->
-              <div>
-                <h6 class="mb-3">Mode de paiement</h6>
-                <c-row class="mb-4">
-                  @for (mode of modesPaiement; track mode) {
-                    <c-col md="6" class="mb-2">
-                      <div class="form-check">
-                        <input 
-                          type="radio" 
-                          class="form-check-input" 
-                          [id]="'mode' + mode"
-                          [value]="mode"
-                          formControlName="modePaiement"
-                        >
-                        <label class="form-check-label" [for]="'mode' + mode">
-                          {{ mode }}
-                        </label>
-                      </div>
-                    </c-col>
+              <div class="text-center" [class.text-primary]="step === 'paiement'">
+                <span class="badge rounded-pill"
+                  [ngClass]="step === 'paiement' ? 'bg-primary' : 'bg-secondary'">2</span>
+                <div class="small">Paiement</div>
+              </div>
+              <div class="flex-grow-1 mx-2 mt-2">
+                <c-progress [height]="2">
+                  <c-progress-bar [value]="step === 'confirmation' ? 100 : 0"></c-progress-bar>
+                </c-progress>
+              </div>
+              <div class="text-center" [class.text-primary]="step === 'confirmation'">
+                <span class="badge rounded-pill"
+                  [ngClass]="step === 'confirmation' ? 'bg-primary' : 'bg-secondary'">3</span>
+                <div class="small">Confirmation</div>
+              </div>
+            </div>
+          </c-col>
+        </c-row>
+
+        <form [formGroup]="checkoutForm">
+          @if (step === 'info') {
+          <!-- Étape 1: Informations -->
+          <div>
+            <h6 class="mb-3">1. Sélectionner l'acheteur</h6>
+            <c-row class="mb-4">
+              <c-col md="12">
+                <select class="form-select" formControlName="idAcheteur">
+                  <option value="">Choisir un acheteur</option>
+                  @for (a of acheteurs; track a._id) {
+                  <option [value]="a._id">{{ a.nom || 'Acheteur ' + a._id }}</option>
                   }
-                </c-row>
-  
-                <div class="d-flex justify-content-between mt-4">
-                  <button cButton color="secondary" type="button" (click)="step = 'info'">
-                    Retour
-                  </button>
-                  <button 
-                    cButton 
-                    color="primary" 
-                    type="button" 
-                    [disabled]="!checkoutForm.get('modePaiement')?.valid"
-                    (click)="validerPaiement()"
-                  >
-                    Vérifier ma commande
-                  </button>
-                </div>
-              </div>
+                </select>
+              </c-col>
+            </c-row>
+
+            <h6 class="mb-3">2. Adresse de livraison</h6>
+            <c-row formGroupName="adresseLivraison">
+              <c-col md="12" class="mb-3">
+                <label class="fw-semibold">Rue</label>
+                <input type="text" class="form-control" formControlName="rue">
+              </c-col>
+              <c-col md="4" class="mb-3">
+                <label class="fw-semibold">Code postal</label>
+                <input type="text" class="form-control" formControlName="codePostal">
+              </c-col>
+              <c-col md="4" class="mb-3">
+                <label class="fw-semibold">Ville</label>
+                <input type="text" class="form-control" formControlName="ville">
+              </c-col>
+              <c-col md="4" class="mb-3">
+                <label class="fw-semibold">Pays</label>
+                <input type="text" class="form-control" formControlName="pays">
+              </c-col>
+            </c-row>
+
+            <div class="d-flex justify-content-between mt-4">
+              <button cButton color="secondary" type="button" (click)="retourPanier()">
+                Retour au panier
+              </button>
+              <button cButton color="primary" type="button" (click)="validerInformations()">
+                Continuer vers le paiement
+              </button>
+            </div>
+          </div>
+          }
+
+          @if (step === 'paiement') {
+          <!-- Étape 2: Paiement -->
+          <div>
+            <h6 class="mb-3">Mode de paiement</h6>
+
+            @if (checkoutForm.get('idAcheteur')?.value) {
+            <div class="alert alert-info py-2 small d-flex align-items-center mb-3">
+              <svg cIcon name="cil-wallet" class="me-2"></svg>
+              Votre solde actuel : <strong>{{ soldeActuel | number:'1.2-2' }} €</strong>
+            </div>
             }
-  
-            @if (step === 'confirmation') {
-              <!-- Étape 3: Confirmation -->
-              <div>
-                <div class="alert alert-success">
-                  <svg cIcon name="cil-check" size="lg" class="me-2"></svg>
-                  Votre commande est prête à être validée
-                </div>
-  
-                <h6 class="mb-3">Récapitulatif</h6>
-                
-                @for (item of items; track item.idProduitParBoutique) {
-                  <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                    <div>
-                      <div>{{ item.nomProduit }}</div>
-                      <small class="text-body-secondary">{{ item.nomBoutique }} x{{ item.quantite }}</small>
-                    </div>
-                    <div class="fw-bold">
-                      {{ (getPrixItem(item) * item.quantite) | number:'1.2-2' }} €
-                    </div>
+
+            <c-row class="mb-1">
+              @for (mode of modesPaiement; track mode) {
+              <c-col md="6" class="mb-3">
+                <div class="form-check p-3 border rounded h-100 transition-all cursor-pointer"
+                  [class.border-primary]="checkoutForm.get('modePaiement')?.value === mode"
+                  [class.bg-light]="checkoutForm.get('modePaiement')?.value === mode">
+                  <input type="radio" class="form-check-input ms-0" [id]="'mode' + mode" [value]="mode"
+                    formControlName="modePaiement">
+                  <label class="form-check-label ms-2 fw-semibold" [for]="'mode' + mode">
+                    {{ mode }}
+                  </label>
+                  @if (mode === 'Portefeuille numérique') {
+                  <div class="small text-body-secondary ms-2 mt-1">
+                    Payez instantanément avec votre solde.
+                    @if (soldeActuel < total()) { <div class="text-danger">
+                      <svg cIcon name="cil-warning" size="sm" class="me-1"></svg>
+                      Solde insuffisant (Manque {{ (total() - soldeActuel) | number:'1.2-2' }} €)
                   </div>
+                  }
+                </div>
                 }
-  
-                <hr>
-                
-                <div class="d-flex justify-content-between">
-                  <span>Total</span>
-                  <span class="fw-bold text-primary fs-5">{{ total() | number:'1.2-2' }} €</span>
-                </div>
-  
-                <div class="d-flex justify-content-between mt-4">
-                  <button cButton color="secondary" type="button" (click)="step = 'paiement'">
-                    Retour
-                  </button>
-                  <button cButton color="success" type="button" (click)="confirmerCommande()">
-                    Confirmer la commande
-                  </button>
-                </div>
-              </div>
-            }
-          </form>
-        </c-card-body>
-      </c-card>
-    </c-col>
-  
-    <c-col md="4">
-      <c-card class="shadow-sm">
-        <c-card-header class="bg-primary text-white">
-          <h5 class="mb-0">Récapitulatif</h5>
-        </c-card-header>
-        
-        <c-card-body>
-          <div class="d-flex justify-content-between mb-2">
-            <span>Sous-total</span>
-            <span>{{ sousTotal() | number:'1.2-2' }} €</span>
           </div>
-          
-          <div class="d-flex justify-content-between mb-2">
-            <span>Livraison</span>
-            <span>{{ fraisLivraison() | number:'1.2-2' }} €</span>
-          </div>
-          
-          <hr>
-          
-          <div class="d-flex justify-content-between mb-3 fs-5">
-            <span>Total</span>
-            <span class="fw-bold text-primary">{{ total() | number:'1.2-2' }} €</span>
-          </div>
-  
-          <div class="small text-body-secondary">
-            <svg cIcon name="cil-lock-locked" size="sm" class="me-1"></svg>
-            Paiement sécurisé
-          </div>
-        </c-card-body>
-      </c-card>
-    </c-col>
-  </c-row>
+  </c-col>
+  }
+</c-row>
+
+<div class="d-flex justify-content-between mt-4">
+  <button cButton color="secondary" type="button" (click)="step = 'info'">
+    Retour
+  </button>
+  <button cButton color="primary" type="button"
+    [disabled]="!checkoutForm.get('modePaiement')?.valid || isSoldeInsuffisant()" (click)="validerPaiement()">
+    Vérifier ma commande
+  </button>
+</div>
+</div>
+}
+
+@if (step === 'confirmation') {
+<!-- Étape 3: Confirmation -->
+<div>
+  <div class="alert alert-success">
+    <svg cIcon name="cil-check" size="lg" class="me-2"></svg>
+    Votre commande est prête à être validée
+  </div>
+
+  <h6 class="mb-3">Récapitulatif</h6>
+
+  @for (item of items; track item.idProduitParBoutique) {
+  <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+    <div>
+      <div>{{ item.nomProduit }}</div>
+      <small class="text-body-secondary">{{ item.nomBoutique }} x{{ item.quantite }}</small>
+    </div>
+    <div class="fw-bold">
+      {{ (getPrixItem(item) * item.quantite) | number:'1.2-2' }} €
+    </div>
+  </div>
+  }
+
+  <hr>
+
+  <div class="d-flex justify-content-between">
+    <span>Total</span>
+    <span class="fw-bold text-primary fs-5">{{ total() | number:'1.2-2' }} €</span>
+  </div>
+
+  <div class="d-flex justify-content-between mt-4">
+    <button cButton color="secondary" type="button" (click)="step = 'paiement'">
+      Retour
+    </button>
+    <button cButton color="success" type="button" (click)="confirmerCommande()">
+      Confirmer la commande
+    </button>
+  </div>
+</div>
+}
+</form>
+</c-card-body>
+</c-card>
+</c-col>
+
+<c-col md="4">
+  <c-card class="shadow-sm">
+    <c-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Récapitulatif</h5>
+    </c-card-header>
+
+    <c-card-body>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Sous-total</span>
+        <span>{{ sousTotal() | number:'1.2-2' }} €</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span>Livraison</span>
+        <span>{{ fraisLivraison() | number:'1.2-2' }} €</span>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-between mb-3 fs-5">
+        <span>Total</span>
+        <span class="fw-bold text-primary">{{ total() | number:'1.2-2' }} €</span>
+      </div>
+
+      <div class="small text-body-secondary">
+        <svg cIcon name="cil-lock-locked" size="sm" class="me-1"></svg>
+        Paiement sécurisé
+      </div>
+    </c-card-body>
+  </c-card>
+</c-col>
+</c-row>

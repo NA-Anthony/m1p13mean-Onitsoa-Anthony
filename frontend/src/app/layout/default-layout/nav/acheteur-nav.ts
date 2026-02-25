@@ -98,6 +98,11 @@ export const acheteurNavItems: INavData[] = [
         name: 'Mon panier',
         url: '/ecommerce/panier',
         iconComponent: { name: 'cil-cart' }
+      },
+      {
+        name: 'Mon Portefeuille',
+        url: '/ecommerce/portefeuille',
+        iconComponent: { name: 'cil-wallet' }
       }
     ]
   },

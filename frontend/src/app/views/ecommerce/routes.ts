@@ -21,6 +21,13 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'portefeuille',
+    loadComponent: () => import('./portefeuille/portefeuille.component').then(m => m.PortefeuilleComponent),
+    data: {
+      title: 'Mon portefeuille'
+    }
+  },
+  {
     path: 'panier',
     loadComponent: () => import('./panier/panier.component').then(m => m.PanierComponent),
     data: {

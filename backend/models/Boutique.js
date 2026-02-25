@@ -17,7 +17,8 @@ const boutiqueSchema = new mongoose.Schema({
     dimanche: { ouverture: String, fermeture: String }
   },
   noteMoyenne: { type: Number, default: 0 },
-  totalAvis: { type: Number, default: 0 }
+  totalAvis: { type: Number, default: 0 },
+  caisse: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Boutique', boutiqueSchema);

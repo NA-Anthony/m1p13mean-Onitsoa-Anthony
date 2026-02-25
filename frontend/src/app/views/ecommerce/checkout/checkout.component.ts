@@ -15,6 +15,7 @@ import { IconModule } from '@coreui/icons-angular';
 import { CartService } from '../cart.service';
 import { CommandeService } from '../../commande/commande.service';
 import { AcheteurService } from '../../acheteur/acheteur.service';
+import { PortefeuilleService } from '../portefeuille.service';
 import { MODES_PAIEMENT } from '../../commande/commande.model';
 
 @Component({
@@ -32,49 +33,78 @@ import { MODES_PAIEMENT } from '../../commande/commande.model';
     ButtonModule,
     BadgeModule,
     FormModule,
-    ProgressModule,  // ← AJOUTER DANS LES IMPORTS
+    ProgressModule,
     IconModule
   ]
 })
 export class CheckoutComponent implements OnInit {
-    constructor(
-        private fb: FormBuilder,
-        private cartService: CartService,
-        private commandeService: CommandeService,
-        private acheteurService: AcheteurService,
-        private router: Router
-      ) {
-        this.checkoutForm = this.fb.group({
-          idAcheteur: ['', Validators.required],
-          modePaiement: ['', Validators.required],
-          adresseLivraison: this.fb.group({
-            rue: ['', Validators.required],
-            codePostal: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
-            ville: ['', Validators.required],
-            pays: ['France']
-          })
-        });
-    }
-  checkoutForm: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private cartService: CartService,
+    private commandeService: CommandeService,
+    private acheteurService: AcheteurService,
+    private portefeuilleService: PortefeuilleService,
+    private router: Router
+  ) {
+    this.checkoutForm = this.fb.group({
+      idAcheteur: ['', Validators.required],
+      modePaiement: ['', Validators.required],
+      adresseLivraison: this.fb.group({
+        rue: ['', Validators.required],
+        codePostal: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
+        ville: ['', Validators.required],
+        pays: ['France']
+      })
+    });
+  }
+  checkoutForm!: FormGroup;
   acheteurs: any[] = [];
-  items = this.cartService.getPanier();
-  sousTotal = this.cartService.sousTotal;
-  fraisLivraison = this.cartService.fraisLivraison;
-  total = this.cartService.total;
-  
+  items: any[] = [];
+  sousTotal: any;
+  fraisLivraison: any;
+  total: any;
+  soldeActuel: number = 0;
+
   modesPaiement = MODES_PAIEMENT;
   step: 'info' | 'paiement' | 'confirmation' = 'info';
 
   ngOnInit(): void {
+    this.items = this.cartService.getPanier();
+    this.sousTotal = this.cartService.sousTotal;
+    this.fraisLivraison = this.cartService.fraisLivraison;
+    this.total = this.cartService.total;
+
     if (this.items.length === 0) {
-      this.router.navigate(['/catalogue']);
+      this.router.navigate(['/ecommerce/catalogue']);
       return;
     }
 
     this.acheteurService.getAcheteurs().subscribe({
-      next: (data) => this.acheteurs = data
+      next: (data: any[]) => this.acheteurs = data
+    });
+
+    // Écouter le changement d'acheteur pour charger son solde
+    this.checkoutForm.get('idAcheteur')?.valueChanges.subscribe(id => {
+      if (id) {
+        this.chargerSoldeAcheteur(id);
+      }
     });
   }
+
+  chargerSoldeAcheteur(id: string): void {
+    this.portefeuilleService.getSoldeAcheteur().subscribe({
+      next: (res: any) => {
+        this.soldeActuel = res.solde;
+      }
+    });
+  }
+
+  isSoldeInsuffisant(): boolean {
+  console.log('solde:', this.soldeActuel, 'total:', this.total());
+  return this.checkoutForm.get('modePaiement')?.value === 'Portefeuille numérique' 
+    && this.soldeActuel < this.total();
+}
 
   getPrixItem(item: any): number {
     return item.enPromotion && item.prixPromo ? item.prixPromo : item.prix;
@@ -90,7 +120,7 @@ export class CheckoutComponent implements OnInit {
   validerInformations(): void {
     // Marquer tous les champs comme touched pour afficher les erreurs
     this.checkoutForm.get('idAcheteur')?.markAsTouched();
-    
+
     const adresseGroup = this.checkoutForm.get('adresseLivraison');
     if (adresseGroup instanceof FormGroup) {
       Object.keys(adresseGroup.controls).forEach(field => {
@@ -102,13 +132,13 @@ export class CheckoutComponent implements OnInit {
     // Vérifier la validité
     // if (this.checkoutForm.get('idAcheteur')?.valid && 
     //     adresseGroup?.valid) {
-      this.step = 'paiement';
+    this.step = 'paiement';
     // }
   }
 
   validerPaiement(): void {
     // if (this.checkoutForm.get('modePaiement')?.valid) {
-      this.step = 'confirmation';
+    this.step = 'confirmation';
     // }
   }
 
@@ -125,6 +155,9 @@ export class CheckoutComponent implements OnInit {
     // Récupérer la première boutique (simplifié)
     const idBoutique = this.items[0]?.idBoutique;
 
+    const modePaiementForm = this.checkoutForm.value.modePaiement;
+    const modePaiementData = modePaiementForm === 'Portefeuille numérique' ? 'portefeuille' : modePaiementForm;
+
     const commande = {
       idAcheteur: this.checkoutForm.value.idAcheteur,
       idBoutique: idBoutique,
@@ -132,8 +165,8 @@ export class CheckoutComponent implements OnInit {
       adresseLivraison: this.checkoutForm.value.adresseLivraison,
       fraisLivraison: this.fraisLivraison(),
       total: this.total(),
-      modePaiement: this.checkoutForm.value.modePaiement,
-      paiementEffectue: this.checkoutForm.value.modePaiement === 'Carte bancaire'
+      modePaiement: modePaiementData,
+      paiementEffectue: modePaiementData === 'portefeuille' || modePaiementForm === 'Carte bancaire'
     };
 
     this.commandeService.createCommande(commande).subscribe({

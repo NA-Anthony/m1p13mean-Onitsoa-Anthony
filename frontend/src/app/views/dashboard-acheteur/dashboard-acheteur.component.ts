@@ -11,9 +11,10 @@ import {
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { CommandeService } from '../commande/commande.service';
-import { AvisService } from '../avis/avis.service';
+// import { AvisService } from '../avis/avis.service'; // Service à créer s'il n'existe pas encore
 import { AcheteurService } from '../acheteur/acheteur.service';
 import { CartService } from '../ecommerce/cart.service';
+import { PortefeuilleService } from '../ecommerce/portefeuille.service';
 
 @Component({
   selector: 'app-dashboard-acheteur',
@@ -34,20 +35,21 @@ import { CartService } from '../ecommerce/cart.service';
 })
 export class DashboardAcheteurComponent implements OnInit {
   acheteurId = '1'; // À remplacer par l'ID de l'acheteur connecté
-  
+
   // Statistiques
   totalCommandes = 0;
   totalDepenses = 0;
   totalAvis = 0;
   panierActuel = 0;
-  
+  soldeActuel = 0;
+
   // Commandes
   commandesEnCours: any[] = [];
   historiqueCommandes: any[] = [];
-  
+
   // Derniers avis
   derniersAvis: any[] = [];
-  
+
   // Recommandations (simulées)
   recommandations: any[] = [
     { nom: 'Smartphone Galaxy', prix: 699.99, boutique: 'Boutique Parisienne' },
@@ -57,53 +59,66 @@ export class DashboardAcheteurComponent implements OnInit {
 
   constructor(
     private commandeService: CommandeService,
-    private avisService: AvisService,
+    // @Optional() private avisService: AvisService, // Décommenter quand le service sera prêt
     private acheteurService: AcheteurService,
-    private cartService: CartService
-  ) {}
+    private cartService: CartService,
+    private portefeuilleService: PortefeuilleService
+  ) { }
 
   ngOnInit(): void {
     this.loadStats();
-    this.loadCommandes();
-    this.loadAvis();
+    this.chargerSolde();
+    // this.loadAvis();
     this.panierActuel = this.cartService.totalItems();
   }
 
+  chargerSolde(): void {
+    this.portefeuilleService.getSoldeAcheteur().subscribe({
+      next: (res) => this.soldeActuel = res.solde,
+      error: (err) => console.error(err)
+    });
+  }
+
   loadStats(): void {
-    this.commandeService.getCommandesByAcheteur(this.acheteurId).subscribe(commandes => {
+    this.commandeService.getMesCommandes().subscribe((commandes: any[]) => {
       this.totalCommandes = commandes.length;
-      this.totalDepenses = commandes.reduce((acc, c) => acc + c.total, 0);
-      
-      this.commandesEnCours = commandes.filter(c => 
+      this.totalDepenses = commandes.reduce((acc: number, c: any) => acc + (c.total || 0), 0);
+
+      this.commandesEnCours = commandes.filter((c: any) =>
         !['livrée', 'annulée'].includes(c.statut)
       );
-      
+
       this.historiqueCommandes = commandes
-        .filter(c => ['livrée', 'annulée'].includes(c.statut))
-        .sort((a, b) => new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime())
+        .filter((c: any) => ['livrée', 'annulée'].includes(c.statut))
+        .sort((a: any, b: any) => new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime())
         .slice(0, 5);
     });
 
+    // Optionnel : Intégration Avis quand prêt
+    /*
     this.avisService.getAvisByAcheteur(this.acheteurId).subscribe(avis => {
       this.totalAvis = avis.length;
     });
+    */
   }
 
   loadCommandes(): void {
-    this.commandeService.getCommandesByAcheteur(this.acheteurId).subscribe(commandes => {
-      this.commandesEnCours = commandes.filter(c => 
+    this.commandeService.getMesCommandes().subscribe((commandes: any[]) => {
+      this.commandesEnCours = commandes.filter((c: any) =>
         !['livrée', 'annulée'].includes(c.statut)
       );
     });
   }
 
+  /* 
   loadAvis(): void {
-    this.avisService.getAvisByAcheteur(this.acheteurId).subscribe(avis => {
+    this.avisService.getAvisByAcheteur(this.acheteurId).subscribe((avis: any[]) => {
       this.derniersAvis = avis
-        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
         .slice(0, 3);
     });
   }
+  */
 
   getStatutClass(statut: string): string {
     const classes: any = {

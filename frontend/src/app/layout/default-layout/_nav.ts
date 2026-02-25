@@ -245,6 +245,11 @@ export const navItems: INavData[] = [
         name: 'Panier',
         url: '/ecommerce/panier',
         iconComponent: { name: 'cil-cart' }
+      },
+      {
+        name: 'Mon Portefeuille',
+        url: '/ecommerce/portefeuille',
+        iconComponent: { name: 'cil-wallet' }
       }
     ]
   }
