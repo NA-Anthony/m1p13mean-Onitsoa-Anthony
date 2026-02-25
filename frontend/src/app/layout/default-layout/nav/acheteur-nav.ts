@@ -2,20 +2,11 @@ import { INavData } from '@coreui/angular';
 
 export const acheteurNavItems: INavData[] = [
   {
-    name: 'Dashboard',
-    url: '/dashboard',
-    iconComponent: { name: 'cil-speedometer' },
-    badge: {
-      color: 'info',
-      text: 'NEW'
-    }
-  },
-  {
     title: true,
     name: 'Mon Espace'
   },
   {
-    name: 'Dashboard Acheteur',
+    name: 'Dashboard',
     url: '/dashboard-acheteur',
     iconComponent: { name: 'cil-speedometer' },
     badge: {
@@ -26,11 +17,6 @@ export const acheteurNavItems: INavData[] = [
   {
     title: true,
     name: 'Achats'
-  },
-  {
-    name: 'Mon Profil',
-    url: '/acheteurs/mon-profil',
-    iconComponent: { name: 'cil-user' }
   },
   {
     name: 'Mes Commandes',

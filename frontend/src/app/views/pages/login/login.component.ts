@@ -59,9 +59,10 @@ export class LoginComponent {
         } 
         // else if (userRole === 'admin') {
         //   this.router.navigate(['/dashboard-admin']);
-        // } else if (userRole === 'acheteur') {
-        //   this.router.navigate(['/dashboard-acheteur']);
         // } 
+        else if (userRole === 'acheteur') {
+          this.router.navigate(['/dashboard-acheteur']);
+        } 
         else {
           // Redirection par défaut si le rôle n'est pas reconnu
           this.router.navigate(['/dashboard']);

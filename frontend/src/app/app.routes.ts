@@ -95,13 +95,13 @@ export const routes: Routes = [
           title: 'Dashboard Boutique'
         }
       },
-      // {
-      //   path: 'dashboard-acheteur',
-      //   loadComponent: () => import('./views/dashboard-acheteur/dashboard-acheteur.component').then(m => m.DashboardAcheteurComponent),
-      //   data: {
-      //     title: 'Dashboard Acheteur'
-      //   }
-      // },
+      {
+        path: 'dashboard-acheteur',
+        loadComponent: () => import('./views/dashboard-acheteur/dashboard-acheteur.component').then(m => m.DashboardAcheteurComponent),
+        data: {
+          title: 'Dashboard Acheteur'
+        }
+      },
       {
         path: 'boutiques',
         loadChildren: () => import('./views/boutique/routes').then((m) => m.routes)
