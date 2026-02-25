@@ -141,10 +141,10 @@ export class RegisterComponent {
       prenom: username, // For simplicity using username as both first/last name initially
       email: mail,
       password: pass,
-      role: userRole === 'shop' ? 'boutique' : 'acheteur',
+      role: userRole, // userRole is already 'boutique' or 'acheteur'
     };
 
-    if (userRole === 'shop') {
+    if (userRole === 'boutique') {
       payload.nomBoutique = username + ' Shop'; // Default shop name
     }
 

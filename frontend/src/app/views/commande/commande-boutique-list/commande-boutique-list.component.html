@@ -1,0 +1,49 @@
+<div class="container-lg">
+  <div class="page-header mb-4">
+    <div class="row align-items-center">
+      <div class="col">
+        <h1 class="page-title">Commandes reçues</h1>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Chargement...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && commandes.length === 0" class="alert alert-info">Aucune commande reçue.</div>
+
+  <div *ngIf="!loading && commandes.length > 0" class="card">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Acheteur</th>
+            <th>Total</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cmd of commandes">
+            <td>{{ cmd._id | slice:0:8 }}...</td>
+            <td>{{ cmd.dateCommande | date:'dd/MM/yyyy' }}</td>
+            <td>{{ cmd.idAcheteur?.nom || cmd.idAcheteur?.prenom || '-' }}</td>
+            <td>{{ cmd.total | number:'1.2-2' }} €</td>
+            <td>
+                <select class="form-select form-select-sm" #statutSelect (change)="changeStatut(cmd._id, statutSelect.value)">
+                    <option *ngFor="let s of statuts" [value]="s" [selected]="s === cmd.statut">
+                        {{ s }}
+                    </option>
+                </select>
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/commandes', cmd._id]">Détails</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

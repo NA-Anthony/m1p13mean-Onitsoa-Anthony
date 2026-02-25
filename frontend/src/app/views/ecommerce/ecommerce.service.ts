@@ -31,6 +31,27 @@ export class EcommerceService {
   }
 
   /**
+   * Obtenir les commandes reçues par la boutique connectée
+   */
+  getCommandesBoutique(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/commandes/boutique`);
+  }
+
+  /**
+   * Mettre à jour le statut d'une commande
+   */
+  updateStatut(id: string, statut: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/commandes/${id}/statut`, { statut });
+  }
+
+  /**
+   * Mettre à jour le paiement d'une commande
+   */
+  updatePaiement(id: string, paiementEffectue: boolean, modePaiement?: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/commandes/${id}/paiement`, { paiementEffectue, modePaiement });
+  }
+
+  /**
    * Obtenir une commande par ID
    */
   getCommandeById(id: string): Observable<any> {

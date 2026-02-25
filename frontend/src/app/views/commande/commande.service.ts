@@ -32,6 +32,27 @@ export class CommandeService {
   }
 
   /**
+   * Obtenir les commandes reçues par la boutique connectée
+   */
+  getCommandesBoutique(): Observable<Commande[]> {
+    return this.ecommerceService.getCommandesBoutique();
+  }
+
+  /**
+   * Mettre à jour le statut d'une commande (boutique)
+   */
+  updateStatut(id: string, statut: string): Observable<Commande> {
+    return this.ecommerceService.updateStatut(id, statut);
+  }
+
+  /**
+   * Mettre à jour le paiement d'une commande
+   */
+  updatePaiement(id: string, paiementEffectue: boolean, modePaiement?: string): Observable<Commande> {
+    return this.ecommerceService.updatePaiement(id, paiementEffectue, modePaiement);
+  }
+
+  /**
    * Get a specific commande by ID.
    * @param id The commande ID
    * @returns Observable<Commande> The order details

@@ -9,6 +9,13 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'boutique',
+    loadComponent: () => import('./commande-boutique-list/commande-boutique-list.component').then(m => m.CommandeBoutiqueListComponent),
+    data: {
+      title: 'Commandes reçues'
+    }
+  },
+  {
     path: ':id',
     loadComponent: () => import('./commande-detail/commande-detail.component').then(m => m.CommandeDetailComponent),
     data: {

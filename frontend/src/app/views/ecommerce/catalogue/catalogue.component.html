@@ -1,32 +1,94 @@
-<!-- Bannière promo -->
-<c-card class="bg-primary text-white mb-4">
-  <c-card-body class="py-4">
+<!-- Breadcrumb / Retour -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a routerLink="/ecommerce/catalogue" class="text-decoration-none">
+        <svg cIcon name="cil-store" size="sm" class="me-1"></svg>
+        Boutiques
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      {{ boutique?.nomBoutique || 'Catalogue' }}
+    </li>
+  </ol>
+</nav>
+
+<!-- Bannière boutique -->
+@if (boutique) {
+<c-card class="mb-4 border-0 shadow boutique-banner">
+  <c-card-body class="py-4 px-4">
     <c-row class="align-items-center">
-      <c-col>
-        <h3 class="mb-1">Bienvenue sur notre marketplace</h3>
-        <p class="mb-0 opacity-75">Livraison gratuite à partir de 100€ d'achat</p>
-      </c-col>
       <c-col md="auto">
-        <button cButton color="light" routerLink="/panier">
+        @if (boutique.logo) {
+        <img [src]="boutique.logo" [alt]="boutique.nomBoutique"
+          class="rounded-circle border border-3 border-white shadow" style="width:72px;height:72px;object-fit:cover;">
+        } @else {
+        <div
+          class="rounded-circle border border-3 border-white shadow d-flex align-items-center justify-content-center bg-light"
+          style="width:72px;height:72px;">
+          <svg cIcon name="cil-store" size="xl" class="text-primary"></svg>
+        </div>
+        }
+      </c-col>
+      <c-col>
+        <h4 class="mb-1 fw-bold text-white">{{ boutique.nomBoutique }}</h4>
+        @if (boutique.description) {
+        <p class="mb-0 text-white opacity-75 small">{{ boutique.description }}</p>
+        }
+        @if (boutique.adresse) {
+        <p class="mb-0 text-white opacity-75 small">
+          <svg cIcon name="cil-location-pin" size="sm" class="me-1"></svg>{{ boutique.adresse }}
+        </p>
+        }
+      </c-col>
+      <c-col md="auto" class="text-end">
+        <button cButton color="light" (click)="retourBoutiques()" class="me-2">
+          <svg cIcon name="cil-arrow-left" class="me-1"></svg>
+          Retour
+        </button>
+        <button cButton color="light" routerLink="/ecommerce/panier">
           <svg cIcon name="cil-cart" class="me-2"></svg>
-          Mon panier ({{ cartService.totalItems() }})
+          Panier ({{ cartService.totalItems() }})
         </button>
       </c-col>
     </c-row>
   </c-card-body>
 </c-card>
+}
 
-<!-- Filtres -->
-<c-card class="mb-4">
+<!-- Spinner -->
+@if (loading) {
+<div class="text-center py-5">
+  <c-spinner color="primary"></c-spinner>
+  <p class="mt-3 text-body-secondary">Chargement des produits...</p>
+</div>
+}
+
+<!-- Erreur -->
+@if (!loading && error) {
+<c-card class="text-center py-5 border-danger">
   <c-card-body>
-    <c-row class="g-3">
+    <svg cIcon name="cil-warning" size="3xl" class="text-danger mb-3"></svg>
+    <h5 class="text-danger">{{ error }}</h5>
+    <button cButton color="primary" (click)="loadBoutiqueEtProduits()">Réessayer</button>
+    <button cButton color="secondary" variant="outline" class="ms-2" (click)="retourBoutiques()">Retour aux
+      boutiques</button>
+  </c-card-body>
+</c-card>
+}
+
+@if (!loading && !error) {
+<!-- Filtres -->
+<c-card class="mb-4 border-0 shadow-sm">
+  <c-card-body>
+    <c-row class="g-3 align-items-center">
       <c-col md="6">
         <div class="input-group">
-          <span class="input-group-text">
+          <span class="input-group-text bg-white">
             <svg cIcon name="cil-search"></svg>
           </span>
-          <input type="text" class="form-control" placeholder="Rechercher un produit..." [(ngModel)]="searchTerm"
-            (input)="filterProduits()">
+          <input type="text" class="form-control border-start-0" placeholder="Rechercher un produit..."
+            [(ngModel)]="searchTerm" (input)="filterProduits()">
         </div>
       </c-col>
       <c-col md="4">
@@ -37,10 +99,8 @@
           }
         </select>
       </c-col>
-      <c-col md="2">
-        <div class="text-body-secondary small mt-2">
-          {{ filteredProduits.length }} produit(s)
-        </div>
+      <c-col md="2" class="text-body-secondary small">
+        {{ filteredProduits.length }} produit(s)
       </c-col>
     </c-row>
   </c-card-body>
@@ -50,10 +110,10 @@
 <c-row>
   @for (p of filteredProduits; track p._id) {
   <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
-    <c-card class="h-100 shadow-sm produit-card">
+    <c-card class="h-100 shadow-sm produit-card border-0">
       <div class="position-relative">
         <!-- Image du produit -->
-        <c-avatar [size]="'xl'" [src]="p.idProduit?.image || 'assets/images/products/default.jpg'"
+        <c-avatar [size]="'xl'" [src]="p.idProduit?.image || p.produit?.image || 'assets/images/products/default.jpg'"
           class="mx-auto mt-3 border border-3 border-white shadow"
           style="width: 120px; height: 120px; object-fit: cover;"></c-avatar>
 
@@ -68,7 +128,7 @@
         @if (p.stock <= 0) { <span class="position-absolute top-0 end-0 m-2 badge bg-secondary">
           Rupture
           </span>
-          } @else if (p.stock < 5) { <span class="position-absolute top-0 end-0 m-2 badge bg-warning">
+          } @else if (p.stock < 5) { <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark">
             Plus que {{ p.stock }}
             </span>
             }
@@ -76,13 +136,17 @@
 
       <c-card-body class="text-center">
         <!-- Nom produit -->
-        <h5 class="card-title mb-1">{{ p.idProduit?.nom }}</h5>
+        <h5 class="card-title mb-1">{{ p.idProduit?.nom || p.produit?.nom }}</h5>
 
-        <!-- Nom boutique -->
-        <p class="text-body-secondary small mb-2">{{ p.idBoutique?.nomBoutique }}</p>
+        <!-- Catégorie -->
+        @if (p.idProduit?.categorie || p.produit?.categorie) {
+        <span class="badge bg-light text-dark border small mb-2">
+          {{ (p.idProduit?.categorie || p.produit?.categorie) | titlecase }}
+        </span>
+        }
 
         <!-- Prix -->
-        <div class="mb-2">
+        <div class="mb-3 mt-2">
           @if (p.enPromotion && p.prixPromo) {
           <span class="text-decoration-line-through text-body-secondary me-2">
             {{ p.prix }} €
@@ -99,31 +163,33 @@
             <svg cIcon name="cil-cart" class="me-2"></svg>
             Ajouter au panier
           </button>
-          <button cButton color="info" variant="outline" [routerLink]="['/produits', p.idProduit?._id]">
-            <svg cIcon name="cil-magnifying-glass" class="me-2"></svg>
-            Détails
-          </button>
         </div>
       </c-card-body>
     </c-card>
   </c-col>
-  } @empty {
+  }
+
+  @empty {
   <c-col>
-    <c-card class="text-center py-5">
+    <c-card class="text-center py-5 border-0 shadow-sm">
       <c-card-body>
         <svg cIcon name="cil-basket" size="3xl" class="text-body-secondary mb-3"></svg>
         <h5>Aucun produit trouvé</h5>
-        <p class="text-body-secondary">Essayez de modifier vos filtres</p>
+        <p class="text-body-secondary">Cette boutique n'a pas encore de produits ou modifiez vos filtres.</p>
+        <button cButton color="secondary" variant="outline" (click)="retourBoutiques()">
+          Voir d'autres boutiques
+        </button>
       </c-card-body>
     </c-card>
   </c-col>
   }
 </c-row>
+}
 
 <!-- Modal quick view -->
 <c-modal [visible]="showModal" (visibleChange)="showModal = $event">
   <c-modal-header>
-    <h5 class="modal-title">{{ selectedProduit?.idProduit?.nom }}</h5>
+    <h5 class="modal-title">{{ selectedProduit?.idProduit?.nom || selectedProduit?.produit?.nom }}</h5>
     <button cButtonClose (click)="showModal = false"></button>
   </c-modal-header>
 
@@ -131,28 +197,26 @@
     @if (selectedProduit) {
     <c-row>
       <c-col md="5" class="text-center mb-3 mb-md-0">
-        <c-avatar [src]="selectedProduit.idProduit?.image || 'assets/images/products/default.jpg'" [size]="'xl'"
-          style="width: 150px; height: 150px; object-fit: cover;"></c-avatar>
+        <c-avatar
+          [src]="selectedProduit.idProduit?.image || selectedProduit.produit?.image || 'assets/images/products/default.jpg'"
+          [size]="'xl'" style="width: 150px; height: 150px; object-fit: cover;"></c-avatar>
       </c-col>
 
       <c-col md="7">
         <!-- Description -->
-        <p class="mb-2">{{ selectedProduit.idProduit?.description || 'Aucune description disponible' }}</p>
+        <p class="mb-2">{{ selectedProduit.idProduit?.description || selectedProduit.produit?.description || 'Aucune
+          description disponible' }}</p>
 
         <!-- Boutique -->
         <p class="mb-2">
-          <strong>Boutique:</strong> {{ selectedProduit.idBoutique?.nomBoutique }}
-          @if (selectedProduit.idBoutique?.logo) {
-          <img [src]="selectedProduit.idBoutique.logo" class="ms-2"
-            style="width: 20px; height: 20px; border-radius: 50%;">
-          }
+          <strong>Boutique:</strong> {{ boutique?.nomBoutique || selectedProduit.idBoutique?.nomBoutique }}
         </p>
 
         <!-- Catégorie -->
         <p class="mb-2">
           <strong>Catégorie:</strong>
-          <span class="badge bg-primary-soft text-primary">
-            {{ selectedProduit.idProduit?.categorie | titlecase }}
+          <span class="badge bg-primary ms-2">
+            {{ (selectedProduit.idProduit?.categorie || selectedProduit.produit?.categorie) | titlecase }}
           </span>
         </p>
 
@@ -160,9 +224,9 @@
         <p class="mb-2">
           <strong>Disponibilité:</strong>
           @if (selectedProduit.stock > 0) {
-          <span class="text-success"> En stock ({{ selectedProduit.stock }} unités)</span>
+          <span class="text-success ms-1"> En stock ({{ selectedProduit.stock }} unités)</span>
           } @else {
-          <span class="text-danger"> Rupture de stock</span>
+          <span class="text-danger ms-1"> Rupture de stock</span>
           }
         </p>
 
@@ -170,16 +234,14 @@
         <div class="mb-3">
           <strong>Prix:</strong>
           @if (selectedProduit.enPromotion && selectedProduit.prixPromo) {
-          <span class="text-decoration-line-through text-body-secondary ms-2">
-            {{ selectedProduit.prix }} €
-          </span>
+          <span class="text-decoration-line-through text-body-secondary ms-2">{{ selectedProduit.prix }} €</span>
           <span class="fw-bold text-danger ms-2">{{ selectedProduit.prixPromo }} €</span>
           } @else {
           <span class="fw-bold ms-2">{{ selectedProduit.prix }} €</span>
           }
         </div>
 
-        <!-- Caractéristiques (si disponibles) -->
+        <!-- Caractéristiques -->
         @if (selectedProduit.idProduit?.caracteristiques) {
         <div class="small">
           <strong>Caractéristiques:</strong>

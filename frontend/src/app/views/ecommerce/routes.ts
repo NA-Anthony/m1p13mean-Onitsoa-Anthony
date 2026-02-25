@@ -8,9 +8,16 @@ export const routes: Routes = [
   },
   {
     path: 'catalogue',
-    loadComponent: () => import('./catalogue/catalogue.component').then(m => m.CatalogueComponent),
+    loadComponent: () => import('./boutiques-catalogue/boutiques-catalogue.component').then(m => m.BoutiquesCatalogueComponent),
     data: {
       title: 'Catalogue'
+    }
+  },
+  {
+    path: 'catalogue/:boutiqueId',
+    loadComponent: () => import('./catalogue/catalogue.component').then(m => m.CatalogueComponent),
+    data: {
+      title: 'Produits de la boutique'
     }
   },
   {
