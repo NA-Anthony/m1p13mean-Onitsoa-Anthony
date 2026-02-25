@@ -88,20 +88,20 @@ export const routes: Routes = [
       //     title: 'Dashboard Admin'
       //   }
       // },
-      // {
-      //   path: 'dashboard-boutique',
-      //   loadComponent: () => import('./views/dashboard-boutique/dashboard-boutique.component').then(m => m.DashboardBoutiqueComponent),
-      //   data: {
-      //     title: 'Dashboard Boutique'
-      //   }
-      // },
-      // {
-      //   path: 'dashboard-acheteur',
-      //   loadComponent: () => import('./views/dashboard-acheteur/dashboard-acheteur.component').then(m => m.DashboardAcheteurComponent),
-      //   data: {
-      //     title: 'Dashboard Acheteur'
-      //   }
-      // },
+      {
+        path: 'dashboard-boutique',
+        loadComponent: () => import('./views/dashboard-boutique/dashboard-boutique.component').then(m => m.DashboardBoutiqueComponent),
+        data: {
+          title: 'Dashboard Boutique'
+        }
+      },
+      {
+        path: 'dashboard-acheteur',
+        loadComponent: () => import('./views/dashboard-acheteur/dashboard-acheteur.component').then(m => m.DashboardAcheteurComponent),
+        data: {
+          title: 'Dashboard Acheteur'
+        }
+      },
       {
         path: 'boutiques',
         loadChildren: () => import('./views/boutique/routes').then((m) => m.routes)

@@ -1,10 +1,28 @@
-<!-- En-tête avec KPIs -->
-<c-row class="mb-4">
+<!-- Indicateur de chargement -->
+@if (loading) {
+  <div class="text-center py-5">
+    <c-spinner color="primary"></c-spinner>
+    <p class="mt-2">Chargement du tableau de bord...</p>
+  </div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+  <c-alert color="danger" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    {{ error }}
+  </c-alert>
+}
+
+<!-- Contenu du dashboard -->
+@if (!loading && !error) {
+  <!-- En-tête avec KPIs -->
+  <c-row class="mb-4">
     <c-col sm="6" lg="3">
       <c-card class="text-white bg-primary">
         <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
           <div>
-            <div class="fs-4 fw-semibold">{{ totalProduits }}</div>
+            <div class="fs-4 fw-semibold">{{ stats.produits.total }}</div>
             <div>Produits</div>
           </div>
           <svg cIcon name="cil-basket" size="xl"></svg>
@@ -16,7 +34,7 @@
       <c-card class="text-white bg-success">
         <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
           <div>
-            <div class="fs-4 fw-semibold">{{ totalCommandes }}</div>
+            <div class="fs-4 fw-semibold">{{ stats.commandes.total }}</div>
             <div>Commandes</div>
           </div>
           <svg cIcon name="cil-cart" size="xl"></svg>
@@ -28,7 +46,7 @@
       <c-card class="text-white bg-warning">
         <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
           <div>
-            <div class="fs-4 fw-semibold">{{ totalAvis }}</div>
+            <div class="fs-4 fw-semibold">{{ stats.avis.total }}</div>
             <div>Avis</div>
           </div>
           <svg cIcon name="cil-comment-square" size="xl"></svg>
@@ -40,7 +58,7 @@
       <c-card class="text-white bg-info">
         <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
           <div>
-            <div class="fs-4 fw-semibold">{{ noteMoyenne | number:'1.1-1' }}</div>
+            <div class="fs-4 fw-semibold">{{ stats.avis.noteMoyenne | number:'1.1-1' }}</div>
             <div>Note moyenne</div>
           </div>
           <svg cIcon name="cil-star" size="xl"></svg>
@@ -48,17 +66,14 @@
       </c-card>
     </c-col>
   </c-row>
-  
+
   <!-- Deuxième ligne de KPIs -->
   <c-row class="mb-4">
     <c-col sm="6" lg="4">
       <c-card class="border-start border-4 border-primary">
         <c-card-body>
           <div class="text-body-secondary small">Chiffre d'affaires</div>
-          <div class="fs-4 fw-semibold">{{ chiffreAffaires | number:'1.0-0' }} €</div>
-          <c-progress [height]="4" class="mt-2">
-            <c-progress-bar [value]="70" color="primary"></c-progress-bar>
-          </c-progress>
+          <div class="fs-4 fw-semibold">{{ formatMontant(stats.commandes.chiffreAffaires) }}</div>
         </c-card-body>
       </c-card>
     </c-col>
@@ -67,10 +82,7 @@
       <c-card class="border-start border-4 border-success">
         <c-card-body>
           <div class="text-body-secondary small">Valeur du stock</div>
-          <div class="fs-4 fw-semibold">{{ valeurStock | number:'1.0-0' }} €</div>
-          <c-progress [height]="4" class="mt-2">
-            <c-progress-bar [value]="60" color="success"></c-progress-bar>
-          </c-progress>
+          <div class="fs-4 fw-semibold">{{ formatMontant(stats.produits.valeurStock) }}</div>
         </c-card-body>
       </c-card>
     </c-col>
@@ -79,25 +91,25 @@
       <c-card class="border-start border-4 border-warning">
         <c-card-body>
           <div class="text-body-secondary small">Taux de satisfaction</div>
-          <div class="fs-4 fw-semibold">{{ (noteMoyenne / 5 * 100) | number:'1.0-0' }}%</div>
+          <div class="fs-4 fw-semibold">{{ getPourcentageSatisfaction() | number:'1.0-0' }}%</div>
           <c-progress [height]="4" class="mt-2">
-            <c-progress-bar [value]="(noteMoyenne / 5 * 100)" color="warning"></c-progress-bar>
+            <c-progress-bar [value]="getPourcentageSatisfaction()" color="warning"></c-progress-bar>
           </c-progress>
         </c-card-body>
       </c-card>
     </c-col>
   </c-row>
-  
-  <!-- Graphique et alertes -->
+
+  <!-- Graphiques -->
   <c-row class="mb-4">
     <c-col md="8">
       <c-card class="shadow-sm">
         <c-card-header>
           <svg cIcon name="cil-chart" class="me-2"></svg>
-          Évolution des ventes
+          Ventes des 7 derniers jours
         </c-card-header>
         <c-card-body>
-          <c-chart type="line" [data]="ventesParMois"></c-chart>
+          <c-chart type="line" [data]="ventes7Jours"></c-chart>
         </c-card-body>
       </c-card>
     </c-col>
@@ -109,12 +121,12 @@
           Alertes stock faible
         </c-card-header>
         <c-card-body>
-          @if (stockFaible.length > 0) {
+          @if (stats.produits.stockFaible.length > 0) {
             <div class="list-group">
-              @for (p of stockFaible; track p._id) {
+              @for (p of stats.produits.stockFaible; track p._id) {
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <div>{{ p.produit?.nom }}</div>
+                    <div>{{ p.nom }}</div>
                     <small class="text-body-secondary">Stock: {{ p.stock }}</small>
                   </div>
                   <button cButton color="warning" size="sm" [routerLink]="['/produits-par-boutique', p._id, 'edit']">
@@ -130,74 +142,158 @@
       </c-card>
     </c-col>
   </c-row>
-  
-  <!-- Derniers avis et commandes -->
-  <c-row>
-    <c-col lg="5" class="mb-4">
+
+  <!-- Promotions actives et derniers avis -->
+  <c-row class="mb-4">
+    <c-col md="4">
       <c-card class="shadow-sm h-100">
         <c-card-header>
-          <svg cIcon name="cil-comment-square" class="me-2"></svg>
-          Derniers avis
+          <svg cIcon name="cil-tags" class="me-2"></svg>
+          Promotions actives
+          <span class="badge bg-danger ms-2">{{ stats.promotions.total }}</span>
         </c-card-header>
         <c-card-body>
-          @for (a of derniersAvis; track a._id) {
-            <div class="mb-3 pb-2 border-bottom">
-              <div class="d-flex align-items-center mb-2">
-                <small class="text-body-secondary me-2">{{ formatDate(a.createdAt) }}</small>
-                <div>
-                  @for (i of getNoteEtoiles(a.note); track i) {
-                    <svg cIcon 
-                      name="cil-star" 
-                      size="sm"
-                      [ngClass]="{'text-warning': i <= a.note, 'text-secondary': i > a.note}"
-                    ></svg>
-                  }
+          @if (stats.promotions.actives.length > 0) {
+            <div class="list-group">
+              @for (p of stats.promotions.actives; track p._id) {
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <div>{{ p.produit?.nom }}</div>
+                      <small class="text-body-secondary">-{{ p.remisePourcentage }}%</small>
+                    </div>
+                    <small class="text-success">Active</small>
+                  </div>
+                  <div class="small text-body-secondary">
+                    Du {{ formatDate(p.dateDebut) }} au {{ formatDate(p.dateFin) }}
+                  </div>
                 </div>
-              </div>
-              <p class="mb-1">{{ a.commentaire }}</p>
-              <small class="text-body-secondary">{{ a.produitParBoutique?.produit?.nom }}</small>
+              }
+            </div>
+          } @else {
+            <p class="text-body-secondary text-center">Aucune promotion active</p>
+          }
+          @if (stats.promotions.total > 3) {
+            <div class="text-center mt-2">
+              <a routerLink="/promotions" class="small">Voir toutes les promotions</a>
             </div>
           }
         </c-card-body>
       </c-card>
     </c-col>
     
-    <c-col lg="7" class="mb-4">
+    <c-col md="4">
       <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-comment-square" class="me-2"></svg>
+          Derniers avis
+        </c-card-header>
+        <c-card-body>
+          @if (stats.avis.derniers.length > 0) {
+            @for (a of stats.avis.derniers; track a._id) {
+              <div class="mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center mb-2">
+                  <small class="text-body-secondary me-2">{{ formatDate(a.createdAt) }}</small>
+                  <div>
+                    @for (i of getNoteEtoiles(a.note); track i) {
+                      <svg cIcon 
+                        name="cil-star" 
+                        size="sm"
+                        [ngClass]="{'text-warning': i <= a.note, 'text-secondary': i > a.note}"
+                      ></svg>
+                    }
+                  </div>
+                </div>
+                <p class="mb-1 small">{{ a.commentaire }}</p>
+                <small class="text-body-secondary">{{ a.produit?.nom }}</small>
+                @if (a.reponseBoutique) {
+                  <div class="bg-light p-1 rounded mt-1 small">
+                    <span class="fw-semibold">Réponse:</span> {{ a.reponseBoutique.commentaire }}
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <p class="text-body-secondary text-center">Aucun avis</p>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col md="4">
+      <c-card class="shadow-sm h-100">
+        <c-card-header>
+          <svg cIcon name="cil-chart-pie" class="me-2"></svg>
+          Répartition des notes
+        </c-card-header>
+        <c-card-body>
+          <c-chart type="doughnut" [data]="repartitionVentes"></c-chart>
+          @if (stats.avis.total > 0) {
+            <div class="text-center mt-2">
+              <small class="text-body-secondary">
+                Basé sur {{ stats.avis.total }} avis
+              </small>
+            </div>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <!-- Dernières commandes -->
+  <c-row>
+    <c-col xs="12" class="mb-4">
+      <c-card class="shadow-sm">
         <c-card-header>
           <svg cIcon name="cil-list" class="me-2"></svg>
           Dernières commandes
         </c-card-header>
         <c-card-body>
-          <div class="table-responsive">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Commande</th>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Total</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (c of dernieresCommandes; track c._id) {
+          @if (stats.commandes.dernieres.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
                   <tr>
-                    <td>{{ c._id }}</td>
-                    <td>{{ formatDate(c.dateCommande) }}</td>
-                    <td>{{ c.acheteur?.telephone || 'N/A' }}</td>
-                    <td>{{ c.total | number:'1.2-2' }} €</td>
-                    <td>
-                      <span class="badge" [ngClass]="'bg-' + getStatutClass(c.statut)">
-                        {{ c.statut }}
-                      </span>
-                    </td>
+                    <th>Commande</th>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Total</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
                   </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  @for (c of stats.commandes.dernieres; track c._id) {
+                    <tr>
+                      <td>{{ c._id }}</td>
+                      <td>{{ formatDate(c.dateCommande) }}</td>
+                      <td>{{ c.acheteur?.telephone || 'N/A' }}</td>
+                      <td>{{ formatMontant(c.total) }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="'bg-' + getStatutClass(c.statut)">
+                          {{ c.statut }}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          cButton 
+                          color="info" 
+                          size="sm" 
+                          [routerLink]="['/commandes', c._id]"
+                        >
+                          <svg cIcon name="cil-magnifying-glass"></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="text-body-secondary text-center">Aucune commande</p>
+          }
         </c-card-body>
       </c-card>
     </c-col>
   </c-row>
+}
