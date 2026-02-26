@@ -69,7 +69,7 @@
 <c-card class="mb-4">
   <c-card-body>
     <c-row class="align-items-center">
-      <c-col md="4" class="mb-3 mb-md-0">
+      <c-col md="3" class="mb-3 mb-md-0">
         <div class="input-group">
           <span class="input-group-text">
             <svg cIcon name="cil-search"></svg>
@@ -83,7 +83,7 @@
           >
         </div>
       </c-col>
-      <c-col md="2" class="mb-3 mb-md-0">
+      <c-col md="3" class="mb-3 mb-md-0">
         <select class="form-select" [(ngModel)]="filterNote" (change)="filterAvis()">
           <option value="">Toutes notes</option>
           @for (n of notes; track n) {
@@ -98,7 +98,7 @@
         </div>
       </c-col>
       @if (isAcheteur) {
-        <c-col md="2" class="text-end">
+        <c-col md="4" class="text-end">
           <button cButton color="primary" routerLink="nouveau">
             <svg cIcon name="cil-plus" class="me-2"></svg>
             Nouvel avis
@@ -152,21 +152,24 @@
               </c-col>
               
               <!-- Commentaire -->
-              <c-col md="5" class="mb-3 mb-md-0">
-                <p class="mb-1">{{ a.commentaire }}</p>
-                @if (a.reponseBoutique) {
-                  <div class="bg-light p-2 rounded small mt-2">
+            <c-col md="6" class="mb-3 mb-md-0 d-flex flex-column justify-content-center">
+              <p class="mb-1 text-center">{{ a.commentaire }}</p>
+              @if (a.reponseBoutique) {
+                <div class="bg-light p-2 rounded small mt-2">
+                  <div class="d-flex align-items-center justify-content-center">
                     <svg cIcon name="cil-speech" size="sm" class="text-primary me-1"></svg>
-                    <span class="fw-semibold">Réponse:</span> {{ a.reponseBoutique.commentaire }}
-                    <div class="small text-body-secondary mt-1">
-                      {{ formatDate(a.reponseBoutique.date) }}
-                    </div>
+                    <span class="fw-semibold">Réponse:</span>
                   </div>
-                }
-              </c-col>
+                  <div class="text-center mt-1">{{ a.reponseBoutique.commentaire }}</div>
+                  <div class="small text-body-secondary text-center mt-1">
+                    {{ formatDate(a.reponseBoutique.date) }}
+                  </div>
+                </div>
+              }
+            </c-col>
               
               <!-- Actions -->
-              <c-col md="2" class="text-end" (click)="$event.stopPropagation()">
+              <c-col md="3" class="text-end" (click)="$event.stopPropagation()">
                 <div class="btn-group-vertical">
                   <button 
                     cButton 

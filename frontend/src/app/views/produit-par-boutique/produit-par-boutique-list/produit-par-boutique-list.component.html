@@ -270,7 +270,6 @@
   </c-row>
 }
 
-<!-- Modal de promotion -->
 <c-modal [visible]="showPromoModal" (visibleChange)="showPromoModal = $event" size="lg">
   <c-modal-header>
     <h5 class="modal-title">
@@ -300,6 +299,12 @@
         </div>
       </div>
 
+      <!-- Message d'information sur les dates -->
+      <div class="alert alert-info small mb-3">
+        <svg cIcon name="cil-info" class="me-2"></svg>
+        <strong>Important :</strong> La promotion sera active du jour sélectionné à 00:00 jusqu'à la fin de la journée de fin (23:59).
+      </div>
+
       <div class="row">
         <c-col md="6" class="mb-3">
           <label class="fw-semibold">Remise (%)</label>
@@ -315,6 +320,7 @@
             >
             <span class="input-group-text">%</span>
           </div>
+          <small class="text-body-secondary">Valeur entre 1 et 100%</small>
         </c-col>
 
         <c-col md="6" class="mb-3">
@@ -326,6 +332,7 @@
             [ngModelOptions]="{standalone: true}"
             [min]="today"
           >
+          <small class="text-body-secondary">La promotion débutera à 00:00 ce jour</small>
         </c-col>
 
         <c-col md="6" class="mb-3">
@@ -336,6 +343,7 @@
             [(ngModel)]="promoData.dateFin"
             [ngModelOptions]="{standalone: true}"
           >
+          <small class="text-body-secondary">La promotion se terminera à 23:59 ce jour</small>
         </c-col>
 
         <c-col md="6" class="mb-3">
@@ -359,6 +367,19 @@
           </div>
         </c-col>
       </div>
+
+      <!-- Remplacer isDateFinInvalide() par isDateFinAvantDebut() -->
+      @if (promoData.dateDebut && promoData.dateFin && isDateFinAvantDebut()) {
+        <c-alert color="warning" class="mt-2">
+          <svg cIcon name="cil-warning" class="me-2"></svg>
+          La date de fin doit être après ou égale à la date de début.
+        </c-alert>
+      } @else if (promoData.dateDebut && promoData.dateFin) {
+        <div class="bg-light p-2 rounded small mt-2">
+          <strong>Période de validité :</strong><br>
+          Du {{ promoData.dateDebut }} à 00:00 au {{ promoData.dateFin }} à 23:59
+        </div>
+      }
 
       @if (promoError) {
         <c-alert color="danger" class="mt-2">

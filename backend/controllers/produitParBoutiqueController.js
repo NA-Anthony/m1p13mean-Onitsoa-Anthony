@@ -19,10 +19,10 @@ exports.getAllProduitsParBoutique = async (req, res) => {
         })
         .sort('-createdAt');
       
-      console.log('Produits trouvés dans DB:', produits.length); // Vérifier ici
+      console.log('Produits trouvés dans DB:', produits.length);
       
       if (produits.length === 0) {
-        return res.json([]); // Retourne un tableau vide si pas de produits
+        return res.json([]);
       }
       
       // Ajouter les promotions actives
@@ -233,8 +233,6 @@ exports.updateStock = async (req, res) => {
 // 🔒 ROUTE PROTÉGÉE (boutique)
 // @route   POST /api/produits/boutique/:id/promotion
 // @desc    Ajouter une promotion à un produit
-// @route   POST /api/produits/boutique/:id/promotion
-// @desc    Ajouter une promotion avec vérification de chevauchement
 exports.ajouterPromotion = async (req, res) => {
     try {
       const { remisePourcentage, dateDebut, dateFin } = req.body;
@@ -253,9 +251,14 @@ exports.ajouterPromotion = async (req, res) => {
       // Vérifier les dates
       const debut = new Date(dateDebut);
       const fin = new Date(dateFin);
+      
+      // Ajuster les dates pour inclure toute la journée
+      debut.setHours(0, 0, 0, 0);
+      fin.setHours(23, 59, 59, 999);
+      
       const maintenant = new Date();
   
-      if (fin <= debut) {
+      if (fin < debut) {
         return res.status(400).json({ msg: 'La date de fin doit être après la date de début' });
       }
   
@@ -335,11 +338,18 @@ exports.supprimerPromotion = async (req, res) => {
       { actif: false }
     );
 
+    produit.enPromotion = false;
+    produit.prixPromo = undefined;
+    await produit.save();
+
     const updated = await ProduitParBoutique.findById(produitId)
       .populate('idProduit')
       .populate('idBoutique');
 
-    res.json(updated);
+    res.json({
+      produit: updated,
+      message: 'Promotion supprimée avec succès'
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur serveur');
@@ -373,6 +383,9 @@ exports.deleteProduitParBoutique = async (req, res) => {
   }
 };
 
+// 🔒 ROUTE PROTÉGÉE (boutique)
+// @route   GET /api/produits/boutique/:id/promotions
+// @desc    Obtenir l'historique des promotions d'un produit
 exports.getHistoriquePromotions = async (req, res) => {
     try {
       const produitId = req.params.id;

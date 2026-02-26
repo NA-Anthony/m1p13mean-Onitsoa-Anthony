@@ -21,9 +21,14 @@ exports.ajouterPromotion = async (req, res) => {
     // Vérifier les dates
     const debut = new Date(dateDebut);
     const fin = new Date(dateFin);
+    
+    // Ajuster les dates pour inclure toute la journée
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(23, 59, 59, 999);
+    
     const maintenant = new Date();
 
-    if (fin <= debut) {
+    if (fin < debut) {
       return res.status(400).json({ msg: 'La date de fin doit être après la date de début' });
     }
 

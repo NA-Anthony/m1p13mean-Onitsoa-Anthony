@@ -65,7 +65,7 @@ export class LoginComponent {
         } 
         else {
           // Redirection par défaut si le rôle n'est pas reconnu
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/dashboard-admin']);
         }
       },
       error: (err) => {

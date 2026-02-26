@@ -34,15 +34,8 @@ export const boutiqueNavItems: INavData[] = [
     }
     ,
     {
-      name: 'Commandes',
+      name: 'Commandes reçues',
       url: '/commandes/boutique',
-      iconComponent: { name: 'cil-list-rich' },
-      children: [
-        {
-          name: 'Commandes reçues',
-          url: '/commandes/boutique',
-          iconComponent: { name: 'cil-list' }
-        }
-      ]
+      iconComponent: { name: 'cil-list-rich' }
     }
 ];
