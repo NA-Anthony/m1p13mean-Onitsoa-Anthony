@@ -15,63 +15,7 @@ export const acheteurNavItems: INavData[] = [
     }
   },
   {
-    title: true,
-    name: 'Achats'
-  },
-  {
-    name: 'Mes Commandes',
-    url: '/commandes',
-    iconComponent: { name: 'cil-cart' },
-    children: [
-      {
-        name: 'Commandes en cours',
-        url: '/commandes',
-        iconComponent: { name: 'cil-list' }
-      },
-      {
-        name: 'Historique',
-        url: '/commandes/historique',
-        iconComponent: { name: 'cil-history' }
-      }
-    ]
-  },
-  {
-    name: 'Mes Avis',
-    url: '/avis',
-    iconComponent: { name: 'cil-comment-square' },
-    children: [
-      {
-        name: 'Mes avis',
-        url: '/avis',
-        iconComponent: { name: 'cil-list' }
-      },
-      {
-        name: 'Donner un avis',
-        url: '/avis/nouveau',
-        iconComponent: { name: 'cil-plus' }
-      }
-    ]
-  },
-  {
-    title: true,
-    name: 'Boutiques'
-  },
-  {
-    name: 'Boutiques',
-    url: '/boutiques',
-    iconComponent: { name: 'cil-building' }
-  },
-  {
-    name: 'Produits',
-    url: '/produits',
-    iconComponent: { name: 'cil-basket' }
-  },
-  {
-    title: true,
-    name: 'E-commerce'
-  },
-  {
-    name: 'Boutique en ligne',
+    name: 'E-commerce',
     url: '/ecommerce',
     iconComponent: { name: 'cil-basket' },
     children: [
@@ -93,28 +37,25 @@ export const acheteurNavItems: INavData[] = [
     ]
   },
   {
-    title: true,
-    name: 'Theme'
+    name: 'Mes Commandes',
+    url: '/commandes',
+    iconComponent: { name: 'cil-cart' }
   },
   {
-    name: 'Colors',
-    url: '/theme/colors',
-    iconComponent: { name: 'cil-drop' }
-  },
-  {
-    name: 'Typography',
-    url: '/theme/typography',
-    iconComponent: { name: 'cil-pencil' }
-  },
-  {
-    title: true,
-    name: 'Links',
-    class: 'mt-auto'
-  },
-  {
-    name: 'Docs',
-    url: 'https://coreui.io/angular/docs/5.x/',
-    iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank' }
+    name: 'Mes Avis',
+    url: '/avis',
+    iconComponent: { name: 'cil-comment-square' },
+    children: [
+      {
+        name: 'Mes avis',
+        url: '/avis',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Donner un avis',
+        url: '/avis/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
   }
 ];
