@@ -28,12 +28,14 @@ import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-default-header',
   templateUrl: './default-header.component.html',
   standalone: true,
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle]
+  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle, CommonModule]
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
@@ -55,6 +57,43 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     const currentMode = this.colorMode();
     return this.colorModes.find(mode=> mode.name === currentMode)?.icon ?? 'cilSun';
   });
+
+  userPhoto$: Observable<string | null>;
+  currentUser$: Observable<any>;
+
+  constructor() {
+    super();
+    this.currentUser$ = this.#authService.currentUser$;
+    this.userPhoto$ = this.#authService.currentUser$.pipe(
+      map(user => user?.photo ? this.getFullImageUrl(user.photo) : null)
+    );
+  }
+
+  getFullImageUrl(url: string): string {
+    if (!url) return '';
+    
+    // Si c'est déjà une URL complète
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // Si c'est une dataURL (base64)
+    if (url.startsWith('data:image')) {
+      return url;
+    }
+    
+    // Chemin relatif - ajouter le domaine du backend
+    return 'http://localhost:3000' + url;
+  }
+
+  getUserInitials(): string {
+    const user = this.#authService.getCurrentUser();
+    if (!user) return 'U';
+    
+    const prenom = user.prenom?.charAt(0) || '';
+    const nom = user.nom?.charAt(0) || '';
+    return (prenom + nom).toUpperCase() || 'U';
+  }
 
   ngOnInit() {
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');

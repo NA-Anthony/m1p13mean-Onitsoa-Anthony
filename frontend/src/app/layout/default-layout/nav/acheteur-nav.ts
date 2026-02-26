@@ -37,6 +37,11 @@ export const acheteurNavItems: INavData[] = [
     ]
   },
   {
+    name: 'Mon Profil',
+    url: '/profil',
+    iconComponent: { name: 'cil-user' }
+  },
+  {
     name: 'Mes Commandes',
     url: '/commandes',
     iconComponent: { name: 'cil-cart' }

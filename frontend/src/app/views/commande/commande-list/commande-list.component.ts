@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   CardModule,
   GridModule,
   ButtonModule,
   BadgeModule,
-  TableModule
+  TableModule,
+  SpinnerModule, 
+  AlertModule   
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { CommandeService } from '../commande.service';
@@ -16,7 +18,6 @@ import { Commande } from '../commande.model';
 @Component({
   selector: 'app-commande-list',
   templateUrl: './commande-list.component.html',
-  styleUrls: ['./commande-list.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -27,8 +28,21 @@ import { Commande } from '../commande.model';
     ButtonModule,
     BadgeModule,
     TableModule,
+    SpinnerModule,
+    AlertModule,  
     IconModule
-  ]
+  ],
+  styles: [`
+    .bg-primary-soft { background-color: rgba(var(--cui-primary-rgb), 0.1); }
+    .border-primary-soft { border-color: rgba(var(--cui-primary-rgb), 0.2); }
+    thead th {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--cui-secondary);
+      font-weight: 700;
+    }
+  `]
 })
 export class CommandeListComponent implements OnInit {
   commandes: Commande[] = [];
@@ -49,7 +63,8 @@ export class CommandeListComponent implements OnInit {
 
   constructor(
     private commandeService: CommandeService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -67,7 +82,6 @@ export class CommandeListComponent implements OnInit {
       },
       error: (err) => {
         this.error = 'Erreur lors du chargement des commandes';
-        console.error(err);
         this.loading = false;
       }
     });
@@ -75,28 +89,24 @@ export class CommandeListComponent implements OnInit {
 
   filterCommandes(): void {
     this.filteredCommandes = this.commandes.filter(cmd => {
+      const idStr = (cmd._id || '').toString();
       const matchesSearch = this.searchTerm === '' || 
-        (cmd._id && cmd._id.toLowerCase().includes(this.searchTerm.toLowerCase()));
-      
+                            idStr.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesStatut = this.filterStatut === '' || cmd.statut === this.filterStatut;
-      
       return matchesSearch && matchesStatut;
     });
   }
 
   voirDetails(id: string | undefined): void {
     if (id) {
-      this.router.navigate(['/commandes', id]);
+        // Navigation relative : on ajoute l'ID à la route actuelle
+        this.router.navigate([id], { relativeTo: this.route });
+      }
     }
-  }
 
-  formatDate(date: Date | undefined): string {
+  formatDate(date: any): string {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return new Date(date).toLocaleDateString('fr-FR');
   }
 
   getStatutColor(statut: string | undefined): string {

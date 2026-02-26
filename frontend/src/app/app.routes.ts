@@ -135,6 +135,17 @@ export const routes: Routes = [
         loadChildren: () => import('./views/commande/routes').then((m) => m.routes)
       },
       {
+        path: 'profil',
+        loadComponent: () => import('./views/profil/profil.component').then(m => m.ProfilComponent),
+        data: {
+          title: 'Mon Profil'
+        }
+      },
+      // {
+      //   path: 'avis',
+      //   loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
+      // },
+      {
         path: 'avis',
         loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
       },

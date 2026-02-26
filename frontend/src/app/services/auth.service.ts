@@ -145,4 +145,32 @@ export class AuthService {
       this.currentUserSubject.next(response.user);
     }
   }
+
+  /**
+   * Met à jour les informations de l'utilisateur et son profil (JSON)
+   */
+  updateProfil(data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/update-me`, data).pipe(
+      tap((response) => {
+        if (response && response.user) {
+          // Mise à jour locale pour que le nouveau nom/photo s'affiche partout
+          localStorage.setItem('user', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+      })
+    );
+}
+
+  /**
+   * Upload une image vers le serveur générique
+   */
+  uploadImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('image', file); // Assurez-vous que le champ s'appelle 'image' comme dans votre backend
+    
+    return this.http.post('http://localhost:3000/api/upload', formData, {
+      reportProgress: true,
+      observe: 'events'
+    });
+  }
 }

@@ -11,6 +11,11 @@ export const boutiqueNavItems: INavData[] = [
         }
     },
     {
+        name: 'Mon Profil',
+        url: '/profil',
+        iconComponent: { name: 'cil-user' },
+    },
+    {
       name: 'Mes produits',
       url: '/produits-par-boutique',
       iconComponent: { name: 'cil-building' },
@@ -37,11 +42,6 @@ export const boutiqueNavItems: INavData[] = [
           name: 'Commandes reçues',
           url: '/commandes/boutique',
           iconComponent: { name: 'cil-list' }
-        },
-        {
-          name: 'Détails commande',
-          url: '/commandes',
-          iconComponent: { name: 'cil-file' }
         }
       ]
     }

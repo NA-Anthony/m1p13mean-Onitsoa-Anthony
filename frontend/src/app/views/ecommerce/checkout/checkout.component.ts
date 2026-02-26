@@ -9,7 +9,7 @@ import {
   ButtonModule,
   BadgeModule,
   FormModule,
-  ProgressModule  // ← AJOUTER CET IMPORT
+  ProgressModule  
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { CartService } from '../cart.service';
@@ -17,6 +17,7 @@ import { CommandeService } from '../../commande/commande.service';
 import { AcheteurService } from '../../acheteur/acheteur.service';
 import { PortefeuilleService } from '../portefeuille.service';
 import { MODES_PAIEMENT } from '../../commande/commande.model';
+import { SpinnerModule } from '@coreui/angular'; 
 
 @Component({
   selector: 'app-checkout',
@@ -34,10 +35,21 @@ import { MODES_PAIEMENT } from '../../commande/commande.model';
     BadgeModule,
     FormModule,
     ProgressModule,
-    IconModule
+    IconModule,
+    SpinnerModule  
   ]
 })
 export class CheckoutComponent implements OnInit {
+
+  checkoutForm!: FormGroup;
+  acheteurId: string = ''; 
+  items: any[] = [];
+  sousTotal: any;
+  fraisLivraison: any;
+  total: any;
+  soldeActuel: number | null = null;
+  modesPaiement = MODES_PAIEMENT;
+  step: 'adresse' | 'paiement' | 'confirmation' = 'adresse';
 
   constructor(
     private fb: FormBuilder,
@@ -48,7 +60,6 @@ export class CheckoutComponent implements OnInit {
     private router: Router
   ) {
     this.checkoutForm = this.fb.group({
-      idAcheteur: ['', Validators.required],
       modePaiement: ['', Validators.required],
       adresseLivraison: this.fb.group({
         rue: ['', Validators.required],
@@ -58,16 +69,6 @@ export class CheckoutComponent implements OnInit {
       })
     });
   }
-  checkoutForm!: FormGroup;
-  acheteurs: any[] = [];
-  items: any[] = [];
-  sousTotal: any;
-  fraisLivraison: any;
-  total: any;
-  soldeActuel: number = 0;
-
-  modesPaiement = MODES_PAIEMENT;
-  step: 'info' | 'paiement' | 'confirmation' = 'info';
 
   ngOnInit(): void {
     this.items = this.cartService.getPanier();
@@ -80,70 +81,46 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    this.acheteurService.getAcheteurs().subscribe({
-      next: (data: any[]) => this.acheteurs = data
-    });
-
-    // Écouter le changement d'acheteur pour charger son solde
-    this.checkoutForm.get('idAcheteur')?.valueChanges.subscribe(id => {
-      if (id) {
-        this.chargerSoldeAcheteur(id);
-      }
-    });
-  }
-
-  chargerSoldeAcheteur(id: string): void {
+    // Récupérer l'acheteur connecté + son solde automatiquement
     this.portefeuilleService.getSoldeAcheteur().subscribe({
       next: (res: any) => {
         this.soldeActuel = res.solde;
+        // Si l'API retourne aussi l'id de l'acheteur :
+        // this.acheteurId = res.idAcheteur;
       }
+    });
+
+    // Écouter le changement de mode de paiement
+    this.checkoutForm.get('modePaiement')?.valueChanges.subscribe(() => {
+      // force la réévaluation du template
     });
   }
 
   isSoldeInsuffisant(): boolean {
-  console.log('solde:', this.soldeActuel, 'total:', this.total());
-  return this.checkoutForm.get('modePaiement')?.value === 'Portefeuille numérique' 
-    && this.soldeActuel < this.total();
-}
+    if (this.soldeActuel === null) return false;
+    return this.checkoutForm.get('modePaiement')?.value === 'Portefeuille numérique'
+      && this.soldeActuel < this.total();
+  }
 
   getPrixItem(item: any): number {
     return item.enPromotion && item.prixPromo ? item.prixPromo : item.prix;
   }
 
-  getTotalBoutique(items: any[]): number {
-    return items.reduce((acc, item) => {
-      const prix = this.getPrixItem(item);
-      return acc + (prix * item.quantite);
-    }, 0);
-  }
-
-  validerInformations(): void {
-    // Marquer tous les champs comme touched pour afficher les erreurs
-    this.checkoutForm.get('idAcheteur')?.markAsTouched();
-
-    const adresseGroup = this.checkoutForm.get('adresseLivraison');
-    if (adresseGroup instanceof FormGroup) {
-      Object.keys(adresseGroup.controls).forEach(field => {
-        const control = adresseGroup.get(field);
-        control?.markAsTouched();
-      });
-    }
-
-    // Vérifier la validité
-    // if (this.checkoutForm.get('idAcheteur')?.valid && 
-    //     adresseGroup?.valid) {
-    this.step = 'paiement';
+  validerAdresse(): void {
+    const adresseGroup = this.checkoutForm.get('adresseLivraison') as FormGroup;
+    Object.keys(adresseGroup.controls).forEach(f => adresseGroup.get(f)?.markAsTouched());
+    // if (adresseGroup.valid) {
+      this.step = 'paiement';
     // }
   }
 
   validerPaiement(): void {
-    // if (this.checkoutForm.get('modePaiement')?.valid) {
-    this.step = 'confirmation';
-    // }
+    if (this.checkoutForm.get('modePaiement')?.valid && !this.isSoldeInsuffisant()) {
+      this.step = 'confirmation';
+    }
   }
 
   confirmerCommande(): void {
-    // Grouper les articles par boutique
     const articles = this.items.map(item => ({
       idProduitParBoutique: item.idProduitParBoutique,
       nomProduit: item.nomProduit,
@@ -152,16 +129,13 @@ export class CheckoutComponent implements OnInit {
       remise: item.prixPromo ? (item.prix - item.prixPromo) : 0
     }));
 
-    // Récupérer la première boutique (simplifié)
-    const idBoutique = this.items[0]?.idBoutique;
-
     const modePaiementForm = this.checkoutForm.value.modePaiement;
     const modePaiementData = modePaiementForm === 'Portefeuille numérique' ? 'portefeuille' : modePaiementForm;
 
     const commande = {
-      idAcheteur: this.checkoutForm.value.idAcheteur,
-      idBoutique: idBoutique,
-      articles: articles,
+      idAcheteur: this.acheteurId,
+      idBoutique: this.items[0]?.idBoutique,
+      articles,
       adresseLivraison: this.checkoutForm.value.adresseLivraison,
       fraisLivraison: this.fraisLivraison(),
       total: this.total(),
@@ -172,12 +146,12 @@ export class CheckoutComponent implements OnInit {
     this.commandeService.createCommande(commande).subscribe({
       next: (cmd: any) => {
         this.cartService.viderPanier();
-        this.router.navigate(['/commande-confirmee', cmd._id]);
+        this.router.navigate(['/ecommerce/portefeuille']);
       }
     });
   }
 
   retourPanier(): void {
-    this.router.navigate(['/panier']);
+    this.router.navigate(['/ecommerce/panier']);
   }
 }
