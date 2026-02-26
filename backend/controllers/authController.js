@@ -219,53 +219,127 @@ exports.initAdmin = async (req, res) => {
 };
 
 // @route   PUT /api/auth/update-me
+// @desc    Mettre à jour le profil de l'utilisateur connecté
+// @access  Private
 exports.updateMe = async (req, res) => {
   try {
-    const { nom, prenom, telephone, adresse, nomBoutique } = req.body;
+    // 1. Récupérer 'photo' depuis req.body (et non req.file)
+    const { nom, prenom, telephone, adresse, nomBoutique, photo } = req.body;
 
-    // 1. Mettre à jour les infos de base (User)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ msg: 'Utilisateur non authentifié' });
+    }
+
     const userFields = {};
     if (nom) userFields.nom = nom;
     if (prenom) userFields.prenom = prenom;
-
-    if (req.file) {
-      userFields.photo = `/uploads/profils/${req.file.filename}`;
-    }
     
+    // Si 'photo' est envoyé dans le corps de la requête JSON
+    if (photo !== undefined) {
+      userFields.photo = photo; 
+    }
+
     let user = await User.findByIdAndUpdate(
       req.user.id,
       { $set: userFields },
-      { new: true }
+      { new: true, runValidators: true }
     ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ msg: 'Utilisateur non trouvé' });
+    }
 
     // 2. Mettre à jour le profil spécifique (Boutique ou Acheteur)
     let profil = null;
+    let updateResult = null;
     
     if (user.role === 'boutique') {
       const boutiqueFields = {};
-      if (nomBoutique) boutiqueFields.nomBoutique = nomBoutique;
-      if (telephone) boutiqueFields.telephone = telephone;
+      if (nomBoutique !== undefined) boutiqueFields.nomBoutique = nomBoutique;
+      if (telephone !== undefined) boutiqueFields.telephone = telephone;
 
-      profil = await Boutique.findByIdAndUpdate(
+      updateResult = await Boutique.findByIdAndUpdate(
         user._id,
         { $set: boutiqueFields },
-        { new: true }
+        { new: true, runValidators: true }
       );
+      
+      if (updateResult) {
+        profil = updateResult;
+      } else {
+        // Si la boutique n'existe pas, la créer
+        const newBoutique = new Boutique({
+          _id: user._id,
+          nomBoutique: nomBoutique || `Boutique de ${user.prenom} ${user.nom}`,
+          telephone: telephone || ''
+        });
+        profil = await newBoutique.save();
+      }
+      
     } else if (user.role === 'acheteur') {
       const acheteurFields = {};
-      if (telephone) acheteurFields.telephone = telephone;
-      if (adresse) acheteurFields.adresseLivraisonParDefaut = adresse;
+      if (telephone !== undefined) acheteurFields.telephone = telephone;
+      
+      if (adresse) {
+        // Validation de l'adresse
+        if (typeof adresse === 'object') {
+          acheteurFields.adresseLivraisonParDefaut = {
+            rue: adresse.rue || '',
+            codePostal: adresse.codePostal || '',
+            ville: adresse.ville || '',
+            pays: adresse.pays || 'France'
+          };
+        }
+      }
 
-      profil = await Acheteur.findByIdAndUpdate(
+      updateResult = await Acheteur.findByIdAndUpdate(
         user._id,
         { $set: acheteurFields },
-        { new: true }
+        { new: true, runValidators: true }
       );
+      
+      if (updateResult) {
+        profil = updateResult;
+      } else {
+        // Si l'acheteur n'existe pas, le créer
+        const newAcheteur = new Acheteur({
+          _id: user._id,
+          telephone: telephone || '',
+          adresseLivraisonParDefaut: adresse || {
+            pays: 'France'
+          }
+        });
+        profil = await newAcheteur.save();
+      }
     }
 
-    res.json({ user, profil });
+    // Journaliser la mise à jour
+    console.log(`✅ Profil mis à jour pour l'utilisateur ${user.email} (${user.role})`);
+
+    res.json({ 
+      success: true,
+      msg: 'Profil mis à jour avec succès',
+      user, 
+      profil 
+    });
+
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Erreur serveur lors de la mise à jour');
+    console.error('❌ Erreur updateMe:', err.message);
+    
+    // Gestion des erreurs de validation MongoDB
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ msg: messages.join(', ') });
+    }
+    
+    // Erreur de duplication (email déjà utilisé)
+    if (err.code === 11000) {
+      return res.status(400).json({ msg: 'Cette valeur est déjà utilisée' });
+    }
+    
+    res.status(500).json({ 
+      msg: 'Erreur serveur lors de la mise à jour du profil',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };

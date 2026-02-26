@@ -11,17 +11,67 @@
     <c-col lg="4">
         <c-card class="shadow-sm border-0 mb-4">
             <c-card-body class="text-center py-4">
-                <c-avatar color="primary" size="xl" class="mb-3 text-white fw-bold" style="font-size: 2rem;">
-                    {{ userData?.prenom?.charAt(0) }}{{ userData?.nom?.charAt(0) }}
-                </c-avatar>
+                <div class="position-relative d-inline-block mb-3">
+                    @if (imagePreview || userData?.photo) {
+                    <c-avatar [src]="getFullImageUrl(imagePreview || userData?.photo)" size="xl"
+                        class="border border-3 border-primary shadow" style="width: 120px; height: 120px; object-fit: cover;"
+                        (error)="onImageError($event)" priority> 
+                    </c-avatar>
+
+                    <!-- Bouton suppression -->
+                    <button type="button"
+                        class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle shadow-sm"
+                        (click)="removeImage()" [disabled]="uploadLoading"
+                        style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid white; transform: translate(10px, -10px);">
+                        <svg cIcon name="cil-trash" size="sm"></svg>
+                    </button>
+                    } @else {
+                    <!-- Avatar avec initiales quand pas de photo -->
+                    <c-avatar color="primary" size="xl"
+                        class="mb-3 text-white fw-bold border border-3 border-primary shadow"
+                        style="width: 120px; height: 120px; font-size: 2rem;">
+                        {{ userData?.prenom?.charAt(0) }}{{ userData?.nom?.charAt(0) }}
+                    </c-avatar>
+                    }
+
+                    <!-- Bouton pour ajouter/changer la photo -->
+                    <button type="button"
+                        class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle shadow-sm"
+                        (click)="fileInput.click()" [disabled]="uploadLoading"
+                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+                        <svg cIcon name="cil-camera" size="sm"></svg>
+                    </button>
+                    <input #fileInput type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)" />
+                </div>
+
+                <!-- Barre de progression upload -->
+                @if (uploadLoading) {
+                <div class="mb-3 px-3">
+                    <c-progress [height]="5" class="mb-2">
+                        <c-progress-bar [value]="uploadProgress" color="primary"></c-progress-bar>
+                    </c-progress>
+                    <small class="text-body-secondary">Upload... {{ uploadProgress }}%</small>
+                </div>
+                }
+
+                <!-- Nom et badge -->
                 <h5 class="mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
                 <c-badge color="info" shape="rounded-pill">{{ userData?.role | titlecase }}</c-badge>
 
                 <hr class="my-4">
 
-                <div class="bg-light p-3 rounded shadow-sm">
-                    <div class="small text-muted mb-1">Solde du portefeuille</div>
-                    <h3 class="text-primary mb-0">{{ profilData?.solde || 0 | number:'1.2-2' }} €</h3>
+                <!-- Solde/Caisse selon le rôle -->
+                <div class="bg-light p-3 rounded shadow-sm border-start border-4"
+                    [class.border-primary]="userData?.role === 'acheteur'"
+                    [class.border-success]="userData?.role === 'boutique'">
+                    <div class="small text-muted mb-1">
+                        {{ userData?.role === 'boutique' ? 'Caisse boutique' : 'Solde du portefeuille' }}
+                    </div>
+                    <h3 class="mb-0" [class.text-primary]="userData?.role === 'acheteur'"
+                        [class.text-success]="userData?.role === 'boutique'">
+                        {{ (userData?.role === 'boutique' ? profilData?.caisse : profilData?.solde) || 0 |
+                        number:'1.2-2' }} €
+                    </h3>
                 </div>
             </c-card-body>
         </c-card>
@@ -33,31 +83,53 @@
                 <h6 class="mb-0 fw-bold">Informations Personnelles</h6>
             </c-card-header>
             <c-card-body>
+                <!-- Messages d'alerte -->
                 @if (message) {
-                <c-alert [color]="message.type" dismissible>{{ message.text }}</c-alert>
+                <c-alert [color]="message.type" dismissible (dismissed)="message = null">{{ message.text }}</c-alert>
                 }
 
                 <form (ngSubmit)="onSubmit()" #profilForm="ngForm">
                     <c-row class="g-3">
+                        <!-- Prénom -->
                         <c-col md="6">
                             <label cLabel>Prénom</label>
                             <input cFormControl name="prenom" [(ngModel)]="userData.prenom" required />
                         </c-col>
+
+                        <!-- Nom -->
                         <c-col md="6">
                             <label cLabel>Nom</label>
                             <input cFormControl name="nom" [(ngModel)]="userData.nom" required />
                         </c-col>
+
+                        <!-- Nom de boutique (uniquement pour boutique) -->
+                        @if (userData?.role === 'boutique') {
+                        <c-col md="12">
+                            <label cLabel>Nom de la Boutique</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><svg cIcon name="cil-store"></svg></span>
+                                <input cFormControl name="nomBoutique" [(ngModel)]="profilData.nomBoutique" required />
+                            </div>
+                        </c-col>
+                        }
+
+                        <!-- Email (non modifiable) -->
                         <c-col md="12">
                             <label cLabel>Email (Non modifiable)</label>
                             <input cFormControl [value]="userData.email" readonly class="bg-light" />
                         </c-col>
+
+                        <!-- Téléphone -->
                         <c-col md="12">
                             <label cLabel>Téléphone</label>
                             <input cFormControl name="telephone" [(ngModel)]="profilData.telephone"
-                                placeholder="Ex: 06 12 34 56 78" />
+                                placeholder="Ex: 034 00 000 00" />
                         </c-col>
 
-                        <h6 class="mt-4 mb-2 text-primary small fw-bold text-uppercase">Adresse par défaut</h6>
+                        <!-- Adresse de livraison (uniquement pour acheteur) -->
+                        @if (userData?.role === 'acheteur') {
+                        <h6 class="mt-4 mb-2 text-primary small fw-bold text-uppercase">Adresse de livraison par défaut
+                        </h6>
                         <c-col md="8">
                             <label cLabel>Rue</label>
                             <input cFormControl name="rue" [(ngModel)]="profilData.adresseLivraisonParDefaut.rue" />
@@ -75,11 +147,18 @@
                             <label cLabel>Pays</label>
                             <input cFormControl name="pays" [(ngModel)]="profilData.adresseLivraisonParDefaut.pays" />
                         </c-col>
+                        }
                     </c-row>
 
-                    <div class="mt-4 pt-3 border-top d-flex justify-content-end">
-                        <button cButton color="primary" type="submit" [disabled]="submitting">
+                    <!-- Boutons d'action -->
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                        <button cButton color="secondary" type="button" (click)="loadUserInfo()"
+                            [disabled]="submitting">
+                            Annuler
+                        </button>
+                        <button cButton color="primary" type="submit" [disabled]="submitting || uploadLoading">
                             @if (submitting) { <c-spinner size="sm" class="me-2"></c-spinner> }
+                            @else { <svg cIcon name="cil-save" class="me-2"></svg> }
                             Enregistrer les modifications
                         </button>
                     </div>
