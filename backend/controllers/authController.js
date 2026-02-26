@@ -58,8 +58,8 @@ exports.register = async (req, res) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ 
-          token, 
+        res.json({
+          token,
           user: {
             id: user._id,
             nom: user.nom,
@@ -115,8 +115,8 @@ exports.login = async (req, res) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ 
-          token, 
+        res.json({
+          token,
           user: {
             id: user._id,
             nom: user.nom,
@@ -140,7 +140,7 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'Utilisateur non trouvé' });
     }
@@ -198,7 +198,7 @@ exports.initAdmin = async (req, res) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ 
+        res.json({
           msg: 'Admin créé avec succès',
           token,
           user: {
@@ -233,10 +233,10 @@ exports.updateMe = async (req, res) => {
     const userFields = {};
     if (nom) userFields.nom = nom;
     if (prenom) userFields.prenom = prenom;
-    
+
     // Si 'photo' est envoyé dans le corps de la requête JSON
     if (photo !== undefined) {
-      userFields.photo = photo; 
+      userFields.photo = photo;
     }
 
     let user = await User.findByIdAndUpdate(
@@ -252,18 +252,20 @@ exports.updateMe = async (req, res) => {
     // 2. Mettre à jour le profil spécifique (Boutique ou Acheteur)
     let profil = null;
     let updateResult = null;
-    
+
     if (user.role === 'boutique') {
       const boutiqueFields = {};
       if (nomBoutique !== undefined) boutiqueFields.nomBoutique = nomBoutique;
       if (telephone !== undefined) boutiqueFields.telephone = telephone;
+      // Synchroniser photo utilisateur -> logo boutique
+      if (photo !== undefined) boutiqueFields.logo = photo;
 
       updateResult = await Boutique.findByIdAndUpdate(
         user._id,
         { $set: boutiqueFields },
         { new: true, runValidators: true }
       );
-      
+
       if (updateResult) {
         profil = updateResult;
       } else {
@@ -271,15 +273,16 @@ exports.updateMe = async (req, res) => {
         const newBoutique = new Boutique({
           _id: user._id,
           nomBoutique: nomBoutique || `Boutique de ${user.prenom} ${user.nom}`,
-          telephone: telephone || ''
+          telephone: telephone || '',
+          logo: photo || '' // Utiliser la photo si présente
         });
         profil = await newBoutique.save();
       }
-      
+
     } else if (user.role === 'acheteur') {
       const acheteurFields = {};
       if (telephone !== undefined) acheteurFields.telephone = telephone;
-      
+
       if (adresse) {
         // Validation de l'adresse
         if (typeof adresse === 'object') {
@@ -297,7 +300,7 @@ exports.updateMe = async (req, res) => {
         { $set: acheteurFields },
         { new: true, runValidators: true }
       );
-      
+
       if (updateResult) {
         profil = updateResult;
       } else {
@@ -316,28 +319,28 @@ exports.updateMe = async (req, res) => {
     // Journaliser la mise à jour
     console.log(`✅ Profil mis à jour pour l'utilisateur ${user.email} (${user.role})`);
 
-    res.json({ 
+    res.json({
       success: true,
       msg: 'Profil mis à jour avec succès',
-      user, 
-      profil 
+      user,
+      profil
     });
 
   } catch (err) {
     console.error('❌ Erreur updateMe:', err.message);
-    
+
     // Gestion des erreurs de validation MongoDB
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ msg: messages.join(', ') });
     }
-    
+
     // Erreur de duplication (email déjà utilisé)
     if (err.code === 11000) {
       return res.status(400).json({ msg: 'Cette valeur est déjà utilisée' });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       msg: 'Erreur serveur lors de la mise à jour du profil',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });

@@ -29,7 +29,7 @@
           <div class="fs-4 fw-semibold">{{ getTotalAvis() }}</div>
           <div>Total avis</div>
         </div>
-        <svg cIcon name="cil-comment-square" size="xl"></svg>  <!-- ← CHANGÉ -->
+        <svg cIcon name="cil-comment-square" size="xl"></svg> <!-- ← CHANGÉ -->
       </c-card-body>
     </c-card>
   </c-col>
@@ -55,13 +55,8 @@
           <span class="input-group-text">
             <svg cIcon name="cil-search"></svg>
           </span>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Rechercher une boutique..." 
-            [(ngModel)]="searchTerm"
-            (input)="filterBoutiques()"
-          >
+          <input type="text" class="form-control" placeholder="Rechercher une boutique..." [(ngModel)]="searchTerm"
+            (input)="filterBoutiques()">
         </div>
       </c-col>
       <c-col md="3" class="mb-3 mb-md-0">
@@ -76,7 +71,7 @@
         <select class="form-select" [(ngModel)]="filterPaiement" (change)="filterBoutiques()">
           <option value="">Tous les paiements</option>
           @for (paiement of modesPaiement; track paiement) {
-            <option [value]="paiement">{{ paiement }}</option>
+          <option [value]="paiement">{{ paiement }}</option>
           }
         </select>
       </c-col>
@@ -93,85 +88,90 @@
 <!-- Liste des boutiques en cartes -->
 <c-row>
   @for (boutique of filteredBoutiques; track boutique._id) {
-    <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
-      <c-card class="h-100 shadow-sm boutique-card" (click)="voirDetails(boutique._id)">
-        <div class="position-relative">
-          <c-avatar 
-            [src]="boutique?.logo || 'assets/images/avatars/default.jpg'" 
-            [size]="'xxl'"
-            class="mb-3 mx-auto border border-3 border-primary"
-            style="width: 120px; height: 120px;"
-          ></c-avatar>
-          <span class="position-absolute top-0 end-0 m-2 badge rounded-pill" 
-                [ngClass]="'bg-' + getNoteColor(boutique.noteMoyenne)">
-            {{ boutique.noteMoyenne }} <svg cIcon name="cil-star" size="sm"></svg>
-          </span>
+  <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
+    <c-card class="h-100 shadow-sm boutique-card" (click)="voirDetails(boutique._id)">
+      <div class="position-relative d-flex justify-content-center pt-3">
+        @if (getBoutiqueImage(boutique)) {
+        <c-avatar [src]="getBoutiqueImage(boutique)" [size]="'xxl'"
+          class="mb-3 border border-3 border-primary shadow-sm"
+          style="width: 120px; height: 120px; object-fit: cover;"></c-avatar>
+        } @else {
+        <div
+          class="rounded-circle border border-3 border-primary shadow-sm d-flex align-items-center justify-content-center bg-primary text-white mb-3"
+          style="width: 120px; height: 120px;">
+          <span class="fw-bold fs-1">{{ getInitiales(boutique.nomBoutique) }}</span>
         </div>
-        
-        <c-card-body class="text-center">
-          <h5 class="card-title mb-1">{{ boutique.nomBoutique }}</h5>
-          <p class="text-body-secondary small mb-2">
-            <svg cIcon name="cil-location-pin" size="sm"></svg>
-            {{ (boutique.adresse || 'Adresse non renseignée') | slice:0:30 }}
-          </p>
-          <p class="text-body-secondary small mb-3">
-            <svg cIcon name="cil-phone" size="sm"></svg>
-            {{ boutique.telephone || 'Téléphone non renseigné' }}
-          </p>
-          
-          <div class="mb-3">
-            @for (paiement of (boutique.modePaiementAcceptes || []).slice(0, 3); track paiement) {
-              <span class="badge bg-info me-1">{{ paiement }}</span>
-            }
-            @if ((boutique.modePaiementAcceptes || []).length > 3) {
-              <span class="badge bg-secondary">+{{ (boutique.modePaiementAcceptes || []).length - 3 }}</span>
-            }
+        }
+        <span class="position-absolute top-0 end-0 m-2 badge rounded-pill"
+          [ngClass]="'bg-' + getNoteColor(boutique.noteMoyenne)">
+          {{ boutique.noteMoyenne }} <svg cIcon name="cil-star" size="sm"></svg>
+        </span>
+      </div>
+
+      <c-card-body class="text-center">
+        <h5 class="card-title mb-1">{{ boutique.nomBoutique }}</h5>
+        <p class="text-body-secondary small mb-2">
+          <svg cIcon name="cil-location-pin" size="sm"></svg>
+          {{ (boutique.adresse || 'Adresse non renseignée') | slice:0:30 }}
+        </p>
+        <p class="text-body-secondary small mb-3">
+          <svg cIcon name="cil-phone" size="sm"></svg>
+          {{ boutique.telephone || 'Téléphone non renseigné' }}
+        </p>
+
+        <div class="mb-3">
+          @for (paiement of (boutique.modePaiementAcceptes || []).slice(0, 3); track paiement) {
+          <span class="badge bg-info me-1">{{ paiement }}</span>
+          }
+          @if ((boutique.modePaiementAcceptes || []).length > 3) {
+          <span class="badge bg-secondary">+{{ (boutique.modePaiementAcceptes || []).length - 3 }}</span>
+          }
+        </div>
+
+        <div class="d-flex justify-content-around text-center mb-3">
+          <div>
+            <div class="fw-bold">{{ boutique.totalAvis }}</div>
+            <small class="text-body-secondary">avis</small>
           </div>
-          
-          <div class="d-flex justify-content-around text-center mb-3">
-            <div>
-              <div class="fw-bold">{{ boutique.totalAvis }}</div>
-              <small class="text-body-secondary">avis</small>
-            </div>
-            <div class="vr"></div>
-            <div>
-              <div class="fw-bold">{{ getHorairesOuverts(boutique) }}</div>
-              <small class="text-body-secondary">/7 jours</small>
-            </div>
+          <div class="vr"></div>
+          <div>
+            <div class="fw-bold">{{ getHorairesOuverts(boutique) }}</div>
+            <small class="text-body-secondary">/7 jours</small>
           </div>
-        </c-card-body>
-        
-        <c-card-footer class="bg-transparent border-top-0">
-          <div class="d-flex justify-content-center gap-2" (click)="$event.stopPropagation()">
-            <button cButton color="info" size="sm" [routerLink]="[boutique._id]">
-              <svg cIcon name="cil-magnifying-glass" class="me-1"></svg>
-              Détails
-            </button>
-            <button cButton color="warning" size="sm" [routerLink]="[boutique._id, 'edit']">
-              <svg cIcon name="cil-pencil" class="me-1"></svg>
-              Modifier
-            </button>
-            <button cButton color="danger" size="sm" (click)="deleteBoutique(boutique._id)">
-              <svg cIcon name="cil-trash" class="me-1"></svg>
-              Suppr.
-            </button>
-          </div>
-        </c-card-footer>
-      </c-card>
-    </c-col>
-  } @empty {
-    <c-col>
-      <c-card class="text-center py-5">
-        <c-card-body>
-          <svg cIcon name="cil-building" size="3xl" class="text-body-secondary mb-3"></svg>
-          <h5>Aucune boutique trouvée</h5>
-          <p class="text-body-secondary mb-3">Commencez par créer votre première boutique</p>
-          <button cButton color="primary" routerLink="nouvelle">
-            <svg cIcon name="cil-plus" class="me-2"></svg>
-            Créer une boutique
+        </div>
+      </c-card-body>
+
+      <c-card-footer class="bg-transparent border-top-0">
+        <div class="d-flex justify-content-center gap-2" (click)="$event.stopPropagation()">
+          <button cButton color="info" size="sm" [routerLink]="[boutique._id]">
+            <svg cIcon name="cil-magnifying-glass" class="me-1"></svg>
+            Détails
           </button>
-        </c-card-body>
-      </c-card>
-    </c-col>
+          <button cButton color="warning" size="sm" [routerLink]="[boutique._id, 'edit']">
+            <svg cIcon name="cil-pencil" class="me-1"></svg>
+            Modifier
+          </button>
+          <button cButton color="danger" size="sm" (click)="deleteBoutique(boutique._id)">
+            <svg cIcon name="cil-trash" class="me-1"></svg>
+            Suppr.
+          </button>
+        </div>
+      </c-card-footer>
+    </c-card>
+  </c-col>
+  } @empty {
+  <c-col>
+    <c-card class="text-center py-5">
+      <c-card-body>
+        <svg cIcon name="cil-building" size="3xl" class="text-body-secondary mb-3"></svg>
+        <h5>Aucune boutique trouvée</h5>
+        <p class="text-body-secondary mb-3">Commencez par créer votre première boutique</p>
+        <button cButton color="primary" routerLink="nouvelle">
+          <svg cIcon name="cil-plus" class="me-2"></svg>
+          Créer une boutique
+        </button>
+      </c-card-body>
+    </c-card>
+  </c-col>
   }
 </c-row>

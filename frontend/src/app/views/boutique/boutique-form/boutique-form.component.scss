@@ -1,142 +1,142 @@
 // Upload container
 .upload-container {
+  width: 100%;
+}
+
+// Mini prévisualisation de l'image
+.upload-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--cui-border-color);
+  background-color: var(--cui-tertiary-bg);
+
+  .upload-thumbnail {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
-  
-  // Mini prévisualisation de l'image
-  .upload-preview {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #dee2e6;
-    background-color: #f8f9fa;
-    
-    .upload-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+}
+
+// Placeholder quand pas d'image
+.upload-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  border: 1px dashed var(--cui-border-color);
+  background-color: var(--cui-tertiary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cui-secondary-color);
+}
+
+// Barre de progression
+.upload-progress {
+  display: flex;
+  align-items: center;
+
+  .progress {
+    flex: 1;
   }
-  
-  // Placeholder quand pas d'image
-  .upload-placeholder {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
-    border: 1px dashed #dee2e6;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #adb5bd;
+
+  .progress-text {
+    font-size: 0.7rem;
+    color: var(--cui-primary);
+    font-weight: 600;
+    min-width: 35px;
   }
-  
-  // Barre de progression
-  .upload-progress {
-    display: flex;
-    align-items: center;
-    
-    .progress {
-      flex: 1;
-    }
-    
-    .progress-text {
-      font-size: 0.7rem;
-      color: var(--cui-primary);
-      font-weight: 600;
-      min-width: 35px;
-    }
-  }
-  
-  // Boutons d'action
-  .btn-outline-primary, .btn-outline-danger {
-    &.btn-sm {
-      padding: 0.25rem 0.75rem;
-      font-size: 0.875rem;
-      
-      svg {
-        width: 14px;
-        height: 14px;
-      }
+}
+
+// Boutons d'action
+.btn-outline-primary,
+.btn-outline-danger {
+  &.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+
+    svg {
+      width: 14px;
+      height: 14px;
     }
   }
-  
-  // Styles existants du formulaire (garder ce qui était déjà)
-  .boutique-card {
-    transition: all 0.2s ease;
-    border-left: 4px solid transparent;
-    cursor: pointer;
-    
-    &:hover {
-      transform: translateX(5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
-      border-left-color: var(--cui-primary);
-    }
+}
+
+// Styles existants du formulaire (garder ce qui était déjà)
+.boutique-card {
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+    border-left-color: var(--cui-primary);
   }
-  
-  // Pour les tableaux d'horaires
-  .table-bordered {
-    th, td {
-      vertical-align: middle;
-    }
-    
-    .form-control-sm {
-      height: calc(1.5em + 0.5rem + 2px);
-      padding: 0.25rem 0.5rem;
-      font-size: 0.875rem;
-    }
+}
+
+// Pour les tableaux d'horaires
+.table-bordered {
+
+  th,
+  td {
+    vertical-align: middle;
   }
-  
-  // Badges de statut
-  .badge {
-    &.bg-success {
-      background-color: #2eb85c !important;
-    }
-    &.bg-secondary {
-      background-color: #6c757d !important;
-    }
+
+  .form-control-sm {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
-  
-  // Pour les checkboxes de paiement
-  .form-check {
-    .form-check-input {
-      margin-top: 0.3rem;
-    }
-    
-    .form-check-label {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      
-      svg {
-        width: 16px;
-        height: 16px;
-      }
-    }
+}
+
+// Badges de statut
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// Pour les checkboxes de paiement
+.form-check {
+  .form-check-input {
+    margin-top: 0.3rem;
   }
-  
-  // Barre de progression principale
-  c-progress {
-    .progress-bar {
-      transition: width 0.3s ease;
-    }
-  }
-  
-  // Pour les messages d'erreur
-  .text-danger {
-    font-size: 0.75rem;
+
+  .form-check-label {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    
+
     svg {
-      width: 12px;
-      height: 12px;
+      width: 16px;
+      height: 16px;
     }
   }
-  
-  // Animation pour les spinners
-  c-spinner {
-    margin-right: 0.25rem;
+}
+
+// Barre de progression principale
+c-progress {
+  .progress-bar {
+    transition: width 0.3s ease;
   }
+}
+
+// Pour les messages d'erreur
+.text-danger {
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// Animation pour les spinners
+c-spinner {
+  margin-right: 0.25rem;
+}
