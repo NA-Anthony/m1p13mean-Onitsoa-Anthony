@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
 import { AuthGuard } from './guards/auth.guard';
+import { dashboardRedirectGuard } from './guards/dashboard-redirect.guard';
 
 export const routes: Routes = [
   // 🔓 Routes publiques (SANS layout et SANS guard)
@@ -24,14 +25,14 @@ export const routes: Routes = [
     loadComponent: () => import('./views/pages/page500/page500.component').then(m => m.Page500Component),
     data: { title: 'Page 500' }
   },
-  
+
   // Redirect par défaut (APRÈS les routes publiques)
   {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
   },
-  
+
   // 🔒 Routes protégées (AVEC layout et guard)
   {
     path: '',
@@ -43,6 +44,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [dashboardRedirectGuard],
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
       {
@@ -163,7 +165,7 @@ export const routes: Routes = [
       // }
     ]
   },
-  
+
   // Route par défaut - catch all (DOIT être en dernier)
   { path: '**', redirectTo: '404' }
 ];
