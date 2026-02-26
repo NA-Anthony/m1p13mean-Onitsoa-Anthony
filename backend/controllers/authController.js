@@ -217,3 +217,55 @@ exports.initAdmin = async (req, res) => {
     res.status(500).send('Erreur serveur');
   }
 };
+
+// @route   PUT /api/auth/update-me
+exports.updateMe = async (req, res) => {
+  try {
+    const { nom, prenom, telephone, adresse, nomBoutique } = req.body;
+
+    // 1. Mettre à jour les infos de base (User)
+    const userFields = {};
+    if (nom) userFields.nom = nom;
+    if (prenom) userFields.prenom = prenom;
+
+    if (req.file) {
+      userFields.photo = `/uploads/profils/${req.file.filename}`;
+    }
+    
+    let user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: userFields },
+      { new: true }
+    ).select('-password');
+
+    // 2. Mettre à jour le profil spécifique (Boutique ou Acheteur)
+    let profil = null;
+    
+    if (user.role === 'boutique') {
+      const boutiqueFields = {};
+      if (nomBoutique) boutiqueFields.nomBoutique = nomBoutique;
+      if (telephone) boutiqueFields.telephone = telephone;
+
+      profil = await Boutique.findByIdAndUpdate(
+        user._id,
+        { $set: boutiqueFields },
+        { new: true }
+      );
+    } else if (user.role === 'acheteur') {
+      const acheteurFields = {};
+      if (telephone) acheteurFields.telephone = telephone;
+      if (adresse) acheteurFields.adresseLivraisonParDefaut = adresse;
+
+      profil = await Acheteur.findByIdAndUpdate(
+        user._id,
+        { $set: acheteurFields },
+        { new: true }
+      );
+    }
+
+    res.json({ user, profil });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur serveur lors de la mise à jour');
+  }
+};

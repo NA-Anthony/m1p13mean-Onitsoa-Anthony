@@ -1,0 +1,91 @@
+<c-row>
+    <c-col xs="12">
+        <h4 class="mb-4">Mon Profil</h4>
+    </c-col>
+
+    @if (loading) {
+    <c-col xs="12" class="text-center py-5">
+        <c-spinner color="primary"></c-spinner>
+    </c-col>
+    } @else {
+    <c-col lg="4">
+        <c-card class="shadow-sm border-0 mb-4">
+            <c-card-body class="text-center py-4">
+                <c-avatar color="primary" size="xl" class="mb-3 text-white fw-bold" style="font-size: 2rem;">
+                    {{ userData?.prenom?.charAt(0) }}{{ userData?.nom?.charAt(0) }}
+                </c-avatar>
+                <h5 class="mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
+                <c-badge color="info" shape="rounded-pill">{{ userData?.role | titlecase }}</c-badge>
+
+                <hr class="my-4">
+
+                <div class="bg-light p-3 rounded shadow-sm">
+                    <div class="small text-muted mb-1">Solde du portefeuille</div>
+                    <h3 class="text-primary mb-0">{{ profilData?.solde || 0 | number:'1.2-2' }} €</h3>
+                </div>
+            </c-card-body>
+        </c-card>
+    </c-col>
+
+    <c-col lg="8">
+        <c-card class="shadow-sm border-0">
+            <c-card-header class="bg-white py-3">
+                <h6 class="mb-0 fw-bold">Informations Personnelles</h6>
+            </c-card-header>
+            <c-card-body>
+                @if (message) {
+                <c-alert [color]="message.type" dismissible>{{ message.text }}</c-alert>
+                }
+
+                <form (ngSubmit)="onSubmit()" #profilForm="ngForm">
+                    <c-row class="g-3">
+                        <c-col md="6">
+                            <label cLabel>Prénom</label>
+                            <input cFormControl name="prenom" [(ngModel)]="userData.prenom" required />
+                        </c-col>
+                        <c-col md="6">
+                            <label cLabel>Nom</label>
+                            <input cFormControl name="nom" [(ngModel)]="userData.nom" required />
+                        </c-col>
+                        <c-col md="12">
+                            <label cLabel>Email (Non modifiable)</label>
+                            <input cFormControl [value]="userData.email" readonly class="bg-light" />
+                        </c-col>
+                        <c-col md="12">
+                            <label cLabel>Téléphone</label>
+                            <input cFormControl name="telephone" [(ngModel)]="profilData.telephone"
+                                placeholder="Ex: 06 12 34 56 78" />
+                        </c-col>
+
+                        <h6 class="mt-4 mb-2 text-primary small fw-bold text-uppercase">Adresse par défaut</h6>
+                        <c-col md="8">
+                            <label cLabel>Rue</label>
+                            <input cFormControl name="rue" [(ngModel)]="profilData.adresseLivraisonParDefaut.rue" />
+                        </c-col>
+                        <c-col md="4">
+                            <label cLabel>Code Postal</label>
+                            <input cFormControl name="cp"
+                                [(ngModel)]="profilData.adresseLivraisonParDefaut.codePostal" />
+                        </c-col>
+                        <c-col md="6">
+                            <label cLabel>Ville</label>
+                            <input cFormControl name="ville" [(ngModel)]="profilData.adresseLivraisonParDefaut.ville" />
+                        </c-col>
+                        <c-col md="6">
+                            <label cLabel>Pays</label>
+                            <input cFormControl name="pays" [(ngModel)]="profilData.adresseLivraisonParDefaut.pays" />
+                        </c-col>
+                    </c-row>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                        <button cButton color="primary" type="submit" [disabled]="submitting">
+                            @if (submitting) { <c-spinner size="sm" class="me-2"></c-spinner> }
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </c-card-body>
+        </c-card>
+    </c-col>
+    }
+</c-row>
