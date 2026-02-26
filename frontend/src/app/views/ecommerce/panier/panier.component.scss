@@ -11,3 +11,24 @@
 .border-bottom:last-child {
   border-bottom: none !important;
 }
+
+// Style pour les badges de prix
+.text-primary {
+  color: var(--cui-primary) !important;
+}
+
+// Responsive design
+@media (max-width: 576px) {
+  .input-group {
+    max-width: 120px;
+    margin: 0 auto;
+  }
+
+  .text-end {
+    text-align: right !important;
+  }
+
+  .mt-2.mt-sm-0 {
+    margin-top: 0.5rem !important;
+  }
+}
