@@ -33,7 +33,7 @@
         @if (!loading && !error && commandes.length > 0) {
         <div class="commande-container">
             @for (cmd of commandes; track cmd._id) {
-            <div class="mb-4 p-3 border rounded shadow-sm bg-white">
+            <div class="mb-4 p-3 border rounded shadow-sm">
                 <c-row class="align-items-center mb-3 pb-2 border-bottom">
                     <c-col xs="12" sm="6" class="mb-2 mb-sm-0">
                         <div class="d-flex align-items-center gap-2">
@@ -95,7 +95,7 @@
                                 class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom-dashed">
                                 <div class="small">
                                     <span class="fw-semibold">{{ article.nomProduit }}</span>
-                                    <span class="text-muted ms-2">x{{ article.quantite }}</span>
+                                    <span class="text-body-secondary ms-2">x{{ article.quantite }}</span>
                                 </div>
                                 <div class="fw-bold small">
                                     {{ article.prixUnitaire * article.quantite | number:'1.2-2' }} €
@@ -105,7 +105,7 @@
                         </div>
                     </c-col>
 
-                    <c-col md="3" class="text-md-end bg-light-subtle rounded p-3">
+                    <c-col md="3" class="text-md-end bg-body-tertiary rounded p-3">
                         <div class="mb-3">
                             <div class="small text-body-secondary">Total commande</div>
                             <div class="fs-4 fw-bold text-primary">{{ cmd.total | number:'1.2-2' }} €</div>

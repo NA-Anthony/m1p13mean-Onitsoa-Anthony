@@ -13,7 +13,7 @@
     }
   </c-card-header>
 
-  <c-card-body class="bg-light-subtle">
+  <c-card-body>
     @if (loading) {
     <div class="text-center py-5"><c-spinner color="primary"></c-spinner></div>
     }
@@ -30,7 +30,7 @@
               </c-avatar>
               <div>
                 <div class="fw-bold">{{ commande.idAcheteur.prenom }} {{ commande.idAcheteur.nom }}</div>
-                <div class="small text-muted">{{ commande.idAcheteur.email }}</div>
+                <div class="small text-body-secondary">{{ commande.idAcheteur.email }}</div>
               </div>
             </div>
           </c-card-body>
@@ -76,10 +76,10 @@
           <c-card-body>
             <h6 class="text-primary mb-3 small fw-bold text-uppercase">Livraison & Statut</h6>
             <div class="mb-3">
-              <label class="small text-muted d-block">Statut actuel</label>
+              <label class="small text-body-secondary d-block">Statut actuel</label>
               <c-badge [color]="getStatutColor(commande.statut)">{{ commande.statut | titlecase }}</c-badge>
             </div>
-            <div class="p-3 rounded bg-light" *ngIf="commande.adresseLivraison">
+            <div class="p-3 rounded bg-body-tertiary" *ngIf="commande.adresseLivraison">
               <div class="fw-bold">{{ commande.adresseLivraison.rue || 'Adresse non spécifiée' }}</div>
               <div class="text-body-secondary small">
                 {{ commande.adresseLivraison.codePostal }} {{ commande.adresseLivraison.ville }}
@@ -91,7 +91,7 @@
         <c-card class="border-0 shadow-sm">
           <c-card-body>
             <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Sous-total</span>
+              <span class="text-body-secondary">Sous-total</span>
               <span>{{ getSousTotal() | number:'1.2-2' }} €</span>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">

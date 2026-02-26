@@ -95,7 +95,7 @@
               <c-col md="6" class="mb-3">
                 <div class="form-check p-3 border rounded h-100 cursor-pointer"
                   [class.border-primary]="checkoutForm.get('modePaiement')?.value === mode"
-                  [class.bg-light]="checkoutForm.get('modePaiement')?.value === mode">
+                  [class.bg-body-tertiary]="checkoutForm.get('modePaiement')?.value === mode">
                   <input type="radio" class="form-check-input ms-0" [id]="'mode' + mode" [value]="mode"
                     formControlName="modePaiement">
                   <label class="form-check-label ms-2 fw-semibold" [for]="'mode' + mode">

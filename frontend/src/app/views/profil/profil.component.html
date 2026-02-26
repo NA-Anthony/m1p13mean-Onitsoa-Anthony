@@ -2,8 +2,9 @@
     <c-col xs="12">
         <div class="d-flex align-items-center mb-4">
             <div>
-                <h3 class="mb-0 text-dark">Mon Profil</h3>
-                <p class="text-muted small mb-0">Gérez vos informations personnelles et paramètres de compte</p>
+                <h3 class="mb-0">Mon Profil</h3>
+                <p class="text-body-secondary small mb-0">Gérez vos informations personnelles et paramètres de compte
+                </p>
             </div>
         </div>
     </c-col>
@@ -20,26 +21,26 @@
             <c-card-body class="text-center pt-0" style="margin-top: -50px;">
                 <div class="position-relative d-inline-block mb-3">
                     @if (imagePreview) {
-                    <img [src]="imagePreview" class="rounded-circle border border-4 border-white shadow-lg bg-white"
+                    <img [src]="imagePreview" class="rounded-circle border border-4 border-body shadow-lg bg-body"
                         style="width: 110px; height: 110px; object-fit: cover;">
 
                     <button type="button"
-                        class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle shadow border-white"
+                        class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle shadow border-body"
                         (click)="removeImage()" [disabled]="uploadLoading"
-                        style="width: 30px; height: 30px; border: 2px solid white; ">
+                        style="width: 30px; height: 30px; border: 2px solid var(--cui-border-color); ">
                         <svg cIcon name="cil-trash" size="sm"></svg>
                     </button>
                     } @else {
-                    <div class="rounded-circle border border-4 border-white shadow-lg bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                    <div class="rounded-circle border border-4 border-body shadow-lg bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
                         style="width: 110px; height: 110px; font-size: 2.2rem; fw-bold">
                         {{ userData?.prenom?.charAt(0) }}{{ userData?.nom?.charAt(0) }}
                     </div>
                     }
 
                     <button type="button"
-                        class="btn btn-light btn-sm position-absolute bottom-0 end-0 rounded-circle shadow border-white"
+                        class="btn btn-light btn-sm position-absolute bottom-0 end-0 rounded-circle shadow border-body"
                         (click)="fileInput.click()" [disabled]="uploadLoading"
-                        style="width: 34px; height: 34px; border: 1px solid #ddd;">
+                        style="width: 34px; height: 34px; border: 1px solid var(--cui-border-color);">
                         <svg cIcon name="cil-camera" size="sm"></svg>
                     </button>
                     <input #fileInput type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)" />
@@ -50,26 +51,27 @@
                     <c-progress [height]="4" class="mb-1">
                         <c-progress-bar [value]="uploadProgress"></c-progress-bar>
                     </c-progress>
-                    <span class="small text-muted">{{ uploadProgress }}% chargé</span>
+                    <span class="small text-body-secondary">{{ uploadProgress }}% chargé</span>
                 </div>
                 }
 
-                <h5 class="fw-bold text-dark mt-2 mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
+                <h5 class="fw-bold mt-2 mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
                 <c-badge [color]="userData?.role === 'boutique' ? 'success' : 'info'" variant="outline" class="px-3">
                     {{ userData?.role | titlecase }}
                 </c-badge>
 
                 <hr class="my-4 opacity-25">
 
-                <div class="mx-2 mb-2 p-3 rounded-4 bg-light border-0 shadow-none d-flex align-items-center">
-                    <div class="flex-shrink-0 bg-white p-2 rounded-3 shadow-sm me-3 text-primary">
+                <div class="mx-2 mb-2 p-3 rounded-4 bg-body-tertiary border-0 shadow-none d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-body p-2 rounded-3 shadow-sm me-3 text-primary border">
                         <svg cIcon [name]="userData?.role === 'boutique' ? 'cil-bank' : 'cil-wallet'" size="lg"></svg>
                     </div>
                     <div class="text-start">
-                        <div class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">
+                        <div class="text-uppercase text-body-secondary fw-bold"
+                            style="font-size: 0.65rem; letter-spacing: 1px;">
                             {{ userData?.role === 'boutique' ? 'Caisse Boutique' : 'Solde Portefeuille' }}
                         </div>
-                        <div class="fs-4 fw-bold text-dark">
+                        <div class="fs-4 fw-bold">
                             {{ (userData?.role === 'boutique' ? profilData?.caisse : profilData?.solde) || 0 |
                             number:'1.2-2' }} €
                         </div>
@@ -81,9 +83,9 @@
 
     <c-col lg="8">
         <c-card class="shadow-sm border-0 mb-4">
-            <c-card-header class="bg-white border-bottom py-3">
+            <c-card-header class="border-bottom py-3">
                 <div class="d-flex align-items-center">
-                    <svg cIcon name="cil-settings" class="me-2 text-muted"></svg>
+                    <svg cIcon name="cil-settings" class="me-2 text-body-secondary"></svg>
                     <h6 class="mb-0 fw-bold">Paramètres du profil</h6>
                 </div>
             </c-card-header>
@@ -100,21 +102,20 @@
                 <form (ngSubmit)="onSubmit()" #profilForm="ngForm">
                     <c-row class="g-4">
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Prénom</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Prénom</label>
                             <input cFormControl name="prenom" [(ngModel)]="userData.prenom"
                                 placeholder="Votre prénom" />
                         </c-col>
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Nom</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Nom</label>
                             <input cFormControl name="nom" [(ngModel)]="userData.nom" placeholder="Votre nom" />
                         </c-col>
 
                         @if (userData?.role === 'boutique') {
                         <c-col md="12">
-                            <label cLabel class="fw-semibold small text-muted">Nom de l'établissement</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Nom de l'établissement</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><svg cIcon
-                                        name="cil-store"></svg></span>
+                                <span class="input-group-text border-end-0"><svg cIcon name="cil-store"></svg></span>
                                 <input cFormControl class="border-start-0" name="nomBoutique"
                                     [(ngModel)]="profilData.nomBoutique" />
                             </div>
@@ -122,13 +123,13 @@
                         }
 
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Adresse Email</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Adresse Email</label>
                             <input cFormControl [value]="userData.email" readonly
-                                class="bg-light text-muted cursor-not-allowed" />
+                                class="bg-body-tertiary text-body-secondary cursor-not-allowed" />
                         </c-col>
 
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Numéro de téléphone</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Numéro de téléphone</label>
                             <input cFormControl name="telephone" [(ngModel)]="profilData.telephone"
                                 placeholder="+33 6 ..." />
                         </c-col>
@@ -142,27 +143,27 @@
                             </div>
                         </c-col>
                         <c-col md="8">
-                            <label cLabel class="fw-semibold small text-muted">Rue et numéro</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Rue et numéro</label>
                             <input cFormControl name="rue" [(ngModel)]="profilData.adresseLivraisonParDefaut.rue" />
                         </c-col>
                         <c-col md="4">
-                            <label cLabel class="fw-semibold small text-muted">Code Postal</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Code Postal</label>
                             <input cFormControl name="cp"
                                 [(ngModel)]="profilData.adresseLivraisonParDefaut.codePostal" />
                         </c-col>
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Ville</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Ville</label>
                             <input cFormControl name="ville" [(ngModel)]="profilData.adresseLivraisonParDefaut.ville" />
                         </c-col>
                         <c-col md="6">
-                            <label cLabel class="fw-semibold small text-muted">Pays</label>
+                            <label cLabel class="fw-semibold small text-body-secondary">Pays</label>
                             <input cFormControl name="pays" [(ngModel)]="profilData.adresseLivraisonParDefaut.pays" />
                         </c-col>
                         }
                     </c-row>
 
-                    <div class="mt-5 d-flex justify-content-end gap-3 bg-light p-3 rounded-3">
-                        <button cButton color="link" type="button" class="text-decoration-none text-secondary"
+                    <div class="mt-5 d-flex justify-content-end gap-3 bg-body-tertiary p-3 rounded-3">
+                        <button cButton color="link" type="button" class="text-decoration-none text-body-secondary"
                             (click)="loadUserInfo()" [disabled]="submitting">
                             Réinitialiser
                         </button>
