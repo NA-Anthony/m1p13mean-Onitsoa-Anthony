@@ -1,0 +1,263 @@
+<c-row>
+  <c-col md="8" class="mx-auto">
+    <c-card class="shadow-sm">
+      <c-card-header class="bg-primary text-white">
+        <h5 class="mb-0">
+          <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+          {{ isEditMode ? 'Modifier l\'avis' : 'Nouvel avis' }}
+        </h5>
+      </c-card-header>
+      
+      <c-card-body>
+        <!-- Messages -->
+        @if (successMessage) {
+          <c-alert color="success" class="mb-3">
+            <svg cIcon name="cil-check" class="me-2"></svg>
+            {{ successMessage }}
+          </c-alert>
+        }
+
+        @if (error) {
+          <c-alert color="danger" class="mb-3">
+            <svg cIcon name="cil-warning" class="me-2"></svg>
+            {{ error }}
+          </c-alert>
+        }
+
+        @if (loading) {
+          <div class="text-center py-5">
+            <c-spinner color="primary"></c-spinner>
+            <p class="mt-2">Chargement...</p>
+          </div>
+        }
+
+        @if (!loading) {
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                @if (!isEditMode) {
+                  <span [class.text-primary]="getProgressValue() >= 30">Boutique & Produits</span>
+                  <span [class.text-primary]="getProgressValue() >= 60">Note</span>
+                  <span [class.text-primary]="getProgressValue() >= 100">Commentaire</span>
+                } @else {
+                  <span [class.text-primary]="getProgressValue() >= 50">Note</span>
+                  <span [class.text-primary]="getProgressValue() >= 100">Commentaire</span>
+                }
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <!-- Sélection boutique (uniquement en mode création) -->
+              @if (!isEditMode) {
+                <c-col md="12" class="mb-3">
+                  <label cLabel for="boutiqueId" class="fw-semibold">Boutique *</label>
+                  <select 
+                    cInput 
+                    id="boutiqueId" 
+                    formControlName="boutiqueId" 
+                    class="form-select"
+                    (change)="onBoutiqueChange($any($event.target).value)"
+                  >
+                    <option value="">Sélectionnez une boutique</option>
+                    @for (b of boutiques; track b.id || b._id) {
+                      <option [value]="b.id || b._id">{{ b.nomBoutique }}</option>
+                    }
+                  </select>
+                  @if (form.get('boutiqueId')?.invalid && form.get('boutiqueId')?.touched) {
+                    <div class="text-danger small mt-1">
+                      <svg cIcon name="cil-warning" size="sm"></svg>
+                      La boutique est requise
+                    </div>
+                  }
+                </c-col>
+              }
+
+              <!-- En mode édition, afficher la boutique et le produit concerné -->
+              @if (isEditMode && selectedProduit) {
+                <c-col md="12" class="mb-3">
+                  <label class="fw-semibold">Boutique</label>
+                  <div class="form-control bg-light mb-3">
+                    {{ selectedBoutique?.nomBoutique || 'Boutique' }}
+                  </div>
+                  
+                  <label class="fw-semibold">Produit concerné</label>
+                  <div class="bg-light p-3 rounded">
+                    <div class="d-flex align-items-center">
+                      <c-avatar 
+                        [src]="selectedProduit.produit?.image || selectedProduit.idProduit?.image || 'assets/images/products/default.webp'" 
+                        [size]="'lg'"
+                        class="me-3"
+                      ></c-avatar>
+                      <div>
+                        <div class="fw-semibold">{{ selectedProduit.produit?.nom || selectedProduit.idProduit?.nom }}</div>
+                        <small class="text-body-secondary">{{ selectedProduit.boutique?.nomBoutique || selectedProduit.idBoutique?.nomBoutique }}</small>
+                      </div>
+                    </div>
+                  </div>
+                </c-col>
+              }
+
+              <!-- Liste des produits (uniquement en mode création) -->
+              @if (!isEditMode && selectedBoutique) {
+                <c-col md="12" class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="fw-semibold">Produits que vous avez reçus *</label>
+                    <span class="badge bg-primary">{{ getProduitsSelectionnesCount() }} sélectionné(s)</span>
+                  </div>
+
+                  <!-- Barre de recherche produits -->
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">
+                      <svg cIcon name="cil-search"></svg>
+                    </span>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      placeholder="Rechercher un produit..." 
+                      [(ngModel)]="searchTerm"
+                      [ngModelOptions]="{standalone: true}"
+                      (input)="filterProduits()"
+                    >
+                  </div>
+
+                  @if (loadingProduits) {
+                    <div class="text-center py-3">
+                      <c-spinner color="primary" size="sm"></c-spinner>
+                      <p class="mt-2 small">Chargement des produits...</p>
+                    </div>
+                  } @else {
+                    <!-- Liste des produits -->
+                    <div class="produits-list border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+                      @if (produitsFiltres.length === 0) {
+                        <p class="text-body-secondary text-center py-3">
+                          @if (searchTerm) {
+                            Aucun produit ne correspond à votre recherche
+                          } @else {
+                            Vous n'avez pas encore reçu de produits de cette boutique
+                          }
+                        </p>
+                      } @else {
+                        @for (p of produitsFiltres; track p._id) {
+                          <div 
+                            class="produit-item d-flex align-items-center p-2 border-bottom"
+                            [class.bg-light]="isProduitSelectionne(p._id)"
+                            style="cursor: pointer;"
+                            (click)="toggleProduit(p._id)"
+                          >
+                            <c-avatar 
+                              [src]="p.produit?.image || p.idProduit?.image || 'assets/images/products/default.webp'" 
+                              [size]="'sm'"
+                              class="me-2"
+                            ></c-avatar>
+                            <div class="flex-grow-1">
+                              <div class="fw-semibold small">{{ p.produit?.nom || p.idProduit?.nom }}</div>
+                              <div class="small text-body-secondary">
+                                {{ p.prix }} €
+                                @if (p.enPromotion && p.prixPromo) {
+                                  <span class="text-danger ms-2">-{{ ((p.prix - p.prixPromo) / p.prix * 100) | number:'1.0-0' }}%</span>
+                                }
+                              </div>
+                            </div>
+                            @if (isProduitSelectionne(p.id)) {
+                              <svg cIcon name="cil-check" class="text-success"></svg>
+                            }
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </c-col>
+              }
+              
+              <!-- Note (modifiable dans les deux modes) -->
+              <c-col md="12" class="mb-3">
+                <label cLabel for="note" class="fw-semibold">Note *</label>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                  @for (n of notes; track n) {
+                    <div class="form-check">
+                      <input 
+                        type="radio" 
+                        class="form-check-input" 
+                        [id]="'note' + n"
+                        [value]="n"
+                        formControlName="note"
+                      >
+                      <label class="form-check-label" [for]="'note' + n">
+                        <span class="d-flex align-items-center">
+                          @for (i of [1,2,3,4,5]; track i) {
+                            <svg cIcon 
+                              name="cil-star" 
+                              size="sm"
+                              [ngClass]="{'text-warning': i <= n, 'text-secondary': i > n}"
+                            ></svg>
+                          }
+                        </span>
+                      </label>
+                    </div>
+                  }
+                </div>
+                @if (form.get('note')?.invalid && form.get('note')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    La note est requise
+                  </div>
+                }
+              </c-col>
+              
+              <!-- Commentaire (modifiable dans les deux modes) -->
+              <c-col md="12" class="mb-3">
+                <label cLabel for="commentaire" class="fw-semibold">Commentaire *</label>
+                <textarea 
+                  cInput 
+                  id="commentaire" 
+                  formControlName="commentaire" 
+                  rows="4" 
+                  class="form-control"
+                  placeholder="Partagez votre expérience avec ces produits..."
+                ></textarea>
+                @if (form.get('commentaire')?.invalid && form.get('commentaire')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Le commentaire est requis
+                  </div>
+                }
+              </c-col>
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button 
+                  cButton 
+                  color="secondary" 
+                  type="button" 
+                  routerLink="/avis"
+                  [disabled]="saving"
+                >
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button 
+                  cButton 
+                  color="primary" 
+                  type="submit" 
+                  [disabled]="form.invalid || (!isEditMode && getProduitsSelectionnesCount() === 0) || saving"
+                >
+                  @if (saving) {
+                    <c-spinner size="sm" class="me-2"></c-spinner>
+                  }
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ saving ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer ' + (getProduitsSelectionnesCount() > 1 ? 'les avis' : 'l\'avis')) }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>

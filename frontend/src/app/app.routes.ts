@@ -134,10 +134,10 @@ export const routes: Routes = [
         path: 'commandes',
         loadChildren: () => import('./views/commande/routes').then((m) => m.routes)
       },
-      // {
-      //   path: 'avis',
-      //   loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
-      // },
+      {
+        path: 'avis',
+        loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
+      },
       // {
       //   path: 'livraisons',
       //   loadChildren: () => import('./views/livraison/routes').then((m) => m.routes)
