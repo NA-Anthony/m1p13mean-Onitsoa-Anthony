@@ -9,7 +9,8 @@ const acheteurSchema = new mongoose.Schema({
     codePostal: String,
     pays: { type: String, default: 'France' }
   },
-  preferences: [String]
+  preferences: [String],
+  solde: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Acheteur', acheteurSchema);

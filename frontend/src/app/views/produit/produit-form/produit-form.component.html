@@ -1,0 +1,261 @@
+<c-card class="shadow-sm">
+  <c-card-header class="bg-primary text-white">
+    <h5 class="mb-0">
+      <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+      {{ isEditMode ? 'Modifier le produit' : 'Nouveau produit' }}
+    </h5>
+  </c-card-header>
+  
+  <c-card-body>
+    <!-- Messages de notification -->
+    @if (successMessage) {
+      <c-alert color="success" class="mb-3">
+        <svg cIcon name="cil-check" class="me-2"></svg>
+        {{ successMessage }}
+      </c-alert>
+    }
+
+    @if (error) {
+      <c-alert color="danger" class="mb-3">
+        <svg cIcon name="cil-warning" class="me-2"></svg>
+        {{ error }}
+      </c-alert>
+    }
+
+    <form [formGroup]="produitForm" (ngSubmit)="onSubmit()">
+      <!-- Barre de progression -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between mb-2 small">
+          <span [class.text-primary]="getProgressValue() >= 30">Nom</span>
+          <span [class.text-primary]="getProgressValue() >= 50">Description</span>
+          <span [class.text-primary]="getProgressValue() >= 70">Catégorie</span>
+          <span [class.text-primary]="getProgressValue() >= 80">Image</span>
+          <span [class.text-primary]="getProgressValue() >= 100">Caract.</span>
+        </div>
+        <c-progress [height]="5">
+          <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+        </c-progress>
+      </div>
+      
+      <c-row>
+        <c-col md="8" class="mb-3">
+          <label cLabel for="nom" class="fw-semibold">Nom du produit *</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-tag"></svg>
+            </span>
+            <input 
+              cInput 
+              type="text" 
+              id="nom" 
+              formControlName="nom" 
+              class="form-control"
+              placeholder="Nom du produit"
+            />
+          </div>
+          @if (produitForm.get('nom')?.invalid && produitForm.get('nom')?.touched) {
+            <div class="text-danger small mt-1">
+              <svg cIcon name="cil-warning" size="sm"></svg>
+              Le nom est requis
+            </div>
+          }
+        </c-col>
+        
+        <c-col md="4" class="mb-3">
+          <label cLabel for="categorie" class="fw-semibold">Catégorie *</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-grid"></svg>
+            </span>
+            <select cInput id="categorie" formControlName="categorie" class="form-select">
+              @for (cat of categories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+        </c-col>
+        
+        <c-col md="12" class="mb-3">
+          <label cLabel for="description" class="fw-semibold">Description</label>
+          <textarea 
+            cInput 
+            id="description" 
+            formControlName="description" 
+            rows="3" 
+            class="form-control"
+            placeholder="Description du produit..."
+          ></textarea>
+        </c-col>
+        
+        <!-- Upload d'image -->
+        <c-col md="8" class="mb-3">
+          <label cLabel for="file-upload" class="fw-semibold">Image du produit</label>
+          
+          <div class="border rounded p-3 text-center bg-light">
+            <!-- Prévisualisation -->
+            @if (imagePreview) {
+              <div class="mb-3 position-relative">
+                <img 
+                  [src]="imagePreview" 
+                  alt="Aperçu du produit" 
+                  class="img-fluid rounded border"
+                  style="max-height: 120px; object-fit: contain;"
+                >
+                <!-- Bouton delete -->
+                <button 
+                  type="button"
+                  class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                  (click)="removeImage()"
+                  [disabled]="uploadLoading"
+                  style="border-radius: 50%; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                >
+                  <svg cIcon name="cil-trash" size="sm"></svg>
+                </button>
+              </div>
+            }
+            
+            <!-- Upload progress -->
+            @if (uploadLoading) {
+              <div class="mb-2">
+                <c-progress [height]="5" class="mb-2">
+                  <c-progress-bar [value]="uploadProgress" color="primary"></c-progress-bar>
+                </c-progress>
+                <small class="text-body-secondary">Upload en cours... {{ uploadProgress }}%</small>
+              </div>
+            }
+            
+            <!-- Bouton de sélection -->
+            <div class="d-flex justify-content-center">
+              <label 
+                for="file-upload" 
+                class="btn btn-outline-primary" 
+                [class.disabled]="uploadLoading"
+                style="cursor: pointer;"
+              >
+                <svg cIcon name="cilCloudDownload" class="me-2"></svg>
+                {{ imagePreview ? 'Changer l\'image' : 'Sélectionner une image' }}
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                class="d-none"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                [disabled]="uploadLoading"
+              />
+            </div>
+            
+            <small class="text-body-secondary d-block mt-2">
+              <svg cIcon name="cil-info" size="sm"></svg>
+              Formats acceptés: JPG, PNG, GIF. Max 5MB.
+            </small>
+          </div>
+          
+          <!-- Champ caché pour stocker l'URL de l'image -->
+          <input type="hidden" formControlName="image">
+        </c-col>
+        
+        <c-col md="4" class="mb-3">
+          <label cLabel for="datePeremption" class="fw-semibold">Date de péremption</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-calendar"></svg>
+            </span>
+            <input 
+              cInput 
+              type="date" 
+              id="datePeremption" 
+              formControlName="datePeremption" 
+              class="form-control"
+            />
+          </div>
+        </c-col>
+      </c-row>
+      
+      <!-- Caractéristiques -->
+      <h6 class="text-primary mt-3 mb-3">
+        <svg cIcon name="cil-list" class="me-2"></svg>
+        Caractéristiques
+      </h6>
+      
+      <c-row class="mb-3">
+        <c-col xs="12">
+          @for (carac of caracteristiques; track trackByIndex($index)) {
+            <c-row class="mb-2">
+              <c-col md="5">
+                <input 
+                  type="text" 
+                  class="form-control form-control-sm" 
+                  placeholder="Nom (ex: couleur)"
+                  [ngModel]="carac.key"
+                  (ngModelChange)="carac.key = $event; updateCaracteristiques()"
+                  [ngModelOptions]="{standalone: true}"
+                >
+              </c-col>
+              <c-col md="5">
+                <input 
+                  type="text" 
+                  class="form-control form-control-sm" 
+                  placeholder="Valeur (ex: rouge)"
+                  [ngModel]="carac.value"
+                  (ngModelChange)="carac.value = $event; updateCaracteristiques()"
+                  [ngModelOptions]="{standalone: true}"
+                >
+              </c-col>
+              <c-col md="2">
+                <button 
+                  cButton 
+                  color="danger" 
+                  size="sm" 
+                  class="w-100"
+                  (click)="removeCaracteristique($index)"
+                >
+                  <svg cIcon name="cil-trash"></svg>
+                </button>
+              </c-col>
+            </c-row>
+          }
+          
+          <button 
+            cButton 
+            color="info" 
+            size="sm" 
+            class="mt-2"
+            (click)="addCaracteristique()"
+          >
+            <svg cIcon name="cil-plus" class="me-2"></svg>
+            Ajouter une caractéristique
+          </button>
+        </c-col>
+      </c-row>
+      
+      <!-- Actions -->
+      <c-row class="mt-4">
+        <c-col class="d-flex gap-2 justify-content-end">
+          <button 
+            cButton 
+            color="secondary" 
+            type="button" 
+            routerLink="/produits"
+            [disabled]="loading || uploadLoading"
+          >
+            <svg cIcon name="cil-x" class="me-2"></svg>
+            Annuler
+          </button>
+          <button 
+            cButton 
+            color="primary" 
+            type="submit" 
+            [disabled]="produitForm.invalid || loading || uploadLoading"
+          >
+            @if (loading) {
+              <c-spinner size="sm" class="me-2"></c-spinner>
+            }
+            <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+            {{ loading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer le produit') }}
+          </button>
+        </c-col>
+      </c-row>
+    </form>
+  </c-card-body>
+</c-card>

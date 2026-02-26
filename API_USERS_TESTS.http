@@ -1,0 +1,77 @@
+### Test API Utilisateurs
+
+@baseUrl = http://localhost:3000/api
+@token = YOUR_JWT_TOKEN_HERE
+
+### 1️⃣ Connexion (récupérer le JWT)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "jean.dupont@email.com",
+  "password": "password123"
+}
+
+### 2️⃣ Lister tous les utilisateurs
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### 3️⃣ Récupérer un utilisateur spécifique
+# Remplacez :id par un ID réel
+GET {{baseUrl}}/users/:id
+Authorization: Bearer {{token}}
+
+### 4️⃣ Créer un nouvel utilisateur
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nom": "Nouveau",
+  "prenom": "Utilisateur",
+  "email": "nouveau.user@test.com",
+  "role": "acheteur",
+  "photo": "https://example.com/photo.jpg",
+  "actif": true
+}
+
+### 5️⃣ Modifier un utilisateur
+# Remplacez :id par un ID réel
+PUT {{baseUrl}}/users/:id
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nom": "NomModifié",
+  "prenom": "PrenomModifié",
+  "photo": "https://example.com/new-photo.jpg"
+}
+
+### 6️⃣ Activer/Désactiver un utilisateur
+# Remplacez :id par un ID réel
+PUT {{baseUrl}}/users/:id/toggle-actif
+Authorization: Bearer {{token}}
+
+### 7️⃣ Changer le mot de passe
+# Remplacez :id par un ID réel
+PUT {{baseUrl}}/users/:id/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "newPassword": "newPassword123"
+}
+
+### 8️⃣ Supprimer un utilisateur
+# Remplacez :id par un ID réel
+DELETE {{baseUrl}}/users/:id
+Authorization: Bearer {{token}}
+
+### 9️⃣ Obtenir les statistiques utilisateurs
+GET {{baseUrl}}/users/stats
+Authorization: Bearer {{token}}
+
+### 🔟 Obtenir les utilisateurs par rôle
+# Valeurs: admin, boutique, acheteur
+GET {{baseUrl}}/users/role/acheteur
+Authorization: Bearer {{token}}

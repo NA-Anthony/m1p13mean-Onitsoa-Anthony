@@ -1,0 +1,167 @@
+<!-- En-tête avec statistiques -->
+<c-row class="mb-4">
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-primary">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalLivraisons() }}</div>
+            <div>Total livraisons</div>
+          </div>
+          <svg cIcon name="cil-truck" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-warning">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalEnAttente() }}</div>
+            <div>En attente</div>
+          </div>
+          <svg cIcon name="cil-clock" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-info">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalEnCours() }}</div>
+            <div>En cours</div>
+          </div>
+          <svg cIcon name="cil-media-play" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col sm="6" lg="3">
+      <c-card class="text-white bg-success">
+        <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ getTotalLivrees() }}</div>
+            <div>Livrées</div>
+          </div>
+          <svg cIcon name="cil-check" size="xl"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+  
+  <!-- Filtres et recherche -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <c-row class="align-items-center">
+        <c-col md="4" class="mb-3 mb-md-0">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg cIcon name="cil-search"></svg>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher livraison, commande, livreur..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterLivraisons()"
+            >
+          </div>
+        </c-col>
+        <c-col md="2" class="mb-3 mb-md-0">
+          <select class="form-select" [(ngModel)]="filterStatut" (change)="filterLivraisons()">
+            <option value="">Tous statuts</option>
+            @for (s of statuts; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </c-col>
+        <c-col md="4" class="mb-3 mb-md-0">
+          <div class="text-body-secondary small">
+            <svg cIcon name="cil-filter" class="me-1"></svg>
+            {{ filteredLivraisons.length }} résultat(s)
+          </div>
+        </c-col>
+        <c-col md="2" class="text-end">
+          <button cButton color="primary" routerLink="nouveau">
+            <svg cIcon name="cil-plus" class="me-2"></svg>
+            Nouvelle livraison
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+  
+  <!-- Liste des livraisons -->
+  <c-row>
+    @for (l of filteredLivraisons; track l._id) {
+      <c-col xs="12" class="mb-3">
+        <c-card class="shadow-sm livraison-card" (click)="voirDetails(l._id)">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div class="fw-semibold">{{ l._id }}</div>
+                <small class="text-body-secondary">Commande {{ l.idCommande }}</small>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div class="fw-semibold">{{ l.livreur || 'Non assigné' }}</div>
+                <small class="text-body-secondary">{{ l.numeroSuivi || 'Pas de suivi' }}</small>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <div class="small">
+                  <div>Estimée: {{ formatDate(l.dateEstimee) }}</div>
+                  @if (l.dateLivraison) {
+                    <div class="text-success">Livrée: {{ formatDate(l.dateLivraison) }}</div>
+                  }
+                </div>
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <span class="badge" [ngClass]="'bg-' + getStatutInfo(l.statut).color">
+                  {{ getStatutInfo(l.statut).label }}
+                </span>
+                @if (getEstEnRetard(l)) {
+                  <span class="badge bg-danger ms-2">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    Retard
+                  </span>
+                }
+              </c-col>
+              
+              <c-col md="2" class="mb-3 mb-md-0">
+                <small class="text-body-secondary">
+                  {{ l.commande?.articles?.length || 0 }} article(s)
+                </small>
+              </c-col>
+              
+              <c-col md="2" class="text-end" (click)="$event.stopPropagation()">
+                <div class="btn-group" role="group">
+                  <button cButton color="info" size="sm" [routerLink]="[l._id]" class="me-1">
+                    <svg cIcon name="cil-magnifying-glass"></svg>
+                  </button>
+                  <button cButton color="warning" size="sm" [routerLink]="[l._id, 'edit']" class="me-1">
+                    <svg cIcon name="cil-pencil"></svg>
+                  </button>
+                  <button cButton color="danger" size="sm" (click)="deleteLivraison(l._id)">
+                    <svg cIcon name="cil-trash"></svg>
+                  </button>
+                </div>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    } @empty {
+      <c-col>
+        <c-card class="text-center py-5">
+          <c-card-body>
+            <svg cIcon name="cil-truck" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5>Aucune livraison trouvée</h5>
+            <p class="text-body-secondary mb-3">Commencez par créer une nouvelle livraison</p>
+            <button cButton color="primary" routerLink="nouveau">
+              <svg cIcon name="cil-plus" class="me-2"></svg>
+              Créer une livraison
+            </button>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    }
+  </c-row>

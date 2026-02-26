@@ -1,0 +1,42 @@
+// Styles pour les cartes
+.c-card {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+  }
+}
+
+// Styles pour les badges
+.badge {
+  &.bg-warning { background-color: #f9b115; }
+  &.bg-info { background-color: #39f; }
+  &.bg-primary { background-color: #321fdb; }
+  &.bg-success { background-color: #2eb85c; }
+  &.bg-danger { background-color: #e55353; }
+}
+
+// Styles pour les barres de progression
+.progress {
+  background-color: #e9ecef;
+  
+  .progress-bar {
+    transition: width 0.3s ease;
+  }
+}
+
+// Styles pour le tableau
+.table-hover tbody tr:hover {
+  background-color: rgba(50, 31, 219, 0.05);
+  cursor: pointer;
+}
+
+// Styles pour la liste des top boutiques
+.list-group-item {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}

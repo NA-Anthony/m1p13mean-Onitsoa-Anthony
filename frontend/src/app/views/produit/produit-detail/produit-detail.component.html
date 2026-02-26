@@ -1,0 +1,134 @@
+<!-- Indicateur de chargement -->
+@if (loading) {
+  <div class="text-center py-5">
+    <c-spinner color="primary"></c-spinner>
+    <p class="mt-2">Chargement du produit...</p>
+  </div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+  <c-alert color="danger" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    {{ error }}
+  </c-alert>
+}
+
+<!-- Contenu du produit -->
+@if (!loading && !error && produit) {
+  <c-row>
+    <c-col md="4" class="mb-4">
+      <c-card class="shadow-sm text-center">
+        <c-card-body>
+          <c-avatar 
+            [src]="produit?.image || 'assets/images/products/default.jpg'" 
+            [size]="'xxl'"
+            class="mb-3 mx-auto border border-3 border-primary"
+            style="width: 150px; height: 150px;"
+          ></c-avatar>
+          <h4>{{ produit?.nom }}</h4>
+          
+          <div class="mb-3">
+            <span class="badge me-1" [ngClass]="'bg-' + getCategorieColor()">
+              <svg cIcon [name]="getCategorieIcon()" size="sm" class="me-1"></svg>
+              {{ getCategorieLabel() }}
+            </span>
+            @if (produit?.datePeremption) {
+              <span class="badge" [ngClass]="isPerime() ? 'bg-danger' : 'bg-success'">
+                <svg cIcon name="cil-calendar" size="sm" class="me-1"></svg>
+                {{ isPerime() ? 'Périmé' : 'Valide' }}
+              </span>
+            }
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button cButton color="warning" [routerLink]="['/produits', produit?._id, 'edit']">
+              <svg cIcon name="cil-pencil" class="me-2"></svg>
+              Modifier
+            </button>
+            <button cButton color="secondary" routerLink="/produits">
+              <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+              Retour
+            </button>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <c-col md="8">
+      <c-row>
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-info" class="me-2"></svg>
+              Description
+            </c-card-header>
+            <c-card-body>
+              <p>{{ produit?.description || 'Aucune description' }}</p>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-tags" class="me-2"></svg>
+              Caractéristiques
+            </c-card-header>
+            <c-card-body>
+              @if (produit?.caracteristiques && objectKeys(produit?.caracteristiques).length > 0) {
+                <div class="list-group">
+                  @for (key of objectKeys(produit?.caracteristiques); track key) {
+                    <div class="list-group-item d-flex justify-content-between">
+                      <span class="fw-semibold">{{ key | titlecase }}</span>
+                      <span>{{ produit?.caracteristiques[key] }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-body-secondary">Aucune caractéristique</p>
+              }
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <c-col md="6" class="mb-4">
+          <c-card class="shadow-sm h-100">
+            <c-card-header>
+              <svg cIcon name="cil-calendar" class="me-2"></svg>
+              Informations
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Créé le</span>
+                  <span>{{ formatDate(produit?.createdAt) }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Mis à jour le</span>
+                  <span>{{ formatDate(produit?.updatedAt) || 'Jamais' }}</span>
+                </div>
+                @if (produit?.datePeremption) {
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span class="fw-semibold">Date de péremption</span>
+                    <span [class.text-danger]="isPerime()">
+                      {{ formatDate(produit?.datePeremption) }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+    </c-col>
+  </c-row>
+}
+
+<!-- Message si produit non trouvé -->
+@if (!loading && !error && !produit) {
+  <c-alert color="warning" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    Produit non trouvé
+  </c-alert>
+}

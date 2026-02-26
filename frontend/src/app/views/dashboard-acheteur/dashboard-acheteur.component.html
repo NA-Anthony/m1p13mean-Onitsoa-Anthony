@@ -1,0 +1,291 @@
+<!-- Indicateur de chargement -->
+@if (loading) {
+<div class="text-center py-5">
+  <c-spinner color="primary"></c-spinner>
+  <p class="mt-2">Chargement de votre tableau de bord...</p>
+</div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+<c-alert color="danger" class="text-center">
+  <svg cIcon name="cil-warning" class="me-2"></svg>
+  {{ error }}
+</c-alert>
+}
+
+<!-- Contenu du dashboard -->
+@if (!loading && !error) {
+<!-- En-tête avec informations personnelles -->
+<c-row class="mb-4">
+  <c-col md="8">
+    <c-card class="shadow-sm bg-primary text-white">
+      <c-card-body>
+        <h5 class="mb-3">
+          <svg cIcon name="cil-user" class="me-2"></svg>
+          Bienvenue sur votre espace acheteur
+        </h5>
+        <p class="mb-1"><strong>Téléphone:</strong> {{ telephone || 'Non renseigné' }}</p>
+        <p class="mb-0"><strong>Adresse:</strong> {{ adresse }}</p>
+      </c-card-body>
+    </c-card>
+  </c-col>
+  <c-col md="4">
+    <c-card class="shadow-sm bg-info text-white">
+      <c-card-body class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="fs-4 fw-semibold">{{ panierActuel }}</div>
+          <div>Articles dans le panier</div>
+        </div>
+        <svg cIcon name="cil-basket" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- En-tête avec KPIs -->
+<c-row class="mb-4">
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-primary">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ stats.commandes.total }}</div>
+          <div>Commandes</div>
+        </div>
+        <svg cIcon name="cil-cart" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-success">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ stats.commandes.enCours }}</div>
+          <div>En cours</div>
+        </div>
+        <svg cIcon name="cil-clock" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-warning">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ stats.commandes.livrees }}</div>
+          <div>Livrées</div>
+        </div>
+        <svg cIcon name="cil-check" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col sm="6" lg="3">
+    <c-card class="text-white bg-info">
+      <c-card-body class="pb-0 d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fs-4 fw-semibold">{{ formatMontant(stats.commandes.totalDepenses) }}</div>
+          <div>Dépensé</div>
+        </div>
+        <svg cIcon name="cil-dollar" size="xl"></svg>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- Graphique des dépenses -->
+<c-row class="mb-4">
+  <c-col xs="12">
+    <c-card class="shadow-sm">
+      <c-card-header>
+        <svg cIcon name="cil-chart" class="me-2"></svg>
+        Évolution de vos dépenses (6 derniers mois)
+      </c-card-header>
+      <c-card-body>
+        <c-chart type="bar" [data]="depensesChart"></c-chart>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- Commandes en cours et recommandations -->
+<c-row class="mb-4">
+  <c-col md="6">
+    <c-card class="shadow-sm h-100">
+      <c-card-header class="bg-primary text-white">
+        <svg cIcon name="cil-clock" class="me-2"></svg>
+        Commandes en cours
+      </c-card-header>
+      <c-card-body>
+        @if (commandesEnCours.length > 0) {
+        @for (c of commandesEnCours; track c._id) {
+        <div class="mb-3 p-3 border rounded">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <span class="fw-semibold">Commande #{{ c._id }}</span>
+              <span class="badge ms-2" [ngClass]="'bg-' + getStatutClass(c.statut)">
+                {{ c.statut }}
+              </span>
+            </div>
+            <div class="fw-bold">{{ formatMontant(c.total) }}</div>
+          </div>
+
+          <c-progress [height]="5" class="mb-2">
+            <c-progress-bar [value]="getProgressValue(c.statut)" [color]="getStatutClass(c.statut)"></c-progress-bar>
+          </c-progress>
+
+          <div class="d-flex justify-content-between small">
+            <span>{{ formatDateSimple(c.dateCommande) }}</span>
+            <span>{{ c.articles }} article(s)</span>
+            <button cButton color="info" size="sm" [routerLink]="['/commandes', c._id]">
+              Détails
+            </button>
+          </div>
+        </div>
+        }
+        } @else {
+        <p class="text-body-secondary text-center">Aucune commande en cours</p>
+        }
+        @if (commandesEnCours.length > 0) {
+        <div class="text-center mt-2">
+          <a routerLink="/commandes" class="small">Voir toutes mes commandes</a>
+        </div>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col md="6">
+    <c-card class="shadow-sm h-100">
+      <c-card-header class="bg-warning text-white">
+        <svg cIcon name="cil-star" class="me-2"></svg>
+        Recommandations pour vous
+      </c-card-header>
+      <c-card-body>
+        @if (stats.recommandations.length > 0) {
+        @for (p of stats.recommandations; track p._id) {
+        <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom">
+          <c-avatar [src]="p.image || 'assets/images/products/default.webp'" [size]="'md'"></c-avatar>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ p.nom }}</div>
+            <small class="text-body-secondary">{{ p.boutique }}</small>
+            @if (p.enPromotion && p.prixPromo) {
+            <div>
+              <span class="text-decoration-line-through text-body-secondary me-2">
+                {{ p.prix }} €
+              </span>
+              <span class="fw-bold text-danger">{{ p.prixPromo }} €</span>
+            </div>
+            } @else {
+            <div class="fw-bold">{{ p.prix }} €</div>
+            }
+          </div>
+          <button cButton color="primary" size="sm" (click)="ajouterAuPanier(p)">
+            <svg cIcon name="cil-cart"></svg>
+          </button>
+        </div>
+        }
+        } @else {
+        <p class="text-body-secondary text-center">Aucune recommandation pour le moment</p>
+        }
+        <div class="text-center mt-2">
+          <a routerLink="/ecommerce/catalogue" class="small">Découvrir le catalogue</a>
+        </div>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- Derniers avis et historique des commandes -->
+<c-row>
+  <c-col md="4">
+    <c-card class="shadow-sm h-100">
+      <c-card-header>
+        <svg cIcon name="cil-comment-square" class="me-2"></svg>
+        Mes derniers avis
+      </c-card-header>
+      <c-card-body>
+        @if (stats.avis.derniers.length > 0) {
+        @for (a of stats.avis.derniers; track a._id) {
+        <div class="mb-3 pb-2 border-bottom">
+          <div class="d-flex align-items-center mb-2">
+            <small class="text-body-secondary me-2">{{ formatDateSimple(a.createdAt) }}</small>
+            <div>
+              @for (i of getNoteEtoiles(a.note); track i) {
+              <svg cIcon name="cil-star" size="sm"
+                [ngClass]="{'text-warning': i <= a.note, 'text-secondary': i > a.note}"></svg>
+              }
+            </div>
+          </div>
+          <p class="mb-1 small">{{ a.commentaire }}</p>
+          <small class="text-body-secondary">{{ a.produit?.nom }} - {{ a.boutique?.nomBoutique }}</small>
+          @if (a.reponseBoutique) {
+          <div class="bg-body-tertiary p-2 rounded mt-1 small">
+            <span class="fw-semibold">Réponse:</span> {{ a.reponseBoutique.commentaire }}
+          </div>
+          }
+        </div>
+        }
+        } @else {
+        <p class="text-body-secondary text-center">Aucun avis</p>
+        }
+        @if (stats.avis.total > 0) {
+        <div class="text-center mt-2">
+          <a routerLink="/avis" class="small">Voir tous mes avis</a>
+        </div>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col md="8">
+    <c-card class="shadow-sm">
+      <c-card-header>
+        <svg cIcon name="cil-history" class="me-2"></svg>
+        Historique des commandes
+      </c-card-header>
+      <c-card-body>
+        @if (stats.commandes.dernieres.length > 0) {
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead>
+              <tr>
+                <th>Commande</th>
+                <th>Date</th>
+                <th>Boutique</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of stats.commandes.dernieres; track c._id) {
+              <tr>
+                <td>{{ c._id }}</td>
+                <td>{{ formatDateSimple(c.dateCommande) }}</td>
+                <td>{{ c.boutique?.nomBoutique || 'N/A' }}</td>
+                <td>{{ formatMontant(c.total) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="'bg-' + getStatutClass(c.statut)">
+                    {{ c.statut }}
+                  </span>
+                </td>
+                <td>
+                  <button cButton color="info" size="sm" [routerLink]="['/commandes', c._id]">
+                    <svg cIcon name="cil-magnifying-glass"></svg>
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+        <p class="text-body-secondary text-center">Aucune commande</p>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+}

@@ -1,0 +1,133 @@
+<c-row>
+  <c-col md="4" class="mb-4">
+    <c-card class="shadow-sm text-center">
+      <c-card-body>
+        <!-- Avatar avec gestion des initiales -->
+        <div class="position-relative d-flex justify-content-center mb-3">
+          @if (boutique?.logo) {
+          <c-avatar [size]="'xxl'" [src]="boutique?.logo" class="border border-3 border-primary"
+            style="width: 150px; height: 150px; object-fit: cover;"></c-avatar>
+          } @else {
+          <div
+            class="rounded-circle border border-3 border-primary d-flex align-items-center justify-content-center bg-primary text-white"
+            style="width: 150px; height: 150px;">
+            <span class="fw-bold" style="font-size: 3.5rem;">
+              {{ getInitiales(boutique?.nomBoutique || '') }}
+            </span>
+          </div>
+          }
+        </div>
+
+        <h4>{{ boutique?.nomBoutique }}</h4>
+
+        <div class="mb-3">
+          <span class="badge rounded-pill" [ngClass]="'bg-' + getNoteColor()">
+            {{ boutique?.noteMoyenne }} / 5
+            <svg cIcon name="cil-star" size="sm" class="ms-1"></svg>
+          </span>
+          <span class="ms-2 badge bg-info">{{ boutique?.totalAvis }} avis</span>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button cButton color="warning" [routerLink]="['/boutiques', boutique?._id, 'edit']">
+            <svg cIcon name="cil-pencil" class="me-2"></svg>
+            Modifier la boutique
+          </button>
+          <button cButton color="secondary" routerLink="/boutiques">
+            <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+            Retour à la liste
+          </button>
+        </div>
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <c-col md="8">
+    <c-row>
+      <c-col md="6" class="mb-4">
+        <c-card class="shadow-sm h-100">
+          <c-card-header>
+            <svg cIcon name="cil-info" class="me-2"></svg>
+            Informations générales
+          </c-card-header>
+          <c-card-body>
+            <div class="mb-3">
+              <label class="text-body-secondary small">Description</label>
+              <p>{{ boutique?.description || 'Aucune description' }}</p>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-body-secondary small">Adresse</label>
+              <p>
+                <svg cIcon name="cil-location-pin" size="sm" class="me-1"></svg>
+                {{ boutique?.adresse || 'Non renseignée' }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-body-secondary small">Téléphone</label>
+              <p>
+                <svg cIcon name="cil-phone" size="sm" class="me-1"></svg>
+                {{ boutique?.telephone || 'Non renseigné' }}
+              </p>
+            </div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col md="6" class="mb-4">
+        <c-card class="shadow-sm h-100">
+          <c-card-header>
+            <svg cIcon name="cil-credit-card" class="me-2"></svg>
+            Modes de paiement
+          </c-card-header>
+          <c-card-body>
+            @if (boutique?.modePaiementAcceptes?.length) {
+            <c-row [gutter]="3">
+              @for (paiement of boutique?.modePaiementAcceptes; track paiement) {
+              <c-col xs="6">
+                <div class="border rounded p-2 text-center">
+                  <svg cIcon [name]="getPaymentIcon(paiement)" size="lg" class="mb-2"></svg>
+                  <div class="small">{{ paiement }}</div>
+                </div>
+              </c-col>
+              }
+            </c-row>
+            } @else {
+            <p class="text-body-secondary">Aucun mode de paiement spécifié</p>
+            }
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col xs="12" class="mb-4">
+        <c-card class="shadow-sm">
+          <c-card-header>
+            <svg cIcon name="cil-clock" class="me-2"></svg>
+            Horaires d'ouverture
+          </c-card-header>
+          <c-card-body>
+            <c-row [gutter]="3">
+              @for (jour of joursSemaine; track jour) {
+              <c-col md="3" sm="6" class="mb-3">
+                <div class="border rounded p-3 text-center">
+                  <div class="fw-semibold mb-2">{{ jour | titlecase }}</div>
+                  @if (getHoraire(jour, 'ouverture') !== 'Fermé') {
+                  <div>
+                    <span class="badge bg-success">{{ getHoraire(jour, 'ouverture') }}</span>
+                    <span class="mx-2">-</span>
+                    <span class="badge bg-danger">{{ getHoraire(jour, 'fermeture') }}</span>
+                  </div>
+                  } @else {
+                  <span class="badge bg-secondary">Fermé</span>
+                  }
+                </div>
+              </c-col>
+              }
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-col>
+</c-row>

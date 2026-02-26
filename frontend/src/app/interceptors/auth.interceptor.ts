@@ -18,6 +18,12 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
 
+    // console.log('🔐 [AuthInterceptor]', {
+    //   url: req.url,
+    //   hasToken: !!token,
+    //   token: token ? token.substring(0, 20) + '...' : 'null'
+    // });
+
     if (token) {
       // Cloner la requête et ajouter le token dans le header Authorization
       req = req.clone({
@@ -25,6 +31,9 @@ export class AuthInterceptor implements HttpInterceptor {
           Authorization: `Bearer ${token}`,
         },
       });
+      // console.log('✅ Token ajouté au header');
+    } else {
+      console.warn('Pas de token disponible');
     }
 
     return next.handle(req);

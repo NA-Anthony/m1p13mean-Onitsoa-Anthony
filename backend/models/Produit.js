@@ -10,6 +10,10 @@ const produitSchema = new mongoose.Schema({
   },
   image: String,
   datePeremption: Date,
+  promotions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Promotion'
+  }],
   caracteristiques: mongoose.Schema.Types.Mixed
 }, { timestamps: true });
 

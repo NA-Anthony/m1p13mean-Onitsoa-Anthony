@@ -52,8 +52,21 @@ export class LoginComponent {
     this.authService.login({ email: user, password: pass }).subscribe({
       next: (response) => {
         this.loading = false;
-        // console.log('Connexion réussie', response);
-        this.router.navigate(['/dashboard']);
+        const userRole = response.user?.role;
+        console.log('Connexion réussie', userRole);
+        if (userRole === 'boutique') {
+          this.router.navigate(['/dashboard-boutique']);
+        } 
+        // else if (userRole === 'admin') {
+        //   this.router.navigate(['/dashboard-admin']);
+        // } 
+        else if (userRole === 'acheteur') {
+          this.router.navigate(['/dashboard-acheteur']);
+        } 
+        else {
+          // Redirection par défaut si le rôle n'est pas reconnu
+          this.router.navigate(['/dashboard-admin']);
+        }
       },
       error: (err) => {
         this.loading = false;

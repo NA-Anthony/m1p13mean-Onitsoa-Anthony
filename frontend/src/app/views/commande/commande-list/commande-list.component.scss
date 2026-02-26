@@ -1,0 +1,27 @@
+
+.bg-primary-soft {
+    background-color: rgba(var(--cui-primary-rgb), 0.1);
+}
+
+.border-primary-soft {
+    border-color: rgba(var(--cui-primary-rgb), 0.2);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--cui-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--cui-primary-rgb), 0.1);
+}
+
+thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--cui-secondary);
+    font-weight: 700;
+}
+
+tbody td {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}

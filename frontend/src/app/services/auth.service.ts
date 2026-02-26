@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError } from 'rxjs';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -88,10 +87,23 @@ export class AuthService {
    * Déconnexion
    */
   logout(): void {
+    // console.log('🚪 Déconnexion en cours...');
+    
+    // Supprimer les données de stockage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Mettre à jour le state
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.isLoadingSubject.next(false);
+    
+    console.log('✅ Données supprimées du localStorage');
+    console.log('   - token:', this.getToken());
+    console.log('   - user:', this.getCurrentUser());
+    
+    // Rediriger vers login
+    console.log('🔄 Redirection vers /login');
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   /**
@@ -132,5 +144,33 @@ export class AuthService {
       localStorage.setItem('user', JSON.stringify(response.user));
       this.currentUserSubject.next(response.user);
     }
+  }
+
+  /**
+   * Met à jour les informations de l'utilisateur et son profil (JSON)
+   */
+  updateProfil(data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/update-me`, data).pipe(
+      tap((response) => {
+        if (response && response.user) {
+          // Mise à jour locale pour que le nouveau nom/photo s'affiche partout
+          localStorage.setItem('user', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+      })
+    );
+}
+
+  /**
+   * Upload une image vers le serveur générique
+   */
+  uploadImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('image', file); // Assurez-vous que le champ s'appelle 'image' comme dans votre backend
+    
+    return this.http.post('http://localhost:3000/api/upload', formData, {
+      reportProgress: true,
+      observe: 'events'
+    });
   }
 }

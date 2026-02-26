@@ -1,0 +1,182 @@
+.footer {
+  background: var(--cui-footer-bg, var(--cui-body-bg));
+  border-top: 1px solid var(--cui-border-color-translucent);
+  padding: 0;
+  position: relative;
+  width: 100%;
+  margin-top: auto;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.02);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cui-border-color), transparent);
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+
+    .footer-left {
+      .names {
+        font-weight: 500;
+        color: var(--cui-body-color);
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--cui-tertiary-bg);
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        border: 1px solid var(--cui-border-color-translucent);
+
+        i {
+          font-size: 1.1rem;
+          color: #667eea;
+        }
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1);
+          transform: translateY(-1px);
+          border-color: #667eea;
+          color: #667eea;
+
+          i {
+            transform: rotate(360deg);
+            transition: transform 0.5s ease;
+          }
+        }
+      }
+    }
+
+    .footer-right {
+      .copyright {
+        font-size: 0.9rem;
+        color: var(--cui-secondary-color);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--cui-tertiary-bg);
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        border: 1px solid var(--cui-border-color-translucent);
+
+        i {
+          font-size: 0.95rem;
+          color: var(--cui-secondary-color);
+        }
+
+        &:hover {
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.05);
+          border-color: #667eea;
+
+          i {
+            color: #667eea;
+          }
+        }
+      }
+    }
+  }
+
+  .footer-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23667eea" fill-opacity="0.03" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,170.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.2;
+    z-index: 1;
+    pointer-events: none;
+  }
+}
+
+// Support spécifique pour le mode sombre forcé via attribut data-coreui-theme
+[data-coreui-theme='dark'] .footer {
+  .footer-wave {
+    opacity: 0.05;
+    filter: brightness(1.5);
+  }
+}
+
+// Pour que le footer reste toujours en bas
+:host {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+}
+
+// Version responsive pour mobile
+@media (max-width: 768px) {
+  .footer {
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.2rem 1.5rem;
+
+      .footer-left {
+        width: 100%;
+
+        .names {
+          width: 100%;
+          justify-content: center;
+          font-size: 0.85rem;
+          white-space: normal;
+          word-break: break-word;
+          line-height: 1.4;
+          text-align: center;
+          padding: 0.5rem 0.8rem;
+        }
+      }
+
+      .footer-right {
+        width: 100%;
+
+        .copyright {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+
+    .footer-wave {
+      height: 25px;
+    }
+  }
+}
+
+// Animation d'entrée
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer {
+  animation: slideUp 0.4s ease-out;
+}
