@@ -1,12 +1,12 @@
 /* Modern register styles - glass effect, rounded inputs, transitions */
 .register-root {
-	background: linear-gradient(135deg, #eef2f7 0%, #f5f8fb 100%);
+	background: var(--cui-body-bg);
 }
 
 .register-card {
 	border-radius: 12px;
 	overflow: hidden;
-	background: rgba(255, 255, 255, 0.85);
+	background: var(--cui-card-bg);
 	backdrop-filter: blur(6px);
 }
 
@@ -15,12 +15,12 @@
 }
 
 .logo-img {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    border-radius: 8px;
-    /* si vous voulez arrondir */
-    display: inline-block;
+	width: 64px;
+	height: 64px;
+	object-fit: contain;
+	border-radius: 8px;
+	/* si vous voulez arrondir */
+	display: inline-block;
 }
 
 .logo {
@@ -44,7 +44,7 @@
 }
 
 .subtitle {
-	color: #6c757d;
+	color: var(--cui-secondary-color);
 	margin-bottom: 1rem;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .muted-link {
-	color: #6c757d;
+	color: var(--cui-secondary-color);
 	text-decoration: none;
 }
 

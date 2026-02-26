@@ -170,6 +170,29 @@ export class CatalogueComponent implements OnInit {
     return Math.round(((produit.prix - produit.prixPromo) / produit.prix) * 100);
   }
 
+  getBoutiqueImage(): string {
+    if (!this.boutique) return '';
+    const logo = this.boutique.logo || this.boutique.profil?.logo || this.boutique.user?.photo || this.boutique.photo;
+    return this.getFullImageUrl(logo);
+  }
+
+  getInitiales(nom: string): string {
+    if (!nom) return 'B';
+    return nom
+      .split(' ')
+      .slice(0, 2)
+      .map(w => w[0]?.toUpperCase() || '')
+      .join('');
+  }
+
+  getFullImageUrl(url: string | null): string {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image')) {
+      return url;
+    }
+    return 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
+  }
+
   retourBoutiques(): void {
     this.router.navigate(['/ecommerce/catalogue']);
   }

@@ -1,43 +1,30 @@
-<!-- Breadcrumb / Retour -->
-<nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item">
-      <a routerLink="/ecommerce/catalogue" class="text-decoration-none">
-        <svg cIcon name="cil-store" size="sm" class="me-1"></svg>
-        Boutiques
-      </a>
-    </li>
-    <li class="breadcrumb-item active" aria-current="page">
-      {{ boutique?.nomBoutique || 'Catalogue' }}
-    </li>
-  </ol>
-</nav>
-
 <!-- Bannière boutique -->
 @if (boutique) {
 <c-card class="mb-4 border-0 shadow boutique-banner">
   <c-card-body class="py-4 px-4">
     <c-row class="align-items-center">
       <c-col md="auto">
-        @if (boutique.logo) {
-        <img [src]="boutique.logo" [alt]="boutique.nomBoutique"
-          class="rounded-circle border border-3 border-white shadow" style="width:72px;height:72px;object-fit:cover;">
+        @if (getBoutiqueImage()) {
+        <img [src]="getBoutiqueImage()" [alt]="boutique?.nomBoutique || boutique?.profil?.nomBoutique"
+          class="rounded-circle border border-3 border-body shadow" style="width:72px;height:72px;object-fit:cover;">
         } @else {
         <div
-          class="rounded-circle border border-3 border-white shadow d-flex align-items-center justify-content-center bg-light"
+          class="rounded-circle border border-3 border-body shadow d-flex align-items-center justify-content-center bg-primary text-white"
           style="width:72px;height:72px;">
-          <svg cIcon name="cil-store" size="xl" class="text-primary"></svg>
+          <span class="fw-bold fs-4">{{ getInitiales(boutique?.nomBoutique || boutique?.profil?.nomBoutique) }}</span>
         </div>
         }
       </c-col>
       <c-col>
-        <h4 class="mb-1 fw-bold text-white">{{ boutique.nomBoutique }}</h4>
-        @if (boutique.description) {
-        <p class="mb-0 text-white opacity-75 small">{{ boutique.description }}</p>
+        <h4 class="mb-1 fw-bold text-white">{{ boutique?.nomBoutique || boutique?.profil?.nomBoutique || 'Boutique' }}
+        </h4>
+        @if (boutique?.description || boutique?.profil?.description) {
+        <p class="mb-0 text-white opacity-75 small">{{ boutique?.description || boutique?.profil?.description }}</p>
         }
-        @if (boutique.adresse) {
+        @if (boutique?.adresse || boutique?.profil?.adresse) {
         <p class="mb-0 text-white opacity-75 small">
-          <svg cIcon name="cil-location-pin" size="sm" class="me-1"></svg>{{ boutique.adresse }}
+          <svg cIcon name="cil-location-pin" size="sm" class="me-1"></svg>{{ boutique?.adresse ||
+          boutique?.profil?.adresse }}
         </p>
         }
       </c-col>
@@ -84,7 +71,7 @@
     <c-row class="g-3 align-items-center">
       <c-col md="6">
         <div class="input-group">
-          <span class="input-group-text bg-white">
+          <span class="input-group-text">
             <svg cIcon name="cil-search"></svg>
           </span>
           <input type="text" class="form-control border-start-0" placeholder="Rechercher un produit..."
@@ -111,10 +98,10 @@
   @for (p of filteredProduits; track p._id) {
   <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
     <c-card class="h-100 shadow-sm produit-card border-0">
-      <div class="position-relative">
+      <div class="position-relative d-flex justify-content-center">
         <!-- Image du produit -->
         <c-avatar [size]="'xl'" [src]="p.idProduit?.image || p.produit?.image || 'assets/images/products/default.jpg'"
-          class="mx-auto mt-3 border border-3 border-white shadow"
+          class="mt-3 border border-3 border-body shadow"
           style="width: 120px; height: 120px; object-fit: cover;"></c-avatar>
 
         <!-- Badge promotion -->
@@ -140,7 +127,7 @@
 
         <!-- Catégorie -->
         @if (p.idProduit?.categorie || p.produit?.categorie) {
-        <span class="badge bg-light text-dark border small mb-2">
+        <span class="badge bg-body-secondary border text-body small mb-2">
           {{ (p.idProduit?.categorie || p.produit?.categorie) | titlecase }}
         </span>
         }
