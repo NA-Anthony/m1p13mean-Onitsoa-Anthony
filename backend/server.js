@@ -36,6 +36,7 @@ app.use('/api/portefeuille', require('./routes/portefeuille'));
 app.use('/api/dashboard-boutique', require('./routes/dashboard-boutique')); 
 app.use('/api/dashboard-acheteur', require('./routes/dashboard-acheteur'));
 app.use('/api/avis', require('./routes/avis'));
+app.use('/api/dashboard-admin', require('./routes/dashboard-admin'));
 
 app.get('/', (req, res) => {
   res.json({

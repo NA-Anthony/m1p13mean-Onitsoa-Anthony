@@ -3,33 +3,16 @@ import { INavData } from '@coreui/angular';
 export const adminNavItems: INavData[] = [
     {
         name: 'Dashboard',
-        url: '/dashboard',
+        url: '/dashboard-admin',
         iconComponent: { name: 'cil-speedometer' },
         badge: {
           color: 'info',
-          text: 'NEW'
+          text: 'Admin'
         }
     },
     {
         title: true,
         name: 'Boutiques'
-    },
-    {
-        name: 'Gestion',
-        url: '/boutiques',
-        iconComponent: { name: 'cil-building' },
-        children: [
-            {
-            name: 'Liste',
-            url: '/boutiques',
-            iconComponent: { name: 'cil-list' }
-            },
-            {
-            name: 'Création',
-            url: '/boutiques/nouvelle',
-            iconComponent: { name: 'cil-plus' }
-            }
-        ]
     },
     {
         name: 'Produits',
@@ -49,8 +32,13 @@ export const adminNavItems: INavData[] = [
         ]
     },
     {
+        name: 'Liste des boutiques',
+        url: '/boutiques',
+        iconComponent: { name: 'cil-building' }
+    },
+    {
         name: 'Produits par boutique',
         url: '/produits-par-boutique',
-        iconComponent: { name: 'cil-building' }
+        iconComponent: { name: 'cil-cart' }
     }
 ];

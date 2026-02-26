@@ -180,7 +180,7 @@ export class ProduitParBoutiqueListComponent implements OnInit {
     });
   }
 
-  // Gestion de la promotion - RENOMMÉE en openPromoModal
+  // Gestion de la promotion
   openPromoModal(item: any, event: Event): void {
     event.stopPropagation();
     if (this.isAdmin) {
@@ -214,11 +214,29 @@ export class ProduitParBoutiqueListComponent implements OnInit {
     return prix - (prix * remise / 100);
   }
 
+  // Vérifier si la date de fin est invalide (strictement avant la date de début)
+  isDateFinAvantDebut(): boolean {
+    if (!this.promoData.dateDebut || !this.promoData.dateFin) return false;
+    
+    const debut = new Date(this.promoData.dateDebut);
+    const fin = new Date(this.promoData.dateFin);
+    
+    // Remettre à minuit pour la comparaison
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(0, 0, 0, 0);
+    
+    return fin < debut; // Strictement avant
+  }
+
+  // Vérifier si la promotion est valide
   isPromoValid(): boolean {
     if (!this.promoData.remise || this.promoData.remise < 1 || this.promoData.remise > 100) return false;
     if (!this.promoData.dateDebut) return false;
     if (!this.promoData.dateFin) return false;
-    if (new Date(this.promoData.dateFin) <= new Date(this.promoData.dateDebut)) return false;
+    
+    // Vérifier que la date de fin n'est pas avant la date de début
+    if (this.isDateFinAvantDebut()) return false;
+    
     return true;
   }
 

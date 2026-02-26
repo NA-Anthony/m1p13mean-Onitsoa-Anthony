@@ -41,6 +41,7 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
   loading = true;
   error: string | null = null;
   showPromoForm = false;
+  saving = false;
   
   // Données promotion
   promoRemise: number = 0;
@@ -131,6 +132,33 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
     return this.item.stock * this.getPrixActuel();
   }
 
+  getPrixPromo(prix: number, remise: number): number {
+    if (!remise) return prix;
+    return prix - (prix * remise / 100);
+  }
+
+  // Vérifier si la date de fin est avant la date de début
+  isDateFinAvantDebut(): boolean {
+    if (!this.promoDateDebut || !this.promoDateFin) return false;
+    
+    const debut = new Date(this.promoDateDebut);
+    const fin = new Date(this.promoDateFin);
+    
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(0, 0, 0, 0);
+    
+    return fin < debut;
+  }
+
+  // Vérifier si la promotion est valide
+  isPromoValid(): boolean {
+    if (!this.promoRemise || this.promoRemise < 1 || this.promoRemise > 100) return false;
+    if (!this.promoDateDebut) return false;
+    if (!this.promoDateFin) return false;
+    if (this.isDateFinAvantDebut()) return false;
+    return true;
+  }
+
   updateStock(): void {
     if (!this.item) return;
     
@@ -139,55 +167,27 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
       return;
     }
 
+    this.saving = true;
     this.service.updateStock(this.item._id, this.quantiteInput).subscribe({
       next: (updated: any) => {
         if (updated) {
           this.item = updated;
           alert('Stock mis à jour avec succès');
         }
+        this.saving = false;
       },
       error: (err: any) => {
         alert(err.error?.msg || 'Erreur lors de la mise à jour');
+        this.saving = false;
         console.error(err);
       }
     });
   }
 
   ajouterPromotion(): void {
-    if (!this.item) return;
-    
-    if (!this.promoRemise || this.promoRemise < 1 || this.promoRemise > 100) {
-      alert('La remise doit être entre 1 et 100%');
-      return;
-    }
-    
-    if (!this.promoDateDebut || !this.promoDateFin) {
-      alert('Veuillez saisir les dates');
-      return;
-    }
-    
-    if (new Date(this.promoDateFin) <= new Date(this.promoDateDebut)) {
-      alert('La date de fin doit être après la date de début');
-      return;
-    }
+    if (!this.item || !this.isPromoValid()) return;
 
-    // Vérifier s'il y a déjà une promotion
-    const aDejaPromo = this.item.enPromotion;
-    
-    let messageConfirmation = 'Êtes-vous sûr de vouloir ajouter cette promotion ?';
-    
-    if (aDejaPromo) {
-      messageConfirmation = '⚠️ ATTENTION : Ce produit a déjà une promotion active.\n\n' +
-        'En ajoutant cette nouvelle promotion :\n' +
-        '• L\'ancienne promotion sera désactivée\n' +
-        '• Si les dates de la nouvelle promotion sont dans le futur, elle sera programmée\n' +
-        '• Si les dates sont actuelles, elle deviendra active immédiatement\n\n' +
-        'Voulez-vous continuer ?';
-    }
-
-    if (!confirm(messageConfirmation)) {
-      return;
-    }
+    this.saving = true;
 
     const promotionData = {
       remisePourcentage: this.promoRemise,
@@ -197,22 +197,22 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
 
     this.service.ajouterPromotion(this.item._id, promotionData).subscribe({
       next: (response: any) => {
-        this.item = response.produit;
+        this.item = response.produit || response;
         this.showPromoForm = false;
         this.promoRemise = 0;
         this.promoDateDebut = '';
         this.promoDateFin = '';
         
-        // Afficher le message de l'API
         if (response.message) {
           alert(response.message);
         }
         
-        // Recharger l'historique
         this.loadHistoriquePromotions();
+        this.saving = false;
       },
       error: (err: any) => {
         alert(err.error?.msg || 'Erreur lors de l\'ajout de la promotion');
+        this.saving = false;
         console.error(err);
       }
     });
@@ -221,16 +221,19 @@ export class ProduitParBoutiqueDetailComponent implements OnInit {
   supprimerPromotion(): void {
     if (!this.item || !confirm('⚠️ Voulez-vous vraiment supprimer cette promotion ?')) return;
     
+    this.saving = true;
     this.service.supprimerPromotion(this.item._id).subscribe({
       next: (response: any) => {
-        this.item = response.produit;
+        this.item = response.produit || response;
         if (response.message) {
           alert(response.message);
         }
         this.loadHistoriquePromotions();
+        this.saving = false;
       },
       error: (err: any) => {
         alert(err.error?.msg || 'Erreur lors de la suppression');
+        this.saving = false;
         console.error(err);
       }
     });
