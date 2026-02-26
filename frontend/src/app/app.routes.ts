@@ -145,6 +145,7 @@ export const routes: Routes = [
       //   path: 'avis',
       //   loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
       // },
+      {
         path: 'avis',
         loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
       },
