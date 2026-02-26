@@ -1,165 +1,176 @@
-<c-row>
+<c-row class="mb-4">
     <c-col xs="12">
-        <h4 class="mb-4">Mon Profil</h4>
+        <div class="d-flex align-items-center mb-4">
+            <div>
+                <h3 class="mb-0 text-dark">Mon Profil</h3>
+                <p class="text-muted small mb-0">Gérez vos informations personnelles et paramètres de compte</p>
+            </div>
+        </div>
     </c-col>
 
     @if (loading) {
     <c-col xs="12" class="text-center py-5">
-        <c-spinner color="primary"></c-spinner>
+        <c-spinner color="primary" variant="grow"></c-spinner>
     </c-col>
     } @else {
     <c-col lg="4">
-        <c-card class="shadow-sm border-0 mb-4">
-            <c-card-body class="text-center py-4">
-                <div class="position-relative d-inline-block mb-3">
-                    @if (imagePreview || userData?.photo) {
-                    <c-avatar [src]="getFullImageUrl(imagePreview || userData?.photo)" size="xl"
-                        class="border border-3 border-primary shadow" style="width: 120px; height: 120px; object-fit: cover;"
-                        (error)="onImageError($event)" priority> 
-                    </c-avatar>
+        <c-card class="shadow-sm border-0 mb-4 overflow-hidden">
+            <div class="bg-primary p-4" style="height: 100px;"></div>
 
-                    <!-- Bouton suppression -->
+            <c-card-body class="text-center pt-0" style="margin-top: -50px;">
+                <div class="position-relative d-inline-block mb-3">
+                    @if (imagePreview) {
+                    <img [src]="imagePreview" class="rounded-circle border border-4 border-white shadow-lg bg-white"
+                        style="width: 110px; height: 110px; object-fit: cover;">
+
                     <button type="button"
-                        class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle shadow-sm"
+                        class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle shadow border-white"
                         (click)="removeImage()" [disabled]="uploadLoading"
-                        style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid white; transform: translate(10px, -10px);">
+                        style="width: 30px; height: 30px; border: 2px solid white; ">
                         <svg cIcon name="cil-trash" size="sm"></svg>
                     </button>
                     } @else {
-                    <!-- Avatar avec initiales quand pas de photo -->
-                    <c-avatar color="primary" size="xl"
-                        class="mb-3 text-white fw-bold border border-3 border-primary shadow"
-                        style="width: 120px; height: 120px; font-size: 2rem;">
+                    <div class="rounded-circle border border-4 border-white shadow-lg bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                        style="width: 110px; height: 110px; font-size: 2.2rem; fw-bold">
                         {{ userData?.prenom?.charAt(0) }}{{ userData?.nom?.charAt(0) }}
-                    </c-avatar>
+                    </div>
                     }
 
-                    <!-- Bouton pour ajouter/changer la photo -->
                     <button type="button"
-                        class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle shadow-sm"
+                        class="btn btn-light btn-sm position-absolute bottom-0 end-0 rounded-circle shadow border-white"
                         (click)="fileInput.click()" [disabled]="uploadLoading"
-                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+                        style="width: 34px; height: 34px; border: 1px solid #ddd;">
                         <svg cIcon name="cil-camera" size="sm"></svg>
                     </button>
                     <input #fileInput type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)" />
                 </div>
 
-                <!-- Barre de progression upload -->
                 @if (uploadLoading) {
-                <div class="mb-3 px-3">
-                    <c-progress [height]="5" class="mb-2">
-                        <c-progress-bar [value]="uploadProgress" color="primary"></c-progress-bar>
+                <div class="px-4 mb-3">
+                    <c-progress [height]="4" class="mb-1">
+                        <c-progress-bar [value]="uploadProgress"></c-progress-bar>
                     </c-progress>
-                    <small class="text-body-secondary">Upload... {{ uploadProgress }}%</small>
+                    <span class="small text-muted">{{ uploadProgress }}% chargé</span>
                 </div>
                 }
 
-                <!-- Nom et badge -->
-                <h5 class="mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
-                <c-badge color="info" shape="rounded-pill">{{ userData?.role | titlecase }}</c-badge>
+                <h5 class="fw-bold text-dark mt-2 mb-1">{{ userData?.prenom }} {{ userData?.nom }}</h5>
+                <c-badge [color]="userData?.role === 'boutique' ? 'success' : 'info'" variant="outline" class="px-3">
+                    {{ userData?.role | titlecase }}
+                </c-badge>
 
-                <hr class="my-4">
+                <hr class="my-4 opacity-25">
 
-                <!-- Solde/Caisse selon le rôle -->
-                <div class="bg-light p-3 rounded shadow-sm border-start border-4"
-                    [class.border-primary]="userData?.role === 'acheteur'"
-                    [class.border-success]="userData?.role === 'boutique'">
-                    <div class="small text-muted mb-1">
-                        {{ userData?.role === 'boutique' ? 'Caisse boutique' : 'Solde du portefeuille' }}
+                <div class="mx-2 mb-2 p-3 rounded-4 bg-light border-0 shadow-none d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-white p-2 rounded-3 shadow-sm me-3 text-primary">
+                        <svg cIcon [name]="userData?.role === 'boutique' ? 'cil-bank' : 'cil-wallet'" size="lg"></svg>
                     </div>
-                    <h3 class="mb-0" [class.text-primary]="userData?.role === 'acheteur'"
-                        [class.text-success]="userData?.role === 'boutique'">
-                        {{ (userData?.role === 'boutique' ? profilData?.caisse : profilData?.solde) || 0 |
-                        number:'1.2-2' }} €
-                    </h3>
+                    <div class="text-start">
+                        <div class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">
+                            {{ userData?.role === 'boutique' ? 'Caisse Boutique' : 'Solde Portefeuille' }}
+                        </div>
+                        <div class="fs-4 fw-bold text-dark">
+                            {{ (userData?.role === 'boutique' ? profilData?.caisse : profilData?.solde) || 0 |
+                            number:'1.2-2' }} €
+                        </div>
+                    </div>
                 </div>
             </c-card-body>
         </c-card>
     </c-col>
 
     <c-col lg="8">
-        <c-card class="shadow-sm border-0">
-            <c-card-header class="bg-white py-3">
-                <h6 class="mb-0 fw-bold">Informations Personnelles</h6>
+        <c-card class="shadow-sm border-0 mb-4">
+            <c-card-header class="bg-white border-bottom py-3">
+                <div class="d-flex align-items-center">
+                    <svg cIcon name="cil-settings" class="me-2 text-muted"></svg>
+                    <h6 class="mb-0 fw-bold">Paramètres du profil</h6>
+                </div>
             </c-card-header>
-            <c-card-body>
-                <!-- Messages d'alerte -->
+            <c-card-body class="p-4">
                 @if (message) {
-                <c-alert [color]="message.type" dismissible (dismissed)="message = null">{{ message.text }}</c-alert>
+                <c-alert [color]="message.type" variant="solid"
+                    class="d-flex align-items-center border-0 shadow-sm mb-4">
+                    <svg cIcon [name]="message.type === 'success' ? 'cil-check-circle' : 'cil-x-circle'"
+                        class="me-2 text-white"></svg>
+                    <div class="text-white">{{ message.text }}</div>
+                </c-alert>
                 }
 
                 <form (ngSubmit)="onSubmit()" #profilForm="ngForm">
-                    <c-row class="g-3">
-                        <!-- Prénom -->
+                    <c-row class="g-4">
                         <c-col md="6">
-                            <label cLabel>Prénom</label>
-                            <input cFormControl name="prenom" [(ngModel)]="userData.prenom" required />
+                            <label cLabel class="fw-semibold small text-muted">Prénom</label>
+                            <input cFormControl name="prenom" [(ngModel)]="userData.prenom"
+                                placeholder="Votre prénom" />
+                        </c-col>
+                        <c-col md="6">
+                            <label cLabel class="fw-semibold small text-muted">Nom</label>
+                            <input cFormControl name="nom" [(ngModel)]="userData.nom" placeholder="Votre nom" />
                         </c-col>
 
-                        <!-- Nom -->
-                        <c-col md="6">
-                            <label cLabel>Nom</label>
-                            <input cFormControl name="nom" [(ngModel)]="userData.nom" required />
-                        </c-col>
-
-                        <!-- Nom de boutique (uniquement pour boutique) -->
                         @if (userData?.role === 'boutique') {
                         <c-col md="12">
-                            <label cLabel>Nom de la Boutique</label>
+                            <label cLabel class="fw-semibold small text-muted">Nom de l'établissement</label>
                             <div class="input-group">
-                                <span class="input-group-text"><svg cIcon name="cil-store"></svg></span>
-                                <input cFormControl name="nomBoutique" [(ngModel)]="profilData.nomBoutique" required />
+                                <span class="input-group-text bg-white border-end-0"><svg cIcon
+                                        name="cil-store"></svg></span>
+                                <input cFormControl class="border-start-0" name="nomBoutique"
+                                    [(ngModel)]="profilData.nomBoutique" />
                             </div>
                         </c-col>
                         }
 
-                        <!-- Email (non modifiable) -->
-                        <c-col md="12">
-                            <label cLabel>Email (Non modifiable)</label>
-                            <input cFormControl [value]="userData.email" readonly class="bg-light" />
+                        <c-col md="6">
+                            <label cLabel class="fw-semibold small text-muted">Adresse Email</label>
+                            <input cFormControl [value]="userData.email" readonly
+                                class="bg-light text-muted cursor-not-allowed" />
                         </c-col>
 
-                        <!-- Téléphone -->
-                        <c-col md="12">
-                            <label cLabel>Téléphone</label>
+                        <c-col md="6">
+                            <label cLabel class="fw-semibold small text-muted">Numéro de téléphone</label>
                             <input cFormControl name="telephone" [(ngModel)]="profilData.telephone"
-                                placeholder="Ex: 034 00 000 00" />
+                                placeholder="+33 6 ..." />
                         </c-col>
 
-                        <!-- Adresse de livraison (uniquement pour acheteur) -->
                         @if (userData?.role === 'acheteur') {
-                        <h6 class="mt-4 mb-2 text-primary small fw-bold text-uppercase">Adresse de livraison par défaut
-                        </h6>
+                        <c-col xs="12">
+                            <div class="d-flex align-items-center mt-3 mb-1">
+                                <hr class="flex-grow-1 opacity-25">
+                                <span class="mx-3 text-uppercase small fw-bold text-primary">Adresse de livraison</span>
+                                <hr class="flex-grow-1 opacity-25">
+                            </div>
+                        </c-col>
                         <c-col md="8">
-                            <label cLabel>Rue</label>
+                            <label cLabel class="fw-semibold small text-muted">Rue et numéro</label>
                             <input cFormControl name="rue" [(ngModel)]="profilData.adresseLivraisonParDefaut.rue" />
                         </c-col>
                         <c-col md="4">
-                            <label cLabel>Code Postal</label>
+                            <label cLabel class="fw-semibold small text-muted">Code Postal</label>
                             <input cFormControl name="cp"
                                 [(ngModel)]="profilData.adresseLivraisonParDefaut.codePostal" />
                         </c-col>
                         <c-col md="6">
-                            <label cLabel>Ville</label>
+                            <label cLabel class="fw-semibold small text-muted">Ville</label>
                             <input cFormControl name="ville" [(ngModel)]="profilData.adresseLivraisonParDefaut.ville" />
                         </c-col>
                         <c-col md="6">
-                            <label cLabel>Pays</label>
+                            <label cLabel class="fw-semibold small text-muted">Pays</label>
                             <input cFormControl name="pays" [(ngModel)]="profilData.adresseLivraisonParDefaut.pays" />
                         </c-col>
                         }
                     </c-row>
 
-                    <!-- Boutons d'action -->
-                    <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                        <button cButton color="secondary" type="button" (click)="loadUserInfo()"
-                            [disabled]="submitting">
-                            Annuler
+                    <div class="mt-5 d-flex justify-content-end gap-3 bg-light p-3 rounded-3">
+                        <button cButton color="link" type="button" class="text-decoration-none text-secondary"
+                            (click)="loadUserInfo()" [disabled]="submitting">
+                            Réinitialiser
                         </button>
-                        <button cButton color="primary" type="submit" [disabled]="submitting || uploadLoading">
+                        <button cButton color="primary" type="submit" class="px-4 shadow-sm"
+                            [disabled]="submitting || uploadLoading">
                             @if (submitting) { <c-spinner size="sm" class="me-2"></c-spinner> }
                             @else { <svg cIcon name="cil-save" class="me-2"></svg> }
-                            Enregistrer les modifications
+                            {{ submitting ? 'Traitement...' : 'Enregistrer les modifications' }}
                         </button>
                     </div>
                 </form>

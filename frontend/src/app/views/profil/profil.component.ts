@@ -7,7 +7,18 @@ import {
   AvatarModule, SpinnerModule, AlertModule, BadgeModule,
   ProgressModule
 } from '@coreui/angular';
-import { IconModule } from '@coreui/icons-angular';
+import { IconModule, IconSetService } from '@coreui/icons-angular';
+import { 
+  cilHistory, 
+  cilCamera, 
+  cilSettings, 
+  cilWallet, 
+  cilBank, 
+  cilCheckCircle, 
+  cilXCircle,
+  cilSave,
+  cilTrash
+} from '@coreui/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -18,7 +29,8 @@ import { AuthService } from '../../services/auth.service';
     CommonModule, FormsModule, CardModule, GridModule, 
     ButtonModule, FormModule, AvatarModule, IconModule,
     SpinnerModule, AlertModule, BadgeModule, ProgressModule
-  ]
+    ],
+  providers: [IconSetService]
 })
 export class ProfilComponent implements OnInit {
   userData: any = null;
@@ -32,20 +44,34 @@ export class ProfilComponent implements OnInit {
     }
   };
   
+  // États de chargement
   loading = true;
   submitting = false;
+  uploadLoading = false;
+  uploadProgress = 0;
   message: { type: string, text: string } | null = null;
   
   // Pour l'upload de photo
   selectedFile: File | null = null;
   imagePreview: string | null = null;
-  uploadLoading = false;
-  uploadProgress = 0;
 
   constructor(
     private authService: AuthService,
-    private http: HttpClient
-  ) {}
+    private http: HttpClient,
+    private iconSetService: IconSetService
+  ) {
+      this.iconSetService.icons = {
+      cilHistory,
+      cilCamera,
+      cilSettings,
+      cilWallet,
+      cilBank,
+      cilCheckCircle,
+      cilXCircle,
+      cilSave,
+      cilTrash
+    };
+  }
 
   ngOnInit(): void {
     this.loadUserInfo();
@@ -67,47 +93,20 @@ export class ProfilComponent implements OnInit {
           }
         };
         
-        // Prévisualisation de la photo existante
+        // Prévisualisation de la photo existante (URL du serveur)
         if (res.user?.photo) {
-          this.imagePreview = res.user.photo;
+          this.imagePreview = this.getFullImageUrl(res.user.photo);
         }
         
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
         this.message = { type: 'danger', text: 'Erreur de chargement du profil' };
         this.loading = false;
+        console.error(err);
       }
     });
-    }
-    
-    /**
- * Gère les erreurs de chargement d'image
- */
-onImageError(event: any): void {
-  console.warn('Erreur de chargement d\'image, utilisation du fallback');
-  // Remplacer par une image par défaut ou cacher l'image cassée
-  event.target.style.display = 'none';
-  // Alternative: event.target.src = 'assets/images/default-avatar.png';
-    }
-    
-    // Dans profil.component.ts
-    getFullImageUrl(url: string | null): string {
-    if (!url) return '';
-    
-    // Si c'est une dataURL (Base64) - retourner directement
-    if (url.startsWith('data:image')) {
-        return url;
-    }
-    
-    // Si c'est déjà une URL complète
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-    }
-    
-    // Chemin relatif - ajouter le domaine du backend
-    return 'http://localhost:3000' + url;
-    }
+  }
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];
@@ -138,7 +137,12 @@ onImageError(event: any): void {
   removeImage(): void {
     this.selectedFile = null;
     this.imagePreview = null;
-    this.userData.photo = '';
+    if (this.userData) {
+      this.userData.photo = '';
+    }
+    // Réinitialiser l'input file
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 
   uploadImage(): Promise<string> {
@@ -175,11 +179,21 @@ onImageError(event: any): void {
     });
   }
 
-  resetForm(): void {
-    this.loadUserInfo(); // Recharger les données originales
-    this.selectedFile = null;
-    this.imagePreview = this.userData?.photo || null;
-    this.message = null;
+  getFullImageUrl(url: string | null): string {
+    if (!url) return '';
+    
+    // Si c'est une dataURL (Base64) - retourner directement
+    if (url.startsWith('data:image')) {
+      return url;
+    }
+    
+    // Si c'est déjà une URL complète
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // Chemin relatif - ajouter le domaine du backend
+    return 'http://localhost:3000' + url;
   }
 
   async onSubmit(): Promise<void> {
@@ -199,18 +213,24 @@ onImageError(event: any): void {
         photoUrl = await this.uploadImage();
       }
 
-      const payload = {
+      const payload: any = {
         nom: this.userData.nom,
         prenom: this.userData.prenom,
         telephone: this.profilData.telephone,
-        photo: photoUrl,
-        adresse: {
+        photo: photoUrl
+      };
+
+      // Ajouter les champs spécifiques selon le rôle
+      if (this.userData.role === 'boutique') {
+        payload.nomBoutique = this.profilData.nomBoutique;
+      } else if (this.userData.role === 'acheteur') {
+        payload.adresse = {
           rue: this.profilData.adresseLivraisonParDefaut.rue,
           codePostal: this.profilData.adresseLivraisonParDefaut.codePostal,
           ville: this.profilData.adresseLivraisonParDefaut.ville,
           pays: this.profilData.adresseLivraisonParDefaut.pays
-        }
-      };
+        };
+      }
 
       this.authService.updateProfil(payload).subscribe({
         next: (res) => {
@@ -218,14 +238,19 @@ onImageError(event: any): void {
           this.submitting = false;
           this.selectedFile = null;
           
-          // Mettre à jour l'utilisateur dans le localStorage si nécessaire
+          // Mettre à jour les données avec la réponse du serveur
           if (res.user) {
             this.userData = { ...this.userData, ...res.user };
+            // Mettre à jour l'aperçu avec la nouvelle URL du serveur
+            if (res.user.photo) {
+              this.imagePreview = this.getFullImageUrl(res.user.photo);
+            }
           }
         },
         error: (err) => {
           this.message = { type: 'danger', text: err.error?.msg || 'Échec de la mise à jour' };
           this.submitting = false;
+          console.error(err);
         }
       });
     } catch (error) {
