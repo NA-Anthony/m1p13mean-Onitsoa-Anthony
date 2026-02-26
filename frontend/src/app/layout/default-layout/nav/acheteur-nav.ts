@@ -15,6 +15,11 @@ export const acheteurNavItems: INavData[] = [
     }
   },
   {
+    name: 'Mon Profil',
+    url: '/profil',
+    iconComponent: { name: 'cil-user' }
+  },
+  {
     title: true,
     name: 'Achats'
   },
@@ -91,30 +96,5 @@ export const acheteurNavItems: INavData[] = [
         iconComponent: { name: 'cil-wallet' }
       }
     ]
-  },
-  {
-    title: true,
-    name: 'Theme'
-  },
-  {
-    name: 'Colors',
-    url: '/theme/colors',
-    iconComponent: { name: 'cil-drop' }
-  },
-  {
-    name: 'Typography',
-    url: '/theme/typography',
-    iconComponent: { name: 'cil-pencil' }
-  },
-  {
-    title: true,
-    name: 'Links',
-    class: 'mt-auto'
-  },
-  {
-    name: 'Docs',
-    url: 'https://coreui.io/angular/docs/5.x/',
-    iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank' }
   }
 ];

@@ -11,6 +11,11 @@ export const boutiqueNavItems: INavData[] = [
         }
     },
     {
+        name: 'Mon Profil',
+        url: '/profil',
+        iconComponent: { name: 'cil-user' },
+    },
+    {
       name: 'Mes produits',
       url: '/produits-par-boutique',
       iconComponent: { name: 'cil-building' },
