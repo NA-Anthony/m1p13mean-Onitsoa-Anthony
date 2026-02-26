@@ -206,11 +206,6 @@
                 </div>
                 <p class="mb-1 small">{{ a.commentaire }}</p>
                 <small class="text-body-secondary">{{ a.produit?.nom }}</small>
-                @if (a.reponseBoutique) {
-                  <div class="bg-light p-1 rounded mt-1 small">
-                    <span class="fw-semibold">Réponse:</span> {{ a.reponseBoutique.commentaire }}
-                  </div>
-                }
               </div>
             }
           } @else {
