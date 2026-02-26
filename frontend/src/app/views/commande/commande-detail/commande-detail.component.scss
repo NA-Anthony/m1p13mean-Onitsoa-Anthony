@@ -1,1 +1,33 @@
+.bg-light-subtle {
+    background-color: #f8f9fa;
+}
 
+.table {
+    thead th {
+        font-size: 0.75rem;
+        background-color: #fcfcfc;
+    }
+
+    tbody td {
+        padding: 1rem 0.75rem;
+    }
+}
+
+.sticky-top {
+    z-index: 10;
+}
+
+// Pour l'impression
+@media print {
+
+    .bg-primary,
+    .btn,
+    .sticky-top button {
+        display: none !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
