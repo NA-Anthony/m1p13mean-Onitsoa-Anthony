@@ -38,13 +38,13 @@ export class BoutiqueListComponent implements OnInit {
   searchTerm: string = '';
   filterNote: string = '0';
   filterPaiement: string = '';
-  
+
   modesPaiement: string[] = ['Carte bancaire', 'Espèces', 'Mobile Money', 'Paypal', 'Apple Pay'];
 
   constructor(
     private boutiqueService: BoutiqueService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadBoutiques();
@@ -61,17 +61,17 @@ export class BoutiqueListComponent implements OnInit {
 
   filterBoutiques(): void {
     this.filteredBoutiques = this.boutiques.filter(boutique => {
-      const matchesSearch = this.searchTerm === '' || 
+      const matchesSearch = this.searchTerm === '' ||
         boutique.nomBoutique.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         boutique.adresse?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         boutique.telephone?.includes(this.searchTerm);
-      
+
       const note = parseFloat(this.filterNote);
       const matchesNote = note === 0 || (boutique.noteMoyenne || 0) >= note;
-      
-      const matchesPaiement = this.filterPaiement === '' || 
+
+      const matchesPaiement = this.filterPaiement === '' ||
         (boutique.modePaiementAcceptes || []).includes(this.filterPaiement);
-      
+
       return matchesSearch && matchesNote && matchesPaiement;
     });
   }
@@ -108,10 +108,33 @@ export class BoutiqueListComponent implements OnInit {
     return Object.values(boutique.horaires).filter(h => h?.ouverture && h?.fermeture).length;
   }
 
+  getBoutiqueImage(boutique: any): string {
+    if (!boutique) return '';
+    const logo = boutique.logo || boutique.profil?.logo || boutique.user?.photo || boutique.photo;
+    return this.getFullImageUrl(logo);
+  }
+
   getNoteColor(note?: number): string {
     const n = note || 0;
     if (n >= 4) return 'success';
     if (n >= 3) return 'warning';
     return 'danger';
+  }
+
+  getFullImageUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image')) {
+      return url;
+    }
+    return 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
+  }
+
+  getInitiales(nom: string): string {
+    if (!nom) return 'B';
+    return nom
+      .split(' ')
+      .slice(0, 2)
+      .map(w => w[0]?.toUpperCase() || '')
+      .join('');
   }
 }

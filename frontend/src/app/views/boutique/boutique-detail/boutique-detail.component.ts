@@ -34,7 +34,7 @@ export class BoutiqueDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private boutiqueService: BoutiqueService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -55,7 +55,7 @@ export class BoutiqueDetailComponent implements OnInit {
   }
 
   getPaymentIcon(mode: string): string {
-    const icons: {[key: string]: string} = {
+    const icons: { [key: string]: string } = {
       'Carte bancaire': 'cil-credit-card',
       'Espèces': 'cil-money',
       'Mobile Money': 'cil-phone',
@@ -71,5 +71,28 @@ export class BoutiqueDetailComponent implements OnInit {
     if (note >= 4) return 'success';
     if (note >= 3) return 'warning';
     return 'danger';
+  }
+
+  getFullImageUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image')) {
+      return url;
+    }
+    return 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
+  }
+
+  getInitiales(nom: string): string {
+    if (!nom) return 'B';
+    return nom
+      .split(' ')
+      .slice(0, 2)
+      .map(w => w[0]?.toUpperCase() || '')
+      .join('');
+  }
+
+  getBoutiqueImage(boutique: any): string {
+    if (!boutique) return '';
+    const logo = boutique.logo || boutique.profil?.logo || boutique.user?.photo || boutique.photo;
+    return this.getFullImageUrl(logo);
   }
 }
