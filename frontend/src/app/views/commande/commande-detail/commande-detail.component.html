@@ -1,0 +1,110 @@
+<c-card class="shadow-sm border-0 mb-4">
+  <c-card-header class="bg-primary text-white d-flex justify-content-between align-items-center py-3">
+    <div class="d-flex align-items-center">
+      <button cButton color="light" variant="ghost" class="text-white me-2 p-0" [routerLink]="['..']">
+        <svg cIcon name="cil-arrow-left" size="lg"></svg>
+      </button>
+      <h5 class="mb-0">Détails de la commande</h5>
+    </div>
+    @if (commande) {
+    <c-badge color="light" class="text-primary px-3">
+      #{{ (commande._id ? commande._id.toString() : '') | uppercase }}
+    </c-badge>
+    }
+  </c-card-header>
+
+  <c-card-body>
+    @if (loading) {
+    <div class="text-center py-5"><c-spinner color="primary"></c-spinner></div>
+    }
+
+    @if (!loading && commande) {
+    <c-row>
+      <c-col lg="8">
+        <c-card class="border-0 shadow-sm mb-4">
+          <c-card-body>
+            <h6 class="text-primary mb-3 fw-bold text-uppercase small">Client</h6>
+            <div class="d-flex align-items-center" *ngIf="commande.idAcheteur">
+              <c-avatar color="primary" class="text-white me-3">
+                {{ commande.idAcheteur.prenom?.charAt(0) }}{{ commande.idAcheteur.nom?.charAt(0) }}
+              </c-avatar>
+              <div>
+                <div class="fw-bold">{{ commande.idAcheteur.prenom }} {{ commande.idAcheteur.nom }}</div>
+                <div class="small text-body-secondary">{{ commande.idAcheteur.email }}</div>
+              </div>
+            </div>
+          </c-card-body>
+        </c-card>
+
+        <c-card class="border-0 shadow-sm mb-4">
+          <c-card-body>
+            <h6 class="text-primary mb-4 fw-bold text-uppercase small">Articles</h6>
+            <div class="table-responsive">
+              <table cTable align="middle" class="mb-0 border">
+                <thead>
+                  <tr class="small text-uppercase">
+                    <th>Produit</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (article of commande.articles; track $index) {
+                  <tr>
+                    <td>
+                      <div class="fw-bold">{{ article.nomProduit }}</div>
+                      @if ((article.remise || 0) > 0) {
+                      <small class="text-danger">-{{ article.remise }}€ remise</small>
+                      }
+                    </td>
+                    <td class="text-center">x{{ article.quantite }}</td>
+                    <td class="text-end fw-bold text-primary">
+                      {{ ((article.prixUnitaire || 0) - (article.remise || 0)) * (article.quantite || 0) |
+                      number:'1.2-2' }} €
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col lg="4">
+        <c-card class="border-0 shadow-sm mb-4">
+          <c-card-body>
+            <h6 class="text-primary mb-3 small fw-bold text-uppercase">Livraison & Statut</h6>
+            <div class="mb-3">
+              <label class="small text-body-secondary d-block">Statut actuel</label>
+              <c-badge [color]="getStatutColor(commande.statut)">{{ commande.statut | titlecase }}</c-badge>
+            </div>
+            <div class="p-3 rounded bg-body-tertiary" *ngIf="commande.adresseLivraison">
+              <div class="fw-bold">{{ commande.adresseLivraison.rue || 'Adresse non spécifiée' }}</div>
+              <div class="text-body-secondary small">
+                {{ commande.adresseLivraison.codePostal }} {{ commande.adresseLivraison.ville }}
+              </div>
+            </div>
+          </c-card-body>
+        </c-card>
+
+        <c-card class="border-0 shadow-sm">
+          <c-card-body>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-body-secondary">Sous-total</span>
+              <span>{{ getSousTotal() | number:'1.2-2' }} €</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
+              <span class="h6 mb-0 fw-bold">Total TTC</span>
+              <span class="h4 mb-0 fw-bold text-primary">{{ commande.total | number:'1.2-2' }} €</span>
+            </div>
+            <button cButton color="primary" variant="outline" class="w-100" (click)="window.print()">
+              Imprimer la facture
+            </button>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+    }
+  </c-card-body>
+</c-card>

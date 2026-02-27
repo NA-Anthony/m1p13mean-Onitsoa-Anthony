@@ -1,8 +1,15 @@
 // Vérifier si l'utilisateur est admin
 const admin = (req, res, next) => {
+    console.log('🔒 [Admin Middleware]', { 
+      userRole: req.user?.role, 
+      isAdmin: req.user?.role === 'admin' 
+    });
+    
     if (req.user && req.user.role === 'admin') {
+      console.log('✅ Accès admin autorisé');
       next();
     } else {
+      console.error('❌ Accès admin refusé - rôle:', req.user?.role);
       res.status(403).json({ msg: 'Accès réservé aux administrateurs' });
     }
   };

@@ -1,0 +1,83 @@
+// Pour la prévisualisation de l'image
+.position-relative {
+    .btn-danger {
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+  
+  // Pour les barres de progression
+  c-progress {
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+  }
+  
+  // Pour les messages d'erreur
+  .text-danger {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  // Pour les badges d'information
+  .text-body-secondary {
+    svg {
+      width: 12px;
+      height: 12px;
+      margin-right: 0.25rem;
+    }
+  }
+  
+  // Pour les boutons d'action
+  .btn-outline-primary, .btn-outline-danger {
+    &.btn-sm {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+  
+  // Pour la zone d'upload
+  .border.rounded.p-3.text-center.bg-light {
+    transition: border-color 0.2s ease;
+    
+    &:hover {
+      border-color: var(--cui-primary) !important;
+    }
+  }
+  
+  // Pour les caractéristiques
+  .mb-2 {
+    .form-control-sm {
+      font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+  
+  // Animation pour le spinner
+  c-spinner {
+    margin-right: 0.25rem;
+  }

@@ -2,6 +2,9 @@ const Commande = require('../models/Commande');
 const Livraison = require('../models/Livraison');
 const ProduitParBoutique = require('../models/ProduitParBoutique');
 const Promotion = require('../models/Promotion');
+const Acheteur = require('../models/Acheteur');
+const Boutique = require('../models/Boutique');
+const Transaction = require('../models/Transaction');
 
 // 🔒 ROUTE PROTÉGÉE (acheteur)
 // @route   POST /api/commandes
@@ -23,18 +26,18 @@ exports.createCommande = async (req, res) => {
     for (let article of articles) {
       const produit = await ProduitParBoutique.findById(article.idProduitParBoutique)
         .populate('idProduit');
-      
+
       if (!produit) {
         return res.status(404).json({ msg: `Produit non trouvé` });
       }
-      
+
       if (produit.idBoutique.toString() !== idBoutique) {
         return res.status(400).json({ msg: `Ce produit n'appartient pas à cette boutique` });
       }
-      
+
       if (produit.stock < article.quantite) {
-        return res.status(400).json({ 
-          msg: `Stock insuffisant pour ${produit.idProduit.nom}. Disponible: ${produit.stock}` 
+        return res.status(400).json({
+          msg: `Stock insuffisant pour ${produit.idProduit.nom}. Disponible: ${produit.stock}`
         });
       }
 
@@ -50,7 +53,7 @@ exports.createCommande = async (req, res) => {
       if (promotion) {
         prix = produit.prix * (1 - promotion.remisePourcentage / 100);
       }
-      
+
       articlesVerifies.push({
         idProduitParBoutique: produit._id,
         nomProduit: produit.idProduit.nom,
@@ -58,8 +61,45 @@ exports.createCommande = async (req, res) => {
         quantite: article.quantite,
         remise: promotion ? promotion.remisePourcentage : 0
       });
-      
+
       total += prix * article.quantite;
+    }
+
+    const montantTotal = Math.round((total + (fraisLivraison || 0)) * 100) / 100;
+
+    // --- LOGIQUE PAIEMENT PORTEFEUILLE ---
+    let estPayee = false;
+    if (modePaiement === 'portefeuille') {
+      const acheteur = await Acheteur.findById(idAcheteur);
+      if (!acheteur || acheteur.solde < montantTotal) {
+        return res.status(400).json({ msg: 'Solde insuffisant dans votre portefeuille' });
+      }
+
+      const boutique = await Boutique.findById(idBoutique);
+      if (!boutique) return res.status(404).json({ msg: 'Boutique non trouvée' });
+
+      // Transfert
+      acheteur.solde -= montantTotal;
+      boutique.caisse += montantTotal;
+      estPayee = true;
+
+      await acheteur.save();
+      await boutique.save();
+
+      // Enregistrer les transactions
+      await new Transaction({
+        idUser: idAcheteur,
+        type: 'achat',
+        montant: -montantTotal,
+        description: `Paiement commande boutique: ${boutique.nomBoutique}`
+      }).save();
+
+      await new Transaction({
+        idUser: idBoutique,
+        type: 'vente',
+        montant: montantTotal,
+        description: `Vente commande de l'acheteur ID: ${idAcheteur}`
+      }).save();
     }
 
     const commande = new Commande({
@@ -68,10 +108,10 @@ exports.createCommande = async (req, res) => {
       articles: articlesVerifies,
       adresseLivraison,
       fraisLivraison: fraisLivraison || 0,
-      total: Math.round((total + (fraisLivraison || 0)) * 100) / 100,
+      total: montantTotal,
       modePaiement,
       statut: 'en_attente',
-      paiementEffectue: false
+      paiementEffectue: estPayee
     });
 
     await commande.save();
@@ -110,7 +150,7 @@ exports.getMesCommandes = async (req, res) => {
     const commandes = await Commande.find({ idAcheteur: req.user.id })
       .populate('idBoutique', 'nomBoutique logo')
       .sort('-dateCommande');
-    
+
     // Récupérer les livraisons associées
     const commandesAvecLivraison = await Promise.all(commandes.map(async (cmd) => {
       const livraison = await Livraison.findOne({ idCommande: cmd._id });
@@ -135,7 +175,7 @@ exports.getCommandesBoutique = async (req, res) => {
     const commandes = await Commande.find({ idBoutique: req.user.id })
       .populate('idAcheteur', 'nom prenom email')
       .sort('-dateCommande');
-    
+
     res.json(commandes);
   } catch (err) {
     console.error(err.message);
@@ -221,9 +261,9 @@ exports.getCommandeById = async (req, res) => {
 exports.updateStatut = async (req, res) => {
   try {
     const { statut } = req.body;
-    
+
     const commande = await Commande.findById(req.params.id);
-    
+
     if (!commande) {
       return res.status(404).json({ msg: 'Commande non trouvée' });
     }
@@ -246,7 +286,7 @@ exports.updateStatut = async (req, res) => {
     if (statut === 'livrée') {
       await Livraison.findOneAndUpdate(
         { idCommande: commande._id },
-        { 
+        {
           statut: 'livree',
           dateLivraison: new Date()
         }
@@ -276,9 +316,9 @@ exports.updateStatut = async (req, res) => {
 exports.updatePaiement = async (req, res) => {
   try {
     const { paiementEffectue, modePaiement } = req.body;
-    
+
     const commande = await Commande.findById(req.params.id);
-    
+
     if (!commande) {
       return res.status(404).json({ msg: 'Commande non trouvée' });
     }
@@ -290,7 +330,7 @@ exports.updatePaiement = async (req, res) => {
 
     if (paiementEffectue !== undefined) commande.paiementEffectue = paiementEffectue;
     if (modePaiement) commande.modePaiement = modePaiement;
-    
+
     await commande.save();
     res.json(commande);
   } catch (err) {
@@ -305,7 +345,7 @@ exports.updatePaiement = async (req, res) => {
 exports.annulerCommande = async (req, res) => {
   try {
     const commande = await Commande.findById(req.params.id);
-    
+
     if (!commande) {
       return res.status(404).json({ msg: 'Commande non trouvée' });
     }

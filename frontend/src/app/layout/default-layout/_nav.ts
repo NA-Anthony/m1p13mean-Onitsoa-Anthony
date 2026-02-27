@@ -11,282 +11,246 @@ export const navItems: INavData[] = [
     }
   },
   {
-    title: true,
-    name: 'Theme'
-  },
-  {
-    name: 'Colors',
-    url: '/theme/colors',
-    iconComponent: { name: 'cil-drop' }
-  },
-  {
-    name: 'Typography',
-    url: '/theme/typography',
-    linkProps: { fragment: 'headings' },
-    iconComponent: { name: 'cil-pencil' }
-  },
-  {
-    name: 'Components',
+    name: 'Dashboards',
     title: true
   },
   {
-    name: 'Base',
-    url: '/base',
-    iconComponent: { name: 'cil-puzzle' },
-    children: [
-      {
-        name: 'Accordion',
-        url: '/base/accordion',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Breadcrumbs',
-        url: '/base/breadcrumbs',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Cards',
-        url: '/base/cards',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Carousel',
-        url: '/base/carousel',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Collapse',
-        url: '/base/collapse',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'List Group',
-        url: '/base/list-group',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Navs & Tabs',
-        url: '/base/navs',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Pagination',
-        url: '/base/pagination',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Placeholder',
-        url: '/base/placeholder',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Popovers',
-        url: '/base/popovers',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Progress',
-        url: '/base/progress',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Spinners',
-        url: '/base/spinners',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Tables',
-        url: '/base/tables',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Tabs',
-        url: '/base/tabs',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Tooltips',
-        url: '/base/tooltips',
-        icon: 'nav-icon-bullet'
-      }
-    ]
-  },
-  {
-    name: 'Buttons',
-    url: '/buttons',
-    iconComponent: { name: 'cil-cursor' },
-    children: [
-      {
-        name: 'Buttons',
-        url: '/buttons/buttons',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Button groups',
-        url: '/buttons/button-groups',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Dropdowns',
-        url: '/buttons/dropdowns',
-        icon: 'nav-icon-bullet'
-      }
-    ]
-  },
-  {
-    name: 'Forms',
-    url: '/forms',
-    iconComponent: { name: 'cil-notes' },
-    children: [
-      {
-        name: 'Form Control',
-        url: '/forms/form-control',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Select',
-        url: '/forms/select',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Checks & Radios',
-        url: '/forms/checks-radios',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Range',
-        url: '/forms/range',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Input Group',
-        url: '/forms/input-group',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Floating Labels',
-        url: '/forms/floating-labels',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Layout',
-        url: '/forms/layout',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Validation',
-        url: '/forms/validation',
-        icon: 'nav-icon-bullet'
-      }
-    ]
-  },
-  {
-    name: 'Charts',
-    iconComponent: { name: 'cil-chart-pie' },
-    url: '/charts'
-  },
-  {
-    name: 'Icons',
-    iconComponent: { name: 'cil-star' },
-    url: '/icons',
-    children: [
-      {
-        name: 'CoreUI Free',
-        url: '/icons/coreui-icons',
-        icon: 'nav-icon-bullet',
-        badge: {
-          color: 'success',
-          text: 'FREE'
-        }
-      },
-      {
-        name: 'CoreUI Flags',
-        url: '/icons/flags',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'CoreUI Brands',
-        url: '/icons/brands',
-        icon: 'nav-icon-bullet'
-      }
-    ]
-  },
-  {
-    name: 'Notifications',
-    url: '/notifications',
-    iconComponent: { name: 'cil-bell' },
-    children: [
-      {
-        name: 'Alerts',
-        url: '/notifications/alerts',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Badges',
-        url: '/notifications/badges',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Modal',
-        url: '/notifications/modal',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Toast',
-        url: '/notifications/toasts',
-        icon: 'nav-icon-bullet'
-      }
-    ]
-  },
-  {
-    name: 'Widgets',
-    url: '/widgets',
-    iconComponent: { name: 'cil-calculator' },
+    name: 'Dashboard Admin',
+    url: '/dashboard-admin',
+    iconComponent: { name: 'cil-speedometer' },
     badge: {
-      color: 'info',
-      text: 'NEW'
+      color: 'danger',
+      text: 'ADMIN'
+    }
+  },
+  {
+    name: 'Dashboard Boutique',
+    url: '/dashboard-boutique',
+    iconComponent: { name: 'cil-building' },
+    badge: {
+      color: 'warning',
+      text: 'BOUTIQUE'
+    }
+  },
+  {
+    name: 'Dashboard Acheteur',
+    url: '/dashboard-acheteur',
+    iconComponent: { name: 'cil-user' },
+    badge: {
+      color: 'success',
+      text: 'ACHETEUR'
     }
   },
   {
     title: true,
-    name: 'Extras'
+    name: 'Boutiques'
   },
   {
-    name: 'Pages',
-    url: '/login',
-    iconComponent: { name: 'cil-star' },
+    name: 'Gestion',
+    url: '/boutiques',
+    iconComponent: { name: 'cil-building' },
     children: [
       {
-        name: 'Login',
-        url: '/login',
-        icon: 'nav-icon-bullet'
+        name: 'Liste',
+        url: '/boutiques',
+        iconComponent: { name: 'cil-list' }
       },
       {
-        name: 'Register',
-        url: '/register',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Error 404',
-        url: '/404',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'Error 500',
-        url: '/500',
-        icon: 'nav-icon-bullet'
+        name: 'Création',
+        url: '/boutiques/nouvelle',
+        iconComponent: { name: 'cil-plus' }
       }
     ]
   },
   {
     title: true,
-    name: 'Links',
-    class: 'mt-auto'
+    name: 'Acheteurs'
   },
   {
-    name: 'Docs',
-    url: 'https://coreui.io/angular/docs/5.x/',
-    iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank' }
+    name: 'Gestion',
+    url: '/acheteurs',
+    iconComponent: { name: 'cil-user' },
+    children: [
+      {
+        name: 'Liste',
+        url: '/acheteurs',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Création',
+        url: '/acheteurs/nouveau',
+        iconComponent: { name: 'cil-user-plus' }
+      }
+    ]
+  },
+  {
+    title: true,
+    name: 'Utilisateurs'
+  },
+  {
+    name: 'Gestion des utilisateurs',
+    url: '/users',
+    iconComponent: { name: 'cil-people' },
+    children: [
+      {
+        name: 'Liste des utilisateurs',
+        url: '/users',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouvel utilisateur',
+        url: '/users/nouveau',
+        iconComponent: { name: 'cil-user-plus' }
+      }
+    ]
+  },
+  {
+    title: true,
+    name: 'Catalogue'
+  },
+  {
+    name: 'Produits',
+    url: '/produits',
+    iconComponent: { name: 'cil-basket' },
+    children: [
+      {
+        name: 'Liste des produits',
+        url: '/produits',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouveau produit',
+        url: '/produits/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Produits par boutique',
+    url: '/produits-par-boutique',
+    iconComponent: { name: 'cil-building' },
+    children: [
+      {
+        name: 'Liste des produits',
+        url: '/produits-par-boutique',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Ajouter',
+        url: '/produits-par-boutique/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Promotions',
+    url: '/promotions',
+    iconComponent: { name: 'cil-tags' },
+    children: [
+      {
+        name: 'Liste des promotions',
+        url: '/promotions',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouvelle promotion',
+        url: '/promotions/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Commandes',
+    url: '/commandes',
+    iconComponent: { name: 'cil-cart' },
+    children: [
+      {
+        name: 'Liste des commandes',
+        url: '/commandes',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouvelle commande',
+        url: '/commandes/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Avis',
+    url: '/avis',
+    iconComponent: { name: 'cil-comment-square' },
+    children: [
+      {
+        name: 'Liste des avis',
+        url: '/avis',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouvel avis',
+        url: '/avis/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Livraisons',
+    url: '/livraisons',
+    iconComponent: { name: 'cil-truck' },
+    children: [
+      {
+        name: 'Liste des livraisons',
+        url: '/livraisons',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouvelle livraison',
+        url: '/livraisons/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    name: 'Tarifs livraison',
+    url: '/tarifs-livraison',
+    iconComponent: { name: 'cil-map' },
+    children: [
+      {
+        name: 'Liste des tarifs',
+        url: '/tarifs-livraison',
+        iconComponent: { name: 'cil-list' }
+      },
+      {
+        name: 'Nouveaux tarifs',
+        url: '/tarifs-livraison/nouveau',
+        iconComponent: { name: 'cil-plus' }
+      }
+    ]
+  },
+  {
+    title: true,
+    name: 'E-commerce'
+  },
+  {
+    name: 'Boutique en ligne',
+    url: '/ecommerce',
+    iconComponent: { name: 'cil-basket' },
+    children: [
+      {
+        name: 'Catalogue',
+        url: '/ecommerce/catalogue',
+        iconComponent: { name: 'cil-grid' }
+      },
+      {
+        name: 'Panier',
+        url: '/ecommerce/panier',
+        iconComponent: { name: 'cil-cart' }
+      },
+      {
+        name: 'Mon Portefeuille',
+        url: '/ecommerce/portefeuille',
+        iconComponent: { name: 'cil-wallet' }
+      }
+    ]
   }
 ];

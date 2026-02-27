@@ -1,0 +1,101 @@
+<c-card class="shadow-sm border-0 mb-4">
+    <c-card-header class="bg-primary text-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0">
+            <svg cIcon name="cil-history" class="me-2"></svg>
+            Mes commandes
+        </h5>
+        <c-badge color="light" class="text-primary px-3">{{ filteredCommandes.length }} commande(s)</c-badge>
+    </c-card-header>
+
+    <c-card-body>
+        <c-row class="mb-4 g-3">
+            <c-col md="6">
+                <div class="input-group">
+                    <span class="input-group-text border-end-0">
+                        <svg cIcon name="cil-search" size="sm"></svg>
+                    </span>
+                    <input type="text" class="form-control border-start-0 ps-0" placeholder="Rechercher par ID..."
+                        [(ngModel)]="searchTerm" (ngModelChange)="filterCommandes()">
+                </div>
+            </c-col>
+            <c-col md="6">
+                <select class="form-select border-primary-soft" [(ngModel)]="filterStatut"
+                    (ngModelChange)="filterCommandes()">
+                    <option value="">Tous les statuts</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="confirmée">Confirmée</option>
+                    <option value="préparée">Préparée</option>
+                    <option value="expédiée">Expédiée</option>
+                    <option value="livrée">Livrée</option>
+                    <option value="annulée">Annulée</option>
+                </select>
+            </c-col>
+        </c-row>
+
+        @if (loading) {
+        <div class="text-center py-5">
+            <c-spinner color="primary" class="mb-3"></c-spinner>
+            <p class="text-body-secondary">Récupération de vos commandes...</p>
+        </div>
+        }
+
+        @if (error) {
+        <c-alert color="danger" class="d-flex align-items-center">
+            <svg cIcon name="cil-warning" class="me-2 flex-shrink-0"></svg>
+            {{ error }}
+        </c-alert>
+        }
+
+        @if (!loading && !error && filteredCommandes.length === 0) {
+        <div class="text-center py-5">
+            <svg cIcon name="cil-search" size="3xl" class="text-body-secondary mb-3"></svg>
+            <h5 class="fw-bold">Aucune commande trouvée</h5>
+            <p class="text-body-secondary">Essayez de modifier vos filtres ou parcourez le catalogue.</p>
+        </div>
+        }
+
+        @if (!loading && !error && filteredCommandes.length > 0) {
+        <div class="table-responsive rounded border">
+            <table cTable hover align="middle" class="mb-0">
+                <thead class="bg-body-tertiary">
+                    <tr>
+                        <th class="border-0">ID Commande</th>
+                        <th class="border-0">Date</th>
+                        <th class="border-0 text-center">Statut</th>
+                        <th class="border-0 text-end">Total</th>
+                        <th class="border-0 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (cmd of filteredCommandes; track cmd._id) {
+                    <tr>
+                        <td>
+                            <span class="badge bg-primary-soft text-primary fw-bold">
+                                #{{ (cmd._id?.toString() || '') | uppercase }}
+                            </span>
+                        </td>
+                        <td class="small text-body-secondary">
+                            <svg cIcon name="cil-calendar" size="sm" class="me-1"></svg>
+                            {{ formatDate(cmd.dateCommande) }}
+                        </td>
+                        <td class="text-center">
+                            <c-badge [color]="getStatutColor(cmd.statut)" class="py-2 px-3">
+                                {{ cmd.statut || 'N/A' | titlecase }}
+                            </c-badge>
+                        </td>
+                        <td class="text-end fw-bold text-primary">
+                            {{ cmd.total | number:'1.2-2' }} €
+                        </td>
+                        <td class="text-center">
+                            <button cButton color="primary" variant="outline" size="sm" (click)="voirDetails(cmd._id)">
+                                Détails
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </c-card-body>
+</c-card>

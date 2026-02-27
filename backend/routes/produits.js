@@ -1,19 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const produitController = require('../controllers/produitController');
+const produitParBoutiqueController = require('../controllers/produitParBoutiqueController');
 const auth = require('../middleware/auth');
-const { admin, boutique } = require('../middleware/role');
+const { boutique } = require('../middleware/role');
 
 // ✅ ROUTES PUBLIQUES
 router.get('/', produitController.getAllProduits);
-router.get('/:id', produitController.getProduitById); // À ajouter
+router.get('/:id', produitController.getProduitById);
+router.get('/categorie/:categorie', produitController.getProduitsByCategorie);
+router.get('/recherche', produitController.rechercheProduits);
+router.get('/boutiques/tous', produitParBoutiqueController.getAllProduitsParBoutique); // Tous les produits par boutique (public)
 
-// 🔒 ROUTES PROTÉGÉES
-router.post('/', auth, admin, produitController.createProduit);
-router.post('/boutique', auth, boutique, produitController.addProduitToBoutique);
-router.put('/boutique/:id', auth, boutique, produitController.updateProduitBoutique);
-router.delete('/boutique/:id', auth, boutique, produitController.deleteProduitBoutique);
-router.post('/:id/promotion', auth, boutique, produitController.addPromotion);
-router.delete('/:id/promotion', auth, boutique, produitController.removePromotion);
+// 🔒 ROUTES PROTÉGÉES (boutique)
+router.get('/boutique/mes-produits', auth, boutique, produitParBoutiqueController.getMesProduits);
+router.get('/boutique/:id', auth, produitParBoutiqueController.getProduitParBoutiqueById);
+router.get('/boutique/:id/promotions', auth, produitParBoutiqueController.getHistoriquePromotions);
+router.post('/boutique', auth, boutique, produitParBoutiqueController.createProduitParBoutique);
+router.put('/boutique/:id', auth, boutique, produitParBoutiqueController.updateProduitParBoutique);
+router.patch('/boutique/:id/stock', auth, boutique, produitParBoutiqueController.updateStock);
+router.post('/boutique/:id/promotion', auth, boutique, produitParBoutiqueController.ajouterPromotion);
+router.delete('/boutique/:id/promotion', auth, boutique, produitParBoutiqueController.supprimerPromotion);
+router.delete('/boutique/:id', auth, boutique, produitParBoutiqueController.deleteProduitParBoutique);
 
 module.exports = router;

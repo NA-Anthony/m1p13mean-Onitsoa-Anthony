@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { NgStyle, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 import { IconDirective } from '@coreui/icons-angular';
 import { ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    standalone: true,
-    imports: [ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle, NgIf, RouterLink]
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  standalone: true,
+  imports: [ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle, NgIf, RouterLink]
 })
 export class LoginComponent {
 
@@ -17,7 +18,7 @@ export class LoginComponent {
   errorMessage = '';
   fieldErrors: { email?: string; password?: string } = {};
 
-  constructor() { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   login(username: string | null, password: string | null) {
     this.errorMessage = '';
@@ -46,17 +47,34 @@ export class LoginComponent {
     }
 
     this.loading = true;
-    // simulate API call — replace with real auth service
-    setTimeout(() => {
-      this.loading = false;
-      // demo: successful login when password === 'demo'
-      if (pass === 'demo') {
-        console.log('Connexion réussie', { user });
-        // TODO: router navigate to dashboard
-      } else {
-        this.errorMessage = 'Identifiant ou mot de passe incorrect.';
+    this.loading = true;
+
+    this.authService.login({ email: user, password: pass }).subscribe({
+      next: (response) => {
+        this.loading = false;
+        const userRole = response.user?.role;
+        console.log('Connexion réussie', userRole);
+        if (userRole === 'boutique') {
+          this.router.navigate(['/dashboard-boutique']);
+        } 
+        // else if (userRole === 'admin') {
+        //   this.router.navigate(['/dashboard-admin']);
+        // } 
+        else if (userRole === 'acheteur') {
+          this.router.navigate(['/dashboard-acheteur']);
+        } 
+        else {
+          // Redirection par défaut si le rôle n'est pas reconnu
+          this.router.navigate(['/dashboard-admin']);
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Login error', err);
+        this.errorMessage = err.error?.msg || 'Identifiant ou mot de passe incorrect.';
       }
-    }, 900);
+    });
+
   }
 
   socialSignIn(provider: string) {

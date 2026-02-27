@@ -1,0 +1,129 @@
+<c-row>
+    <c-col md="8" class="mx-auto">
+      <c-card class="shadow-sm">
+        <c-card-header class="bg-primary text-white">
+          <h5 class="mb-0">
+            <svg cIcon [name]="isEditMode ? 'cil-pencil' : 'cil-plus'" class="me-2"></svg>
+            {{ isEditMode ? 'Modifier la livraison' : 'Nouvelle livraison' }}
+          </h5>
+        </c-card-header>
+        
+        <c-card-body>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Barre de progression -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span [class.text-primary]="getProgressValue() >= 30">Commande</span>
+                <span [class.text-primary]="getProgressValue() >= 50">Livreur</span>
+                <span [class.text-primary]="getProgressValue() >= 70">Suivi</span>
+                <span [class.text-primary]="getProgressValue() >= 100">Date</span>
+              </div>
+              <c-progress [height]="5">
+                <c-progress-bar [value]="getProgressValue()" color="primary"></c-progress-bar>
+              </c-progress>
+            </div>
+            
+            <c-row>
+              <c-col md="12" class="mb-3">
+                <label cLabel for="idCommande" class="fw-semibold">Commande *</label>
+                <select cInput id="idCommande" formControlName="idCommande" class="form-select">
+                  <option value="">Sélectionnez une commande</option>
+                  @for (c of getCommandesDisponibles(); track c._id) {
+                    <option [value]="c._id">
+                      {{ c._id }} - {{ c.acheteur?.telephone }} ({{ c.total }} €)
+                    </option>
+                  }
+                </select>
+                @if (form.get('idCommande')?.invalid && form.get('idCommande')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    La commande est requise
+                  </div>
+                }
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="livreur" class="fw-semibold">Livreur</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-truck"></svg>
+                  </span>
+                  <select cInput id="livreur" formControlName="livreur" class="form-select">
+                    <option value="">Sélectionnez un livreur</option>
+                    @for (l of livreurs; track l) {
+                      <option [value]="l">{{ l }}</option>
+                    }
+                  </select>
+                </div>
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="numeroSuivi" class="fw-semibold">Numéro de suivi</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-barcode"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="text" 
+                    id="numeroSuivi" 
+                    formControlName="numeroSuivi" 
+                    class="form-control"
+                    placeholder="ex: COL123456789"
+                  />
+                </div>
+              </c-col>
+              
+              <c-col md="6" class="mb-3">
+                <label cLabel for="dateEstimee" class="fw-semibold">Date estimée *</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg cIcon name="cil-calendar"></svg>
+                  </span>
+                  <input 
+                    cInput 
+                    type="date" 
+                    id="dateEstimee" 
+                    formControlName="dateEstimee" 
+                    class="form-control"
+                    [min]="today"
+                  />
+                </div>
+                @if (form.get('dateEstimee')?.invalid && form.get('dateEstimee')?.touched) {
+                  <div class="text-danger small mt-1">
+                    <svg cIcon name="cil-warning" size="sm"></svg>
+                    La date estimée est requise
+                  </div>
+                }
+              </c-col>
+              
+              @if (isEditMode) {
+                <c-col md="6" class="mb-3">
+                  <label cLabel for="statut" class="fw-semibold">Statut</label>
+                  <select cInput id="statut" formControlName="statut" class="form-select">
+                    <option value="en_attente">En attente</option>
+                    <option value="en_cours">En cours</option>
+                    <option value="livree">Livrée</option>
+                  </select>
+                </c-col>
+              }
+            </c-row>
+            
+            <!-- Actions -->
+            <c-row class="mt-4">
+              <c-col class="d-flex gap-2 justify-content-end">
+                <button cButton color="secondary" type="button" routerLink="/livraisons">
+                  <svg cIcon name="cil-x" class="me-2"></svg>
+                  Annuler
+                </button>
+                <button cButton color="primary" type="submit" [disabled]="form.invalid">
+                  <svg cIcon [name]="isEditMode ? 'cil-save' : 'cil-plus'" class="me-2"></svg>
+                  {{ isEditMode ? 'Mettre à jour' : 'Créer la livraison' }}
+                </button>
+              </c-col>
+            </c-row>
+          </form>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>

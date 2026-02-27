@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, Input } from '@angular/core';
+import { Component, computed, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import {
   AvatarComponent,
   BadgeComponent,
@@ -27,19 +27,25 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
+import { AuthService } from '../../../services/auth.service';
+import { Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-default-header',
   templateUrl: './default-header.component.html',
   standalone: true,
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle]
+  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle, CommonModule]
 })
-export class DefaultHeaderComponent extends HeaderComponent {
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   readonly #colorModeService = inject(ColorModeService);
+  readonly #authService = inject(AuthService);
   readonly colorMode = this.#colorModeService.colorMode;
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
+
+  @Input() sidebarId: string = 'sidebar1';
 
   readonly colorModes = [
     { name: 'light', text: 'Light', icon: 'cilSun' },
@@ -52,8 +58,44 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode=> mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
+  userPhoto$: Observable<string | null>;
+  currentUser$: Observable<any>;
+
   constructor() {
     super();
+    this.currentUser$ = this.#authService.currentUser$;
+    this.userPhoto$ = this.#authService.currentUser$.pipe(
+      map(user => user?.photo ? this.getFullImageUrl(user.photo) : null)
+    );
+  }
+
+  getFullImageUrl(url: string): string {
+    if (!url) return '';
+    
+    // Si c'est déjà une URL complète
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // Si c'est une dataURL (base64)
+    if (url.startsWith('data:image')) {
+      return url;
+    }
+    
+    // Chemin relatif - ajouter le domaine du backend
+    return 'http://localhost:3000' + url;
+  }
+
+  getUserInitials(): string {
+    const user = this.#authService.getCurrentUser();
+    if (!user) return 'U';
+    
+    const prenom = user.prenom?.charAt(0) || '';
+    const nom = user.nom?.charAt(0) || '';
+    return (prenom + nom).toUpperCase() || 'U';
+  }
+
+  ngOnInit() {
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
     this.#colorModeService.eventName.set('ColorSchemeChange');
 
@@ -70,7 +112,12 @@ export class DefaultHeaderComponent extends HeaderComponent {
       .subscribe();
   }
 
-  @Input() sidebarId: string = 'sidebar1';
+  /**
+   * Déconnecte l'utilisateur
+   */
+  onLogout(): void {
+    this.#authService.logout();
+  }
 
   public newMessages = [
     {

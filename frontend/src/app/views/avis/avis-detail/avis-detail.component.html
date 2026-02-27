@@ -1,0 +1,112 @@
+<!-- Indicateur de chargement -->
+@if (loading) {
+  <div class="text-center py-5">
+    <c-spinner color="primary"></c-spinner>
+    <p class="mt-2">Chargement de l'avis...</p>
+  </div>
+}
+
+<!-- Message d'erreur -->
+@if (error && !loading) {
+  <c-alert color="danger" class="text-center">
+    <svg cIcon name="cil-warning" class="me-2"></svg>
+    {{ error }}
+  </c-alert>
+}
+
+<!-- Contenu de l'avis -->
+@if (!loading && !error && avis) {
+  <c-row>
+    <!-- Colonne gauche - Infos acheteur -->
+    <c-col md="4" class="mb-4">
+      <c-card class="shadow-sm text-center">
+        <c-card-body>
+          <c-avatar 
+            [src]="avis.idAcheteur?.photo || 'assets/images/avatars/default.jpg'" 
+            [size]="'xxl'"
+            class="mb-3 mx-auto border border-3 border-primary"
+            style="width: 120px; height: 120px;"
+          >
+            {{ getInitials() }}
+          </c-avatar>
+          <h5>{{ avis.idAcheteur?.prenom }} {{ avis.idAcheteur?.nom }}</h5>
+          <p class="text-body-secondary">{{ avis.idAcheteur?.telephone || 'Acheteur' }}</p>
+          
+          <div class="mb-3">
+            <div class="d-flex justify-content-center mb-2">
+              @for (i of getStars(); track i) {
+                <svg 
+                  cIcon 
+                  name="cil-star" 
+                  size="lg"
+                  class="mx-1"
+                  [ngClass]="{'text-warning': i <= avis.note, 'text-secondary': i > avis.note}"
+                ></svg>
+              }
+            </div>
+            <span class="badge fs-6" [ngClass]="'bg-' + getNoteColor()">
+              {{ avis.note }}/5
+            </span>
+          </div>
+          
+          <div class="d-grid gap-2">
+            @if (peutModifier()) {
+              <button cButton color="warning" [routerLink]="['/avis', avis._id, 'edit']">
+                <svg cIcon name="cil-pencil" class="me-2"></svg>
+                Modifier mon avis
+              </button>
+            }
+            <button cButton color="secondary" routerLink="/avis">
+              <svg cIcon name="cil-arrow-left" class="me-2"></svg>
+              Retour à la liste
+            </button>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    
+    <!-- Colonne droite - Détails de l'avis -->
+    <c-col md="8">
+      <c-row>
+        <!-- Informations produit -->
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-info" class="me-2"></svg>
+              Informations produit
+            </c-card-header>
+            <c-card-body>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Produit</span>
+                  <span>{{ avis.idProduitParBoutique?.idProduit?.nom }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Boutique</span>
+                  <span>{{ avis.idProduitParBoutique?.idBoutique?.nomBoutique }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                  <span class="fw-semibold">Date de l'avis</span>
+                  <span>{{ formatDate(avis.createdAt) }}</span>
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-col>
+        
+        <!-- Commentaire -->
+        <c-col xs="12" class="mb-4">
+          <c-card class="shadow-sm">
+            <c-card-header>
+              <svg cIcon name="cil-chat-bubble" class="me-2"></svg>
+              Commentaire
+            </c-card-header>
+            <c-card-body>
+              <p class="fs-5">{{ avis.commentaire }}</p>
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+    </c-col>
+  </c-row>
+}

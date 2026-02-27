@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const boutiqueSchema = new mongoose.Schema({
-  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   nomBoutique: { type: String, required: true },
   description: String,
   adresse: String,
@@ -18,7 +17,8 @@ const boutiqueSchema = new mongoose.Schema({
     dimanche: { ouverture: String, fermeture: String }
   },
   noteMoyenne: { type: Number, default: 0 },
-  totalAvis: { type: Number, default: 0 }
+  totalAvis: { type: Number, default: 0 },
+  caisse: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Boutique', boutiqueSchema);
