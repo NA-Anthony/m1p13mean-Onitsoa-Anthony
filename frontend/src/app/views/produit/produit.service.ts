@@ -7,8 +7,8 @@ import { Produit } from './produit.model';
   providedIn: 'root'
 })
 export class ProduitService {
-  private apiUrl = 'http://localhost:3000/api/produits';
-  private apiAdminUrl = 'http://localhost:3000/api/produits-admin';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/produits';
+  private apiAdminUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/produits-admin';
 
   constructor(private http: HttpClient) {}
 

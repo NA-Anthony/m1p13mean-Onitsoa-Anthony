@@ -59,7 +59,7 @@
             (input)="filterBoutiques()">
         </div>
       </c-col>
-      <c-col md="3" class="mb-3 mb-md-0">
+      <c-col md="4" class="mb-3 mb-md-0">
         <select class="form-select" [(ngModel)]="filterNote" (change)="filterBoutiques()">
           <option value="0">Toutes les notes</option>
           <option value="4">4 étoiles et plus</option>
@@ -67,19 +67,13 @@
           <option value="2">2 étoiles et plus</option>
         </select>
       </c-col>
-      <c-col md="3" class="mb-3 mb-md-0">
+      <c-col md="4" class="mb-3 mb-md-0">
         <select class="form-select" [(ngModel)]="filterPaiement" (change)="filterBoutiques()">
           <option value="">Tous les paiements</option>
           @for (paiement of modesPaiement; track paiement) {
           <option [value]="paiement">{{ paiement }}</option>
           }
         </select>
-      </c-col>
-      <c-col md="2" class="text-end">
-        <button cButton color="primary" routerLink="nouvelle">
-          <svg cIcon name="cil-plus" class="me-2"></svg>
-          Nouvelle boutique
-        </button>
       </c-col>
     </c-row>
   </c-card-body>

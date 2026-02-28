@@ -51,11 +51,23 @@ export class RegisterComponent {
     confirmPassword?: string;
     role?: string;
   } = {};
+  
+  // Propriétés pour le toggle des mots de passe
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
   ) {}
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   register(
     username: string | null,

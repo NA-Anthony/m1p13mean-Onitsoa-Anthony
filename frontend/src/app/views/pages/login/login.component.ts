@@ -17,8 +17,16 @@ export class LoginComponent {
   loading = false;
   errorMessage = '';
   fieldErrors: { email?: string; password?: string } = {};
+  
+  // Propriété pour le toggle du mot de passe
+  showPassword = false;
 
   constructor(private authService: AuthService, private router: Router) { }
+
+  // Méthode pour toggler l'affichage du mot de passe
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   login(username: string | null, password: string | null) {
     this.errorMessage = '';

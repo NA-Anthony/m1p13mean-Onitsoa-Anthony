@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AvisService {
-  private apiUrl = 'http://localhost:3000/api/avis';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/avis';
 
   constructor(private http: HttpClient) {}
 

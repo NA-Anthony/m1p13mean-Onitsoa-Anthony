@@ -78,7 +78,7 @@ export class BoutiqueDetailComponent implements OnInit {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image')) {
       return url;
     }
-    return 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
+    return 'https://m1p13mean-onitsoa-anthony.onrender.com' + (url.startsWith('/') ? '' : '/') + url;
   }
 
   getInitiales(nom: string): string {

@@ -15,7 +15,7 @@
                 <p class="subtitle">Votre destination shopping, partout avec vous</p>
               </div>
 
-              <form (submit)="$event.preventDefault(); login(email.value, password.value)">
+              <form (submit)="$event.preventDefault(); login(email.value, passwordInput.value)">
                 <div class="form-floating mb-3">
                   <c-input-group>
                     <span cInputGroupText><svg cIcon name="cilUser"></svg></span>
@@ -32,18 +32,27 @@
                   <label for="email">Email ou identifiant</label>
                 </div>
 
-                <div class="form-floating mb-3">
+                <div class="form-floating mb-3 position-relative">
                   <c-input-group>
                     <span cInputGroupText><svg cIcon name="cilLockLocked"></svg></span>
                     <input 
-                      #password 
+                      #passwordInput
                       cFormControl 
-                      type="password" 
+                      [type]="showPassword ? 'text' : 'password'"
                       placeholder="Mot de passe" 
                       aria-label="Mot de passe" 
                       autocomplete="current-password" 
                       value="password123" 
                     />
+                    <button 
+                      type="button"
+                      cButton 
+                      color="light" 
+                      class="password-toggle-btn"
+                      (click)="togglePassword()"
+                    >
+                      <svg cIcon [name]="showPassword ? 'cilLockLocked' : 'cilUser'"></svg>
+                    </button>
                   </c-input-group>
                   <label for="password">Mot de passe</label>
                 </div>
@@ -51,7 +60,7 @@
                 <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
                 <div class="d-grid gap-2 mb-2">
-                  <button cButton color="primary" (click)="login(email.value, password.value)" [disabled]="loading" class="btn-login">
+                  <button cButton color="primary" (click)="login(email.value, passwordInput.value)" [disabled]="loading" class="btn-login">
                     <span *ngIf="!loading">Se connecter</span>
                     <span *ngIf="loading">Connexion...</span>
                   </button>

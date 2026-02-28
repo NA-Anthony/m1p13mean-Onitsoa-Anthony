@@ -102,7 +102,7 @@
 
   <!-- Graphiques -->
   <c-row class="mb-4">
-    <c-col md="8">
+    <c-col md="12">
       <c-card class="shadow-sm">
         <c-card-header>
           <svg cIcon name="cil-chart" class="me-2"></svg>
@@ -113,7 +113,10 @@
         </c-card-body>
       </c-card>
     </c-col>
-    
+  </c-row>
+
+  <!-- Promotions actives et derniers avis -->
+  <c-row class="mb-4">
     <c-col md="4">
       <c-card class="shadow-sm h-100">
         <c-card-header class="text-white bg-danger">
@@ -137,46 +140,6 @@
             </div>
           } @else {
             <p class="text-body-secondary text-center">Aucune alerte stock</p>
-          }
-        </c-card-body>
-      </c-card>
-    </c-col>
-  </c-row>
-
-  <!-- Promotions actives et derniers avis -->
-  <c-row class="mb-4">
-    <c-col md="4">
-      <c-card class="shadow-sm h-100">
-        <c-card-header>
-          <svg cIcon name="cil-tags" class="me-2"></svg>
-          Promotions actives
-          <span class="badge bg-danger ms-2">{{ stats.promotions.total }}</span>
-        </c-card-header>
-        <c-card-body>
-          @if (stats.promotions.actives.length > 0) {
-            <div class="list-group">
-              @for (p of stats.promotions.actives; track p._id) {
-                <div class="list-group-item">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <div>{{ p.produit?.nom }}</div>
-                      <small class="text-body-secondary">-{{ p.remisePourcentage }}%</small>
-                    </div>
-                    <small class="text-success">Active</small>
-                  </div>
-                  <div class="small text-body-secondary">
-                    Du {{ formatDate(p.dateDebut) }} au {{ formatDate(p.dateFin) }}
-                  </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="text-body-secondary text-center">Aucune promotion active</p>
-          }
-          @if (stats.promotions.total > 3) {
-            <div class="text-center mt-2">
-              <a routerLink="/promotions" class="small">Voir toutes les promotions</a>
-            </div>
           }
         </c-card-body>
       </c-card>

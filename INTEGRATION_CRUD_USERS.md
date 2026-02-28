@@ -75,7 +75,7 @@ Placement : Entre les routes publiques et les routes protégées.
 Remplacement du mock HTTP par de vrais appels API :
 
 ```typescript
-private baseUrl = 'http://localhost:3000/api/users';
+private baseUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/users';
 
 // Méthodes :
 - getUsers(): Observable<User[]>
@@ -220,7 +220,7 @@ cd backend
 npm start
 ```
 
-Le serveur doit tourner sur `http://localhost:3000`
+Le serveur doit tourner sur `https://m1p13mean-onitsoa-anthony.onrender.com`
 
 ### 2. Démarrer le Frontend
 
@@ -236,14 +236,14 @@ npm start
 #### GET - Lister les utilisateurs
 
 ```
-GET http://localhost:3000/api/users
+GET https://m1p13mean-onitsoa-anthony.onrender.com/api/users
 Header: Authorization: Bearer <token>
 ```
 
 #### POST - Créer un utilisateur
 
 ```
-POST http://localhost:3000/api/users
+POST https://m1p13mean-onitsoa-anthony.onrender.com/api/users
 Content-Type: application/json
 Header: Authorization: Bearer <token>
 
@@ -260,7 +260,7 @@ Header: Authorization: Bearer <token>
 #### PUT - Modifier un utilisateur
 
 ```
-PUT http://localhost:3000/api/users/:id
+PUT https://m1p13mean-onitsoa-anthony.onrender.com/api/users/:id
 Content-Type: application/json
 Header: Authorization: Bearer <token>
 
@@ -274,14 +274,14 @@ Header: Authorization: Bearer <token>
 #### DELETE - Supprimer un utilisateur
 
 ```
-DELETE http://localhost:3000/api/users/:id
+DELETE https://m1p13mean-onitsoa-anthony.onrender.com/api/users/:id
 Header: Authorization: Bearer <token>
 ```
 
 #### PUT - Toggle Actif
 
 ```
-PUT http://localhost:3000/api/users/:id/toggle-actif
+PUT https://m1p13mean-onitsoa-anthony.onrender.com/api/users/:id/toggle-actif
 Header: Authorization: Bearer <token>
 ```
 
@@ -375,7 +375,7 @@ NODE_ENV=development
 // Frontend (environment.ts)
 export const environment = {
   production: false,
-  apiUrl: "http://localhost:3000/api",
+  apiUrl: "https://m1p13mean-onitsoa-anthony.onrender.com/api",
 };
 ```
 

@@ -165,7 +165,7 @@ export class ProduitFormComponent implements OnInit {
       const formData = new FormData();
       formData.append('image', this.selectedFile);
       
-      this.http.post('http://localhost:3000/api/upload', formData, {
+      this.http.post('https://m1p13mean-onitsoa-anthony.onrender.com/api/upload', formData, {
         reportProgress: true,
         observe: 'events'
       }).subscribe({

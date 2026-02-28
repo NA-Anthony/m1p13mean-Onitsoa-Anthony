@@ -45,20 +45,48 @@
                 <label>Adresse email</label>
               </div>
 
-              <div class="form-floating mb-3">
+              <div class="form-floating mb-3 position-relative">
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilLockLocked"></svg></span>
-                  <input #password cFormControl type="password" placeholder="Mot de passe"
-                    autocomplete="new-password" />
+                  <input 
+                    #password 
+                    cFormControl 
+                    [type]="showPassword ? 'text' : 'password'"
+                    placeholder="Mot de passe" 
+                    autocomplete="new-password" 
+                  />
+                  <button 
+                    type="button"
+                    cButton 
+                    color="light" 
+                    class="password-toggle-btn"
+                    (click)="togglePassword()"
+                  >
+                    <svg cIcon [name]="showPassword ? 'cilLockLocked' : 'cilUser'"></svg>
+                  </button>
                 </c-input-group>
                 <label>Mot de passe</label>
               </div>
 
-              <div class="form-floating mb-3">
+              <div class="form-floating mb-3 position-relative">
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilLockLocked"></svg></span>
-                  <input #confirmPassword cFormControl type="password" placeholder="Confirmer le mot de passe"
-                    autocomplete="new-password" />
+                  <input 
+                    #confirmPassword 
+                    cFormControl 
+                    [type]="showConfirmPassword ? 'text' : 'password'"
+                    placeholder="Confirmer le mot de passe" 
+                    autocomplete="new-password" 
+                  />
+                  <button 
+                    type="button"
+                    cButton 
+                    color="light" 
+                    class="password-toggle-btn"
+                    (click)="toggleConfirmPassword()"
+                  >
+                    <svg cIcon [name]="showConfirmPassword ? 'cilLockLocked' : 'cilUser'"></svg>
+                  </button>
                 </c-input-group>
                 <label>Confirmer le mot de passe</label>
               </div>

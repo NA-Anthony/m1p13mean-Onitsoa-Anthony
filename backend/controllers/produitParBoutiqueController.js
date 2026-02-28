@@ -7,50 +7,53 @@ const Boutique = require('../models/Boutique');
 // @route   GET /api/produits-par-boutique
 // @desc    Obtenir tous les produits par boutique (admin)
 exports.getAllProduitsParBoutique = async (req, res) => {
-    try {
-      const produits = await ProduitParBoutique.find()
-        .populate({
-          path: 'idProduit',
-          select: 'nom description categorie image caracteristiques'
-        })
-        .populate({
-          path: 'idBoutique',
-          select: 'nomBoutique adresse telephone logo'
-        })
-        .sort('-createdAt');
+  try {
+    const produits = await ProduitParBoutique.find()
+      .populate({
+        path: 'idProduit',
+        select: 'nom description categorie image caracteristiques'
+      })
+      .populate({
+        path: 'idBoutique',
+        select: 'nomBoutique adresse telephone logo'
+      })
+      .sort('-createdAt');
+    
+    console.log('Produits trouvés dans DB:', produits.length);
+    
+    if (produits.length === 0) {
+      return res.json([]);
+    }
+    
+    // Date actuelle avec heure précise
+    const maintenant = new Date();
+    
+    // Ajouter les promotions actives
+    const produitsAvecPromos = await Promise.all(produits.map(async (prod) => {
+      const promo = await Promotion.findOne({
+        idProduitParBoutique: prod._id,
+        actif: true,
+        dateDebut: { $lte: maintenant },  // Date début <= maintenant
+        dateFin: { $gte: maintenant }      // Date fin >= maintenant
+      });
       
-      console.log('Produits trouvés dans DB:', produits.length);
-      
-      if (produits.length === 0) {
-        return res.json([]);
+      const prodObj = prod.toObject();
+      if (promo) {
+        prodObj.enPromotion = true;
+        prodObj.prixPromo = prod.prix * (1 - promo.remisePourcentage / 100);
+        prodObj.promotion = promo;
       }
       
-      // Ajouter les promotions actives
-      const produitsAvecPromos = await Promise.all(produits.map(async (prod) => {
-        const promo = await Promotion.findOne({
-          idProduitParBoutique: prod._id,
-          actif: true,
-          dateDebut: { $lte: new Date() },
-          dateFin: { $gte: new Date() }
-        });
-        
-        const prodObj = prod.toObject();
-        if (promo) {
-          prodObj.enPromotion = true;
-          prodObj.prixPromo = prod.prix * (1 - promo.remisePourcentage / 100);
-          prodObj.promotion = promo;
-        }
-        
-        return prodObj;
-      }));
-  
-      console.log('Produits avec promos:', produitsAvecPromos.length);
-      res.json(produitsAvecPromos);
-    } catch (err) {
-      console.error('Erreur:', err.message);
-      res.status(500).json({ msg: 'Erreur serveur' });
-    }
-  };
+      return prodObj;
+    }));
+
+    console.log('Produits avec promos:', produitsAvecPromos.length);
+    res.json(produitsAvecPromos);
+  } catch (err) {
+    console.error('Erreur:', err.message);
+    res.status(500).json({ msg: 'Erreur serveur' });
+  }
+};
 
 // 🔒 ROUTE PROTÉGÉE (boutique)
 // @route   GET /api/produits/boutique/mes-produits
@@ -234,87 +237,93 @@ exports.updateStock = async (req, res) => {
 // @route   POST /api/produits/boutique/:id/promotion
 // @desc    Ajouter une promotion à un produit
 exports.ajouterPromotion = async (req, res) => {
-    try {
-      const { remisePourcentage, dateDebut, dateFin } = req.body;
-      const produitId = req.params.id;
-  
-      // Vérifier que le produit existe et appartient à la boutique
-      const produit = await ProduitParBoutique.findById(produitId);
-      if (!produit) {
-        return res.status(404).json({ msg: 'Produit non trouvé' });
-      }
-  
-      if (produit.idBoutique.toString() !== req.user.id) {
-        return res.status(403).json({ msg: 'Non autorisé' });
-      }
-  
-      // Vérifier les dates
-      const debut = new Date(dateDebut);
-      const fin = new Date(dateFin);
-      
-      // Ajuster les dates pour inclure toute la journée
-      debut.setHours(0, 0, 0, 0);
-      fin.setHours(23, 59, 59, 999);
-      
-      const maintenant = new Date();
-  
-      if (fin < debut) {
-        return res.status(400).json({ msg: 'La date de fin doit être après la date de début' });
-      }
-  
-      // Vérifier s'il existe déjà une promotion qui chevauche cette période
-      const promotionExistante = await Promotion.findOne({
-        idProduitParBoutique: produitId,
-        $or: [
-          {
-            dateDebut: { $lte: fin },
-            dateFin: { $gte: debut }
-          }
-        ]
-      });
-  
-      if (promotionExistante) {
-        // Formater les dates pour le message
-        const debutExistante = new Date(promotionExistante.dateDebut).toLocaleDateString('fr-FR');
-        const finExistante = new Date(promotionExistante.dateFin).toLocaleDateString('fr-FR');
-        
-        return res.status(400).json({ 
-          msg: `Une promotion existe déjà du ${debutExistante} au ${finExistante}. Veuillez choisir une autre période.` 
-        });
-      }
-  
-      // Créer la nouvelle promotion
-      const nouvellePromotion = new Promotion({
-        idProduitParBoutique: produitId,
-        remisePourcentage,
-        dateDebut: debut,
-        dateFin: fin,
-        actif: maintenant >= debut && maintenant <= fin
-      });
-  
-      await nouvellePromotion.save();
-  
-      // Mettre à jour le produit
-      produit.enPromotion = nouvellePromotion.actif;
-      if (nouvellePromotion.actif) {
-        produit.prixPromo = produit.prix * (1 - remisePourcentage / 100);
-      }
-      await produit.save();
-  
-      // Retourner le produit mis à jour
-      const produitMisAJour = await ProduitParBoutique.findById(produitId)
-        .populate('idProduit')
-        .populate('idBoutique');
-  
-      res.json({
-        produit: produitMisAJour,
-        message: 'Promotion ajoutée avec succès'
-      });
-  
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Erreur serveur');
+  try {
+    const { remisePourcentage, dateDebut, dateFin } = req.body;
+    const produitId = req.params.id;
+
+    // Vérifier que le produit existe et appartient à la boutique
+    const produit = await ProduitParBoutique.findById(produitId);
+    if (!produit) {
+      return res.status(404).json({ msg: 'Produit non trouvé' });
     }
+
+    if (produit.idBoutique.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'Non autorisé' });
+    }
+
+    // Créer les dates avec gestion de la journée complète
+    const debut = new Date(dateDebut);
+    const fin = new Date(dateFin);
+    
+    // IMPORTANT: Pour la date de fin, on prend la fin de la journée (23:59:59.999)
+    // Pour la date de début, on prend le début de la journée (00:00:00.000)
+    debut.setHours(0, 0, 0, 0);
+    fin.setHours(23, 59, 59, 999);
+    
+    const maintenant = new Date();
+
+    if (fin < debut) {
+      return res.status(400).json({ msg: 'La date de fin doit être après la date de début' });
+    }
+
+    // Vérifier s'il existe déjà une promotion qui chevauche cette période
+    const promotionExistante = await Promotion.findOne({
+      idProduitParBoutique: produitId,
+      $or: [
+        {
+          dateDebut: { $lte: fin },
+          dateFin: { $gte: debut }
+        }
+      ]
+    });
+
+    if (promotionExistante) {
+      // Formater les dates pour le message
+      const debutExistante = new Date(promotionExistante.dateDebut).toLocaleDateString('fr-FR');
+      const finExistante = new Date(promotionExistante.dateFin).toLocaleDateString('fr-FR');
+      
+      return res.status(400).json({ 
+        msg: `Une promotion existe déjà du ${debutExistante} au ${finExistante}. Veuillez choisir une autre période.` 
+      });
+    }
+
+    // Déterminer si la nouvelle promotion doit être active
+    const estActive = maintenant >= debut && maintenant <= fin;
+
+    // Créer la nouvelle promotion
+    const nouvellePromotion = new Promotion({
+      idProduitParBoutique: produitId,
+      remisePourcentage,
+      dateDebut: debut,
+      dateFin: fin,
+      actif: estActive
+    });
+
+    await nouvellePromotion.save();
+
+    // Mettre à jour le produit
+    produit.enPromotion = estActive;
+    if (estActive) {
+      produit.prixPromo = produit.prix * (1 - remisePourcentage / 100);
+    } else {
+      produit.prixPromo = undefined;
+    }
+    await produit.save();
+
+    // Retourner le produit mis à jour
+    const produitMisAJour = await ProduitParBoutique.findById(produitId)
+      .populate('idProduit')
+      .populate('idBoutique');
+
+    res.json({
+      produit: produitMisAJour,
+      message: estActive ? 'Promotion ajoutée et active' : 'Promotion programmée pour plus tard'
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur serveur');
+  }
 };
 
 // 🔒 ROUTE PROTÉGÉE (boutique)
