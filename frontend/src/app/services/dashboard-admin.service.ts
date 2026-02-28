@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class DashboardAdminService {
-  private apiUrl = 'http://localhost:3000/api/dashboard-admin';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/dashboard-admin';
 
   constructor(private http: HttpClient) {}
 

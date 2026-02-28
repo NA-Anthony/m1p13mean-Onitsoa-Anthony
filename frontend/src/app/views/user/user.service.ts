@@ -7,7 +7,7 @@ import { User } from './user.model';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/users';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/users';
 
   constructor(private http: HttpClient) {}
 

@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/auth';
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -168,7 +168,7 @@ export class AuthService {
     const formData = new FormData();
     formData.append('image', file); // Assurez-vous que le champ s'appelle 'image' comme dans votre backend
     
-    return this.http.post('http://localhost:3000/api/upload', formData, {
+    return this.http.post('https://m1p13mean-onitsoa-anthony.onrender.com/api/upload', formData, {
       reportProgress: true,
       observe: 'events'
     });

@@ -9,8 +9,8 @@ import { AuthService } from '../../services/auth.service';
   providedIn: 'root'
 })
 export class ProduitParBoutiqueService {
-  private apiUrl = 'http://localhost:3000/api/produits/boutique';
-  private apiPublicUrl = 'http://localhost:3000/api/produits/boutiques/tous'; // Route publique pour catalogue
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/produits/boutique';
+  private apiPublicUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/produits/boutiques/tous'; // Route publique pour catalogue
 
   constructor(
     private http: HttpClient,

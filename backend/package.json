@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "docker:build": "docker build -t dockeranthonynaa/m1p13mean-onitsoa-anthony:latest .",
+    "docker:push": "docker push dockeranthonynaa/m1p13mean-onitsoa-anthony:latest"
   },
   "keywords": [],
   "author": "",

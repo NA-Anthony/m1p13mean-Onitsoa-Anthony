@@ -66,6 +66,27 @@
 	display: none;
 }
 
+/* Style pour le bouton toggle password */
+.password-toggle-btn {
+	position: absolute;
+	right: 0;
+	top: 0;
+	height: 100%;
+	border: none;
+	background: transparent;
+	z-index: 10;
+	padding: 0 1rem;
+	
+	&:hover {
+		background: rgba(0,0,0,0.05);
+	}
+	
+	svg {
+		width: 20px;
+		height: 20px;
+	}
+}
+
 .btn-login {
 	border-radius: 8px;
 	padding: .6rem 1rem;

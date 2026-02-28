@@ -51,11 +51,23 @@ export class RegisterComponent {
     confirmPassword?: string;
     role?: string;
   } = {};
+  
+  // Propriétés pour le toggle des mots de passe
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
   ) {}
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   register(
     username: string | null,
@@ -154,10 +166,11 @@ export class RegisterComponent {
         this.successMessage =
           'Inscription réussie ! Redirection vers le tableau de bord...';
         // console.log('Registration successful', response);
+        const userRole = response.user?.role || payload.role;
 
         // Redirection automatique au dashboard (l'utilisateur est déjà authentifié)
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.redirectBasedOnRole(userRole);
         }, 1500);
       },
       error: (err) => {
@@ -183,5 +196,21 @@ export class RegisterComponent {
         }
       },
     });
+  }
+
+  private redirectBasedOnRole(role: string): void {
+    switch (role) {
+      case 'admin':
+        this.router.navigate(['/dashboard-admin']);
+        break;
+      case 'boutique':
+        this.router.navigate(['/dashboard-boutique']);
+        break;
+      case 'acheteur':
+        this.router.navigate(['/dashboard-acheteur']);
+        break;
+      default:
+        this.router.navigate(['/dashboard-acheteur']); // fallback
+    }
   }
 }

@@ -1,6 +1,6 @@
 ### Test API Utilisateurs
 
-@baseUrl = http://localhost:3000/api
+@baseUrl = https://m1p13mean-onitsoa-anthony.onrender.com/api
 @token = YOUR_JWT_TOKEN_HERE
 
 ### 1️⃣ Connexion (récupérer le JWT)

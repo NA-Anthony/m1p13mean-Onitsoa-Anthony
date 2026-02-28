@@ -78,53 +78,73 @@
           }
 
           @if (step === 'paiement') {
-          <div>
-            <h6 class="mb-3">Mode de paiement</h6>
-
-            <div class="alert alert-info py-2 small d-flex align-items-center mb-3">
-              <svg cIcon name="cil-wallet" class="me-2"></svg>
-              @if (soldeActuel === null) {
-              <c-spinner size="sm" class="me-2"></c-spinner> Chargement du solde...
-              } @else {
-              Votre solde : <strong class="ms-1">{{ soldeActuel | number:'1.2-2' }} €</strong>
-              }
-            </div>
-
-            <c-row class="mb-1">
-              @for (mode of modesPaiement; track mode) {
-              <c-col md="6" class="mb-3">
-                <div class="form-check p-3 border rounded h-100 cursor-pointer"
-                  [class.border-primary]="checkoutForm.get('modePaiement')?.value === mode"
-                  [class.bg-body-tertiary]="checkoutForm.get('modePaiement')?.value === mode">
-                  <input type="radio" class="form-check-input ms-0" [id]="'mode' + mode" [value]="mode"
-                    formControlName="modePaiement">
-                  <label class="form-check-label ms-2 fw-semibold" [for]="'mode' + mode">
-                    {{ mode }}
-                  </label>
-                  @if (mode === 'Portefeuille numérique') {
-                  <div class="small text-body-secondary ms-2 mt-1">
-                    Payez instantanément avec votre solde.
-                    @if (soldeActuel !== null && soldeActuel < total()) { <div class="text-danger mt-1">
-                      <svg cIcon name="cil-warning" size="sm" class="me-1"></svg>
-                      Solde insuffisant (Manque {{ (total() - soldeActuel) | number:'1.2-2' }} €)
-                  </div>
-                  }
-                </div>
+            <div>
+              <h6 class="mb-3">Mode de paiement</h6>
+          
+              <div class="alert alert-info py-2 small d-flex align-items-center mb-3">
+                <svg cIcon name="cil-wallet" class="me-2"></svg>
+                @if (soldeActuel === null) {
+                <c-spinner size="sm" class="me-2"></c-spinner> Chargement du solde...
+                } @else {
+                Votre solde : <strong class="ms-1">{{ soldeActuel | number:'1.2-2' }} €</strong>
                 }
-          </div>
-  </c-col>
-  }
-</c-row>
-
-<div class="d-flex justify-content-between mt-4">
-  <button cButton color="secondary" type="button" (click)="step = 'adresse'">Retour</button>
-  <button cButton color="primary" type="button"
-    [disabled]="!checkoutForm.get('modePaiement')?.valid || isSoldeInsuffisant()" (click)="validerPaiement()">
-    Vérifier ma commande
-  </button>
-</div>
-</div>
-}
+              </div>
+          
+              <c-row class="mb-1">
+                @for (mode of modesPaiement; track mode) {
+                  <c-col md="6" class="mb-3">
+                    <div class="form-check p-3 border rounded h-100 cursor-pointer"
+                      [class.border-primary]="checkoutForm.get('modePaiement')?.value === mode"
+                      [class.bg-body-tertiary]="checkoutForm.get('modePaiement')?.value === mode"
+                      [class.opacity-50]="mode !== 'Portefeuille numérique'"
+                      [style.pointer-events]="mode !== 'Portefeuille numérique' ? 'none' : 'auto'">
+                      
+                      <input type="radio" class="form-check-input ms-0" [id]="'mode' + mode" [value]="mode"
+                        formControlName="modePaiement"
+                        [disabled]="mode !== 'Portefeuille numérique'">
+                      
+                      <label class="form-check-label ms-2 fw-semibold" [for]="'mode' + mode">
+                        {{ mode }}
+                      </label>
+                      
+                      @if (mode === 'Portefeuille numérique') {
+                        <div class="small text-body-secondary ms-2 mt-1">
+                          Payez instantanément avec votre solde.
+                          
+                          @if (soldeActuel !== null && soldeActuel < total()) {
+                            <div class="text-danger mt-1">
+                              <svg cIcon name="cil-warning" size="sm" class="me-1"></svg>
+                              Solde insuffisant (Manque {{ (total() - soldeActuel) | number:'1.2-2' }} €)
+                            </div>
+                            <div class="small text-warning mt-1">
+                              Ce mode de paiement est indisponible car vous n'avez pas assez de fonds dans votre portefeuille.
+                            </div>
+                          } @else {
+                            <div class="text-success mt-1">
+                              <svg cIcon name="cil-check" size="sm" class="me-1"></svg>
+                              Solde disponible: {{ soldeActuel | number:'1.2-2' }} €
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        <div class="small text-body-secondary ms-2 mt-1">
+                          Ce mode de paiement n'est pas disponible pour le moment.
+                        </div>
+                      }
+                    </div>
+                  </c-col>
+                }
+              </c-row>
+          
+              <div class="d-flex justify-content-between mt-4">
+                <button cButton color="secondary" type="button" (click)="step = 'adresse'">Retour</button>
+                <button cButton color="primary" type="button"
+                  [disabled]="!checkoutForm.get('modePaiement')?.valid || isSoldeInsuffisant()" (click)="validerPaiement()">
+                  Vérifier ma commande
+                </button>
+              </div>
+            </div>
+          }
 
 @if (step === 'confirmation') {
 <div>

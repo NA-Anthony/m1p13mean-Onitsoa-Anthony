@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3000/api'; // À ajuster selon votre backend
+  private baseUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api'; // À ajuster selon votre backend
 
   constructor(private http: HttpClient) {}
 

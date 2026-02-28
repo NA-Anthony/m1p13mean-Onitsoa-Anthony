@@ -83,7 +83,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     }
     
     // Chemin relatif - ajouter le domaine du backend
-    return 'http://localhost:3000' + url;
+    return 'https://m1p13mean-onitsoa-anthony.onrender.com' + url;
   }
 
   getUserInitials(): string {
@@ -96,7 +96,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
+    this.#colorModeService.localStorageItemName.set('m1p13mean-onitsoa-anthony');
     this.#colorModeService.eventName.set('ColorSchemeChange');
 
     this.#activatedRoute.queryParams

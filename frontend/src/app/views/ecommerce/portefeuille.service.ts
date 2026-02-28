@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class PortefeuilleService {
-    private apiUrl = 'http://localhost:3000/api/portefeuille';
+    private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/portefeuille';
 
     constructor(private http: HttpClient) { }
 

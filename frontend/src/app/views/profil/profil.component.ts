@@ -158,7 +158,7 @@ export class ProfilComponent implements OnInit {
       const formData = new FormData();
       formData.append('image', this.selectedFile);
       
-      this.http.post('http://localhost:3000/api/upload', formData, {
+      this.http.post('https://m1p13mean-onitsoa-anthony.onrender.com/api/upload', formData, {
         reportProgress: true,
         observe: 'events'
       }).subscribe({
@@ -193,7 +193,7 @@ export class ProfilComponent implements OnInit {
     }
     
     // Chemin relatif - ajouter le domaine du backend
-    return 'http://localhost:3000' + url;
+    return 'https://m1p13mean-onitsoa-anthony.onrender.com' + url;
   }
 
   async onSubmit(): Promise<void> {

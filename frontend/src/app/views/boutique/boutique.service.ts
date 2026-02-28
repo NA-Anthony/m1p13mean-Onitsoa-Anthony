@@ -8,8 +8,8 @@ import { ApiService } from '../../services/api.service';
   providedIn: 'root'
 })
 export class BoutiqueService {
-  private apiUrl = 'http://localhost:3000/api/boutiques';
-  private apiAdminUrl = 'http://localhost:3000/api/boutiques-admin';
+  private apiUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/boutiques';
+  private apiAdminUrl = 'https://m1p13mean-onitsoa-anthony.onrender.com/api/boutiques-admin';
 
   constructor(private http: HttpClient) {}
 

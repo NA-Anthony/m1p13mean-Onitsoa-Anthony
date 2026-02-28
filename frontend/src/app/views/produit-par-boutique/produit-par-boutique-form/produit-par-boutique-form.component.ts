@@ -91,7 +91,7 @@ export class ProduitParBoutiqueFormComponent implements OnInit {
 
   loadProduits(): void {
     this.loading = true;
-    this.http.get('http://localhost:3000/api/produits').subscribe({
+    this.http.get('https://m1p13mean-onitsoa-anthony.onrender.com/api/produits').subscribe({
       next: (data: any) => {
         this.produits = data;
         this.loading = false;
