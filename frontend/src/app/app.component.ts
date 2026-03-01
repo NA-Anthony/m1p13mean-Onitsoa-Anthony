@@ -12,7 +12,7 @@ import { iconSubset } from './icons/icon-subset';
   imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit {
-  title = 'CoreUI Angular Admin Template';
+  title = 'M1p13mean-Onitsoa-Anthony';
 
   constructor(
     private router: Router,
