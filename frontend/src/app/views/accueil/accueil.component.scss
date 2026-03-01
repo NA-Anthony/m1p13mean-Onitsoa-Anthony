@@ -1,0 +1,251 @@
+// Variables
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+// Utilitaires
+.py-6 {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+// Hero Section
+.hero-section {
+  min-height: 100vh;
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1607082349566-187342175e2f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat fixed;
+  
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+  }
+  
+  .animate-title {
+    animation: fadeInUp 1s ease;
+  }
+  
+  .animate-subtitle {
+    animation: fadeInUp 1s ease 0.3s both;
+  }
+  
+  .animate-buttons {
+    animation: fadeInUp 1s ease 0.6s both;
+  }
+}
+
+// About Section
+.about-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  
+  .gradient-text {
+    background: $primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .divider {
+    width: 80px;
+    height: 4px;
+    background: $primary-gradient;
+    border-radius: 2px;
+  }
+  
+  .about-card {
+    background: white;
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: $primary-gradient;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      
+      &::before {
+        transform: scaleX(1);
+      }
+      
+      .icon-wrapper {
+        animation: float 3s ease infinite;
+      }
+    }
+    
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      background: $primary-gradient;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+    
+    a {
+      color: #667eea;
+      transition: color 0.3s ease;
+      
+      &:hover {
+        color: #764ba2;
+      }
+    }
+  }
+}
+
+// Stats Section
+.stats-section {
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1556740714-a8395b3bf30f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat fixed;
+  
+  .stats-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 100%);
+  }
+  
+  .stat-item {
+    padding: 2rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Features Section
+.features-section {
+  background: white;
+  
+  .divider {
+    width: 80px;
+    height: 4px;
+    background: $secondary-gradient;
+    border-radius: 2px;
+  }
+  
+  .feature-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    
+    &:hover {
+      background: white;
+      border-color: #667eea;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: $primary-gradient;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    a {
+      color: #667eea;
+    }
+  }
+}
+
+// Testimonials Section
+.testimonials-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  
+  .divider {
+    width: 80px;
+    height: 4px;
+    background: $secondary-gradient;
+    border-radius: 2px;
+  }
+  
+  .testimonial-card {
+    background: white;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// CTA Section
+.cta-section {
+  position: relative;
+  background: $primary-gradient;
+  
+  .btn-outline-light {
+    border-width: 2px;
+    
+    &:hover {
+      background: white;
+      color: #667eea;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .py-6 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  .hero-section {
+    h1 {
+      font-size: 2.5rem;
+    }
+  }
+}

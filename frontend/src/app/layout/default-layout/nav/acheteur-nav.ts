@@ -15,6 +15,11 @@ export const acheteurNavItems: INavData[] = [
     }
   },
   {
+    name: 'Accueil',
+    url: '/accueil',
+    iconComponent: { name: 'cil-home' }
+  },
+  {
     name: 'E-commerce',
     url: '/ecommerce',
     iconComponent: { name: 'cil-basket' },

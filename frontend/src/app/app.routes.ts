@@ -64,14 +64,6 @@ export const routes: Routes = [
         path: 'boutiques',
         loadChildren: () => import('./views/boutique/routes').then((m) => m.routes)
       },
-      // {
-      //   path: 'acheteurs',
-      //   loadChildren: () => import('./views/acheteur/routes').then((m) => m.routes)
-      // },
-      // {
-      //   path: 'users',
-      //   loadChildren: () => import('./views/user/routes').then((m) => m.routes)
-      // },
       {
         path: 'produits',
         loadChildren: () => import('./views/produit/routes').then((m) => m.routes)
@@ -84,10 +76,6 @@ export const routes: Routes = [
         path: 'ecommerce',
         loadChildren: () => import('./views/ecommerce/routes').then((m) => m.routes)
       },
-      // {
-      //   path: 'promotions',
-      //   loadChildren: () => import('./views/promotion/routes').then((m) => m.routes)
-      // },
       {
         path: 'commandes',
         loadChildren: () => import('./views/commande/routes').then((m) => m.routes)
@@ -99,26 +87,17 @@ export const routes: Routes = [
           title: 'Mon Profil'
         }
       },
-      // {
-      //   path: 'avis',
-      //   loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
-      // },
+      {
+        path: 'accueil',
+        loadChildren: () => import('./views/accueil/accueil.routes').then(m => m.routes),
+        data: {
+          title: 'Accueil'
+        }
+      },
       {
         path: 'avis',
         loadChildren: () => import('./views/avis/routes').then((m) => m.routes)
-      },
-      // {
-      //   path: 'livraisons',
-      //   loadChildren: () => import('./views/livraison/routes').then((m) => m.routes)
-      // },
-      // {
-      //   path: 'tarifs-livraison',
-      //   loadChildren: () => import('./views/tarif-livraison/routes').then((m) => m.routes)
-      // },
-      // {
-      //   path: 'ecommerce',
-      //   loadChildren: () => import('./views/ecommerce/routes').then((m) => m.routes)
-      // }
+      }
     ]
   },
 
