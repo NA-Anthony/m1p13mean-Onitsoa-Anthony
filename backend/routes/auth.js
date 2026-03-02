@@ -20,4 +20,6 @@ router.get('/me', auth, authController.getMe);
 
 // Le middleware 'upload.single' DOIT être placé avant le contrôleur
 router.put('/update-me', auth, upload.single('photo'), authController.updateMe);
+
+router.put('/update-password', auth, authController.updatePassword);
 module.exports = router;

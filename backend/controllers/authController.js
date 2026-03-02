@@ -346,3 +346,55 @@ exports.updateMe = async (req, res) => {
     });
   }
 };
+
+// @route   PUT /api/auth/update-password
+// @desc    Mettre à jour le mot de passe de l'utilisateur connecté
+// @access  Private
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Vérifier que l'utilisateur est authentifié
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ msg: 'Utilisateur non authentifié' });
+    }
+
+    // Validation du nouveau mot de passe
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ 
+        msg: 'Le nouveau mot de passe doit contenir au moins 6 caractères' 
+      });
+    }
+
+    // Récupérer l'utilisateur avec son mot de passe
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'Utilisateur non trouvé' });
+    }
+
+    // Vérifier l'ancien mot de passe
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Mot de passe actuel incorrect' });
+    }
+
+    // Mettre à jour le mot de passe
+    user.password = newPassword;
+    await user.save();
+
+    // Journaliser le changement
+    console.log(`🔐 Mot de passe mis à jour pour l'utilisateur ${user.email}`);
+
+    res.json({ 
+      success: true, 
+      msg: 'Mot de passe mis à jour avec succès' 
+    });
+
+  } catch (err) {
+    console.error('❌ Erreur updatePassword:', err.message);
+    res.status(500).json({ 
+      msg: 'Erreur serveur lors de la mise à jour du mot de passe',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
