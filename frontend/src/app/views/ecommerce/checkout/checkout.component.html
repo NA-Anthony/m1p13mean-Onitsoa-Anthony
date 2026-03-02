@@ -172,9 +172,14 @@
 
   <div class="d-flex justify-content-between mt-4">
     <button cButton color="secondary" type="button" (click)="step = 'paiement'">Retour</button>
-    <button cButton color="success" type="button" (click)="confirmerCommande()">
+    <button cButton color="success" type="button" (click)="confirmerCommande()" [disabled]="isSubmitting">
+      @if (isSubmitting) {
+      <c-spinner size="sm" class="me-2"></c-spinner>
+      Traitement en cours...
+      } @else {
       <svg cIcon name="cil-check" class="me-1"></svg>
       Confirmer la commande
+      }
     </button>
   </div>
 </div>
@@ -218,3 +223,17 @@
   </c-card>
 </c-col>
 </c-row>
+
+<!-- À ajouter juste après l'ouverture de c-card-body ou à la fin du template -->
+@if (isSubmitting) {
+<div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+  style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+  <c-card class="text-center p-4">
+    <c-card-body>
+      <c-spinner color="primary" class="mb-3" style="width: 3rem; height: 3rem;"></c-spinner>
+      <h5>Traitement de votre commande...</h5>
+      <p class="text-body-secondary mb-0">Veuillez patienter</p>
+    </c-card-body>
+  </c-card>
+</div>
+}

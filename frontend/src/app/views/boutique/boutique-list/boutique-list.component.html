@@ -29,7 +29,7 @@
           <div class="fs-4 fw-semibold">{{ getTotalAvis() }}</div>
           <div>Total avis</div>
         </div>
-        <svg cIcon name="cil-comment-square" size="xl"></svg> <!-- ← CHANGÉ -->
+        <svg cIcon name="cil-comment-square" size="xl"></svg>
       </c-card-body>
     </c-card>
   </c-col>
@@ -56,11 +56,11 @@
             <svg cIcon name="cil-search"></svg>
           </span>
           <input type="text" class="form-control" placeholder="Rechercher une boutique..." [(ngModel)]="searchTerm"
-            (input)="filterBoutiques()">
+            (input)="filterBoutiques()" [disabled]="loading">
         </div>
       </c-col>
       <c-col md="4" class="mb-3 mb-md-0">
-        <select class="form-select" [(ngModel)]="filterNote" (change)="filterBoutiques()">
+        <select class="form-select" [(ngModel)]="filterNote" (change)="filterBoutiques()" [disabled]="loading">
           <option value="0">Toutes les notes</option>
           <option value="4">4 étoiles et plus</option>
           <option value="3">3 étoiles et plus</option>
@@ -68,7 +68,7 @@
         </select>
       </c-col>
       <c-col md="4" class="mb-3 mb-md-0">
-        <select class="form-select" [(ngModel)]="filterPaiement" (change)="filterBoutiques()">
+        <select class="form-select" [(ngModel)]="filterPaiement" (change)="filterBoutiques()" [disabled]="loading">
           <option value="">Tous les paiements</option>
           @for (paiement of modesPaiement; track paiement) {
           <option [value]="paiement">{{ paiement }}</option>
@@ -79,7 +79,54 @@
   </c-card-body>
 </c-card>
 
-<!-- Liste des boutiques en cartes -->
+<!-- État de chargement -->
+@if (loading) {
+<c-row>
+  <c-col>
+    <c-card class="text-center py-5">
+      <c-card-body>
+        <c-spinner color="primary" class="mb-3" style="width: 3rem; height: 3rem;"></c-spinner>
+        <p class="text-body-secondary">Chargement...</p>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+}
+
+<!-- État vide (après chargement) -->
+@else if (filteredBoutiques.length === 0) {
+<c-row>
+  <c-col>
+    <c-card class="text-center py-5">
+      <c-card-body>
+        <svg cIcon name="cil-building" size="3xl" class="text-body-secondary mb-3"></svg>
+        <h5>Aucune boutique trouvée</h5>
+        <p class="text-body-secondary mb-3">
+          @if (searchTerm || filterNote !== '0' || filterPaiement) {
+          Aucune boutique ne correspond à vos critères de recherche
+          } @else {
+          Commencez par créer votre première boutique
+          }
+        </p>
+        @if (!searchTerm && filterNote === '0' && !filterPaiement) {
+        <button cButton color="primary" routerLink="nouvelle">
+          <svg cIcon name="cil-plus" class="me-2"></svg>
+          Créer une boutique
+        </button>
+        } @else {
+        <button cButton color="secondary" (click)="resetFilters()">
+          <svg cIcon name="cil-reload" class="me-2"></svg>
+          Réinitialiser les filtres
+        </button>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+}
+
+<!-- Liste des boutiques (après chargement) -->
+@else {
 <c-row>
   @for (boutique of filteredBoutiques; track boutique._id) {
   <c-col xs="12" sm="6" lg="4" xl="3" class="mb-4">
@@ -87,8 +134,8 @@
       <div class="position-relative d-flex justify-content-center pt-3">
         @if (getBoutiqueImage(boutique)) {
         <c-avatar [src]="getBoutiqueImage(boutique)" [size]="'xxl'"
-          class="mb-3 border border-3 border-primary shadow-sm"
-          style="width: 120px; height: 120px; object-fit: cover;"></c-avatar>
+          class="mb-3 border border-3 border-primary shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+        </c-avatar>
         } @else {
         <div
           class="rounded-circle border border-3 border-primary shadow-sm d-flex align-items-center justify-content-center bg-primary text-white mb-3"
@@ -107,6 +154,7 @@
         <p class="text-body-secondary small mb-2">
           <svg cIcon name="cil-location-pin" size="sm"></svg>
           {{ (boutique.adresse || 'Adresse non renseignée') | slice:0:30 }}
+          @if ((boutique.adresse || '').length > 30) { ... }
         </p>
         <p class="text-body-secondary small mb-3">
           <svg cIcon name="cil-phone" size="sm"></svg>
@@ -153,19 +201,6 @@
       </c-card-footer>
     </c-card>
   </c-col>
-  } @empty {
-  <c-col>
-    <c-card class="text-center py-5">
-      <c-card-body>
-        <svg cIcon name="cil-building" size="3xl" class="text-body-secondary mb-3"></svg>
-        <h5>Aucune boutique trouvée</h5>
-        <p class="text-body-secondary mb-3">Commencez par créer votre première boutique</p>
-        <button cButton color="primary" routerLink="nouvelle">
-          <svg cIcon name="cil-plus" class="me-2"></svg>
-          Créer une boutique
-        </button>
-      </c-card-body>
-    </c-card>
-  </c-col>
   }
 </c-row>
+}

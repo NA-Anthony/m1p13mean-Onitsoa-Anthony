@@ -8,7 +8,8 @@ import {
   AvatarModule,
   ButtonModule,
   BadgeModule,
-  ProgressModule
+  ProgressModule,
+  SpinnerModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { BoutiqueService } from '../boutique.service';
@@ -29,7 +30,8 @@ import { Boutique } from '../boutique.model';
     ButtonModule,
     BadgeModule,
     ProgressModule,
-    IconModule
+    IconModule,
+    SpinnerModule
   ]
 })
 export class BoutiqueListComponent implements OnInit {
@@ -38,6 +40,7 @@ export class BoutiqueListComponent implements OnInit {
   searchTerm: string = '';
   filterNote: string = '0';
   filterPaiement: string = '';
+  loading: boolean = true;
 
   modesPaiement: string[] = ['Carte bancaire', 'Espèces', 'Mobile Money', 'Paypal', 'Apple Pay'];
 
@@ -55,11 +58,13 @@ export class BoutiqueListComponent implements OnInit {
       next: (data) => {
         this.boutiques = data;
         this.filteredBoutiques = data;
+        this.loading = false;
       }
     });
   }
 
   filterBoutiques(): void {
+    if (this.loading) return;
     this.filteredBoutiques = this.boutiques.filter(boutique => {
       const matchesSearch = this.searchTerm === '' ||
         boutique.nomBoutique.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -74,6 +79,13 @@ export class BoutiqueListComponent implements OnInit {
 
       return matchesSearch && matchesNote && matchesPaiement;
     });
+  }
+
+  resetFilters(): void {
+    this.searchTerm = '';
+    this.filterNote = '0';
+    this.filterPaiement = '';
+    this.filteredBoutiques = this.boutiques;
   }
 
   voirDetails(id: string): void {
