@@ -50,6 +50,7 @@ export class CheckoutComponent implements OnInit {
   soldeActuel: number | null = null;
   modesPaiement = MODES_PAIEMENT;
   step: 'adresse' | 'paiement' | 'confirmation' = 'adresse';
+  isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -121,6 +122,10 @@ export class CheckoutComponent implements OnInit {
   }
 
   confirmerCommande(): void {
+    if (this.isSubmitting) return;
+
+    this.isSubmitting = true;
+
     const articles = this.items.map(item => ({
       idProduitParBoutique: item.idProduitParBoutique,
       nomProduit: item.nomProduit,
@@ -147,6 +152,10 @@ export class CheckoutComponent implements OnInit {
       next: (cmd: any) => {
         this.cartService.viderPanier();
         this.router.navigate(['/ecommerce/portefeuille']);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création de la commande', err);
+        this.isSubmitting = false; 
       }
     });
   }
